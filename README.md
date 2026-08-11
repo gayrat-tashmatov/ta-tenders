@@ -74,6 +74,24 @@ npm run dev                   # http://localhost:3000
 | lex.uz (`t.me/s/lexuzofficial`) | публичный Telegram-канал | ⚖️ |
 | 10 новостных RSS | Gazeta, Spot, Kun, UzDaily, … | 📰 |
 
+## Кабинет команды (Supabase)
+
+Закрытая часть `/app`: логин по e-mail/паролю, папки (новые / сохранённые /
+в работе / поданные / выигранные), личные статусы и заметки, видно «кто ведёт».
+Без ключей Supabase локально работает demo-режим, на проде кабинет закрыт.
+
+Подключение (один раз):
+1. supabase.com → New project (регион любой EU, пароль БД сохранить).
+2. SQL Editor → вставить содержимое `supabase/schema.sql` → Run.
+3. Project Settings → API: скопировать Project URL, anon (public) key,
+   service_role key.
+4. Vercel → Project → Settings → Environment Variables:
+   `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` → Redeploy.
+5. GitHub → Secrets → Actions: `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`
+   (пайплайн зеркалит тендеры в Postgres).
+6. Пользователи: Supabase → Authentication → Users → Add user →
+   email+пароль (Auto confirm ✓). Раздать команде.
+
 ## Дедупликация (v3)
 
 1. **Вечный seen** по стабильным ключам: uid источника (`wb:OP…`, `tw:36300`,

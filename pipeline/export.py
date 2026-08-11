@@ -65,7 +65,8 @@ def _row_to_item(r) -> dict:
     }
 
 
-def export_all(store: Store):
+def export_all(store: Store) -> list:
+    """Пишет web/data/*.json; возвращает items (их же зеркалим в Supabase)."""
     config.WEB_DATA_DIR.mkdir(parents=True, exist_ok=True)
 
     rows = store.db.execute(
@@ -119,3 +120,4 @@ def export_all(store: Store):
             json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
     log.info("Экспорт: feed=%d items=%d npa=%d insights=%d → %s",
              len(feed), len(items), len(npa), len(ins), config.WEB_DATA_DIR)
+    return items

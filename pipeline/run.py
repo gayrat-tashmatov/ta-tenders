@@ -162,7 +162,12 @@ def run(send_telegram: bool = True):
 
         new_insight = insights.generate_law_insight(store)
 
-        export.export_all(store)
+        exported = export.export_all(store)
+        try:
+            import supabase_sync
+            supabase_sync.sync_items(exported)
+        except Exception as e:
+            log.warning("Supabase sync FAIL: %s", e)
 
         sent = 0
         if send_telegram:
