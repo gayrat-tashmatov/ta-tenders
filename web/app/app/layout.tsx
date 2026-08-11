@@ -17,9 +17,10 @@ export default async function AppLayout({
           TopAdvisor <span>· Tenders</span>
         </Link>
         <nav className="cab-topnav">
-          <Link href="/app">Кабинет</Link>
-          <Link href="/">Публичный сайт</Link>
-          <Link href="/analytics">Аналитика</Link>
+          <Link href="/app">Тендеры</Link>
+          <Link href="/app/npa">НПА</Link>
+          <Link href="/app/analytics">Аналитика</Link>
+          <Link href="/">Публичный сайт ↗</Link>
         </nav>
         <div className="cab-user">
           {isDemo() && <span className="badge st-expiring">демо-режим</span>}

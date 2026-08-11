@@ -59,8 +59,9 @@ def sync_items(export_items: list) -> bool:
     if not (SUPABASE_URL and SERVICE_KEY):
         log.info("Supabase: ключи не заданы — пропуск синхронизации")
         return True
-    rows = [_row(it) for it in export_items
-            if it["category"] in (config.CAT_INTL, config.CAT_UZTEND, config.CAT_JOB)]
+    # Зеркалим ВСЁ, что уходит на сайт (тендеры, НПА, позиции, отобранные новости):
+    # кабинет читает контент из web/data, а таблица держит FK для tender_state.
+    rows = [_row(it) for it in export_items]
     if not rows:
         return True
     ok = True

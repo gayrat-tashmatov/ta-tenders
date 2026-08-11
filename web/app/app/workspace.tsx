@@ -83,6 +83,8 @@ export function Workspace({
 }) {
   const [folder, setFolder] = useState<string>("all");
   const [cat, setCat] = useState<Category | "all">("all");
+  const [src, setSrc] = useState<string>("all");
+  const [period, setPeriod] = useState<"all" | "today" | "week">("all");
   const [q, setQ] = useState("");
   const [selId, setSelId] = useState<string | null>(null);
   const [, startTransition] = useTransition();
@@ -120,6 +122,11 @@ export function Workspace({
         const ds = deadlineStatus(t.deadline);
         return { ...t, _dl: ds.status, _days: ds.days };
       }),
+    [tenders],
+  );
+
+  const sources = useMemo(
+    () => [...new Set(tenders.map((t) => t.source))].sort(),
     [tenders],
   );
 
@@ -171,6 +178,11 @@ export function Workspace({
             if (t._dl === "expired") return false; // «Все» = актуальные
         }
         if (cat !== "all" && t.category !== cat) return false;
+        if (src !== "all" && t.source !== src) return false;
+        if (period !== "all") {
+          const days = period === "today" ? 1 : 7;
+          if (+new Date(t.firstSeen) < Date.now() - days * 86400000) return false;
+        }
         if (!needle) return true;
         return `${t.title} ${t.titleRu ?? ""} ${t.buyer ?? ""} ${t.source}`
           .toLowerCase()
@@ -188,7 +200,7 @@ export function Workspace({
         );
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enriched, folder, cat, q, states, local]);
+  }, [enriched, folder, cat, src, period, q, states, local]);
 
   const sel = shown.find((t) => t.id === selId) ?? shown[0] ?? null;
   const selState = sel ? my(sel.id) : null;
@@ -229,7 +241,7 @@ export function Workspace({
           </button>
         ))}
         <div className="ws-side-title">Категории</div>
-        {(["all", "international_tender", "uz_tender", "job", "legislation"] as const).map(
+        {(["all", "international_tender", "uz_tender", "job", "legislation", "news"] as const).map(
           (c) => (
             <button
               key={c}
@@ -248,12 +260,41 @@ export function Workspace({
 
       {/* ── центр: список ── */}
       <section className="ws-list">
-        <input
-          className="search"
-          placeholder="Поиск по названию, заказчику, источнику…"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-        />
+        <div className="ws-toolbar">
+          <input
+            className="search"
+            placeholder="Поиск по названию, заказчику, источнику…"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+          />
+          <select
+            className="ws-select"
+            value={src}
+            onChange={(e) => setSrc(e.target.value)}
+          >
+            <option value="all">Все источники</option>
+            {sources.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+          {(
+            [
+              ["all", "За всё время"],
+              ["week", "7 дней"],
+              ["today", "Сегодня"],
+            ] as const
+          ).map(([k, label]) => (
+            <button
+              key={k}
+              className={`tab small${period === k ? " active" : ""}`}
+              onClick={() => setPeriod(k)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
         {demo && (
           <div className="ws-demo-note">
             Демо-режим: статусы и звёздочки не сохраняются, пока не подключён

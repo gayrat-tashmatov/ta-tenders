@@ -273,6 +273,11 @@ a.chip:hover { border-color: var(--accent); text-decoration: none; background: v
 .ws-folder b { font-size: 12px; opacity: .7; }
 .ws-list { padding: 14px 14px 30px; overflow-y: auto; }
 .ws-list .search { width: 100%; margin-bottom: 10px; }
+.ws-toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+.ws-toolbar .search { flex: 1 1 240px; margin-bottom: 0; }
+.ws-select { border: 1px solid var(--divider); background: var(--surface); color: var(--text);
+  border-radius: var(--radius); padding: 7px 10px; font: inherit; font-size: 13px; max-width: 180px; }
+.cab-section { padding-top: 4px; padding-bottom: 40px; flex: 1; overflow-y: auto; }
 .ws-demo-note { background: #fff7e6; border: 1px solid #f0d9a8; color: #7a5c17;
   border-radius: 8px; padding: 8px 12px; font-size: 12.5px; margin-bottom: 10px; }
 @media (prefers-color-scheme: dark) {

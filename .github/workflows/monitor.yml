@@ -50,6 +50,7 @@ jobs:
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           HEADLESS_ENABLED: "1"
           HEADLESS_ON: "etender,xtxarid,ebrd"
+          INSIGHT_EVERY_DAYS: "1"   # аналитический дайджест — каждый день
         run: python pipeline/run.py --run
 
       - name: Commit data
