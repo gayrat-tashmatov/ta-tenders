@@ -14,6 +14,8 @@ export function GET() {
   }
   return NextResponse.json({
     supabaseUrl: host,
+    supabaseUrlRaw: url || null,           // URL не секрет; ключи здесь не показываются
+    urlLooksClean: /^https:\/\/[a-z0-9]+\.supabase\.co$/.test(url),
     anonKeyType: !anon
       ? null
       : anon.startsWith("sb_publishable_")
