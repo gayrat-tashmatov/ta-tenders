@@ -11,7 +11,18 @@ export async function signIn(_prev: { error: string } | null, formData: FormData
   const password = String(formData.get("password") ?? "");
   const supabase = await supabaseServer();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) return { error: "Неверный e-mail или пароль" };
+  if (error) {
+    const m = error.message.toLowerCase();
+    if (m.includes("not confirmed"))
+      return {
+        error:
+          "E-mail не подтверждён. В Supabase (Authentication → Users) удалите " +
+          "пользователя и создайте заново с галочкой «Auto Confirm User».",
+      };
+    if (m.includes("invalid login"))
+      return { error: "Неверный e-mail или пароль" };
+    return { error: `Ошибка входа: ${error.message}` };
+  }
   redirect("/app");
 }
 
