@@ -31,6 +31,22 @@ export interface FullItem extends FeedItem {
   docsChecklist: string[];
   recommendation: string | null;
   summary: string | null;
+  portalOnly?: boolean;
+  lotNumber?: string | null;
+}
+
+/** Подпись для кнопки первоисточника: честно о том, куда ведёт ссылка. */
+export function sourceLinkLabel(it: {
+  portalOnly?: boolean;
+  lotNumber?: string | null;
+  origin: string;
+}): string {
+  if (it.portalOnly)
+    return it.lotNumber
+      ? `Портал · искать лот № ${it.lotNumber}`
+      : "Открыть портал ↗";
+  if (it.origin === "TenderWeek") return "TenderWeek (нужен вход) ↗";
+  return "Первоисточник ↗";
 }
 
 export interface NpaMention {

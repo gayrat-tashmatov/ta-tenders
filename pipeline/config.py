@@ -136,6 +136,8 @@ HEADLESS_SOURCES = [
      "detail_url": "https://etender.uzex.uz/lot/{id}", "consulting_only": True},
     {"key": "xtxarid", "source": "XT-Xarid (госзакупки)", "origin": "xt-xarid.uz",
      "cat": CAT_UZTEND, "url": os.getenv("XTXARID_LIST_URL", "https://xt-xarid.uz/"),
+     "detail_url": "https://xt-xarid.uz/procedure/{id}/core",
+     "prefer_key": "lot_count",   # уровень процедуры (id для ссылки), не позиций внутри неё
      "consulting_only": True},
     {"key": "ebrd", "source": "EBRD ECEPP", "origin": "ecepp.ebrd.com",
      "cat": CAT_INTL,

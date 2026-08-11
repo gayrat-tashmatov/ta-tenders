@@ -1,44 +1,13 @@
-"use client";
+import { LoginForm } from "./login-form";
 
-import { useActionState } from "react";
-import { signIn } from "./actions";
+export const metadata = { title: "Вход | TA Tenders" };
 
-export default function LoginPage() {
-  const [state, action, pending] = useActionState(signIn, null);
-  return (
-    <div className="login-wrap">
-      <form className="login-card" action={action}>
-        <div className="login-brand">
-          TopAdvisor <span>· Tenders</span>
-        </div>
-        <h1>Вход в кабинет</h1>
-        <p className="login-sub">
-          Доступ только для команды. Аккаунты выдаёт администратор.
-        </p>
-        <label>
-          E-mail
-          <input
-            name="email"
-            type="email"
-            autoComplete="username"
-            placeholder="you@topadvisor.biz"
-            required
-          />
-        </label>
-        <label>
-          Пароль
-          <input
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            required
-          />
-        </label>
-        {state?.error && <div className="login-error">{state.error}</div>}
-        <button className="btn wide" disabled={pending}>
-          {pending ? "Входим…" : "Войти"}
-        </button>
-      </form>
-    </div>
-  );
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
+  const { next } = await searchParams;
+  const safeNext = next && next.startsWith("/") ? next : "/app";
+  return <LoginForm next={safeNext} />;
 }

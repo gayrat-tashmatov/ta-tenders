@@ -13,6 +13,7 @@ import {
   npaTypeTitle,
 } from "@/lib/data";
 import { buildActIndex, linkifyActs } from "@/lib/acts";
+import { sourceLinkLabel } from "@/lib/types";
 
 export function generateStaticParams() {
   return getItems().map((it) => ({ slug: it.id }));
@@ -163,10 +164,10 @@ export default async function ItemPage({
 
       <p style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
         <a className="btn" href={it.url} target="_blank" rel="noopener noreferrer">
-          Открыть первоисточник →
+          {sourceLinkLabel(it)}
         </a>
-        <Link className="btn ghost" href="/">
-          ← Ко всем возможностям
+        <Link className="btn ghost" href="/app">
+          ← В кабинет
         </Link>
       </p>
 

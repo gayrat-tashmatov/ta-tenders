@@ -52,6 +52,8 @@ def _row_to_item(r) -> dict:
         "score": r["score"], "npaRefs": npa_refs,
         "buyer": meta.get("buyer") or analysis.get("target_entity"),
         "deadline": _norm_deadline(analysis.get("deadline_info") or meta.get("deadline")),
+        "portalOnly": bool(meta.get("portal_only")),
+        "lotNumber": meta.get("number"),
         "titleRu": analysis.get("title_ru"),
         "summaryRu": analysis.get("summary_ru"),
         "siteBrief": analysis.get("site_brief"),

@@ -4,15 +4,17 @@ import { createServerClient } from "@supabase/ssr";
 const URL_ = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 const ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 
+/** Весь сайт закрыт логином. Открыты только /login и /api/health. */
 export async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+  const isLogin = pathname.startsWith("/login");
+
   if (!URL_ || !ANON) {
-    // Ключей нет: локально — демо открыт; на проде кабинет закрыт
-    if (
-      process.env.NODE_ENV === "production" &&
-      req.nextUrl.pathname.startsWith("/app")
-    ) {
+    // Ключей нет: локальная разработка — всё открыто (демо); прод — всё на /login
+    if (process.env.NODE_ENV === "production" && !isLogin) {
       const url = req.nextUrl.clone();
       url.pathname = "/login";
+      url.search = "";
       return NextResponse.redirect(url);
     }
     return NextResponse.next();
@@ -34,21 +36,25 @@ export async function middleware(req: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isApp = req.nextUrl.pathname.startsWith("/app");
-  const isLogin = req.nextUrl.pathname.startsWith("/login");
-  if (isApp && !user) {
+  if (!user && !isLogin) {
     const url = req.nextUrl.clone();
     url.pathname = "/login";
+    url.search = "";
+    if (pathname !== "/") url.searchParams.set("next", pathname);
     return NextResponse.redirect(url);
   }
-  if (isLogin && user) {
+  if (user && isLogin) {
     const url = req.nextUrl.clone();
     url.pathname = "/app";
+    url.search = "";
     return NextResponse.redirect(url);
   }
   return res;
 }
 
 export const config = {
-  matcher: ["/app/:path*", "/login"],
+  matcher: [
+    // всё, кроме статики Next, иконок и /api/health
+    "/((?!_next/static|_next/image|favicon.ico|icon.svg|api/health).*)",
+  ],
 };

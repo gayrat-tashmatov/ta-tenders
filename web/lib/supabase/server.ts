@@ -28,7 +28,7 @@ export async function supabaseServer() {
 
 export async function currentUser() {
   if (isDemo())
-    return { id: "demo", email: "demo@topadvisor.biz", name: "Демо-режим" };
+    return { id: "demo", email: "demo@topadvisor.biz", name: "Демо" };
   const supabase = await supabaseServer();
   const {
     data: { user },

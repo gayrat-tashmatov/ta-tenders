@@ -77,8 +77,11 @@ def fetch_worldbank(rows: int = 60) -> list:
                 continue
             pid = n.get("project_id", "")
             nid = n.get("id", "")
+            # прямая страница ИЗВЕЩЕНИЯ (не проекта) — проверено вживую
             url = (f"https://projects.worldbank.org/en/projects-operations/"
-                   f"project-detail/{pid}" if pid else config.WB_API_URL)
+                   f"procurement-detail/{nid}" if nid else
+                   f"https://projects.worldbank.org/en/projects-operations/"
+                   f"project-detail/{pid}")
             published = None
             try:
                 published = datetime.strptime(n.get("noticedate", ""), "%d-%b-%Y")\

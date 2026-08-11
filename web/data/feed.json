@@ -1,57 +1,57 @@
 [
  {
-  "id": "xtxarid-26-20-30-000-00001",
+  "id": "tw-36185",
   "category": "uz_tender",
-  "source": "XT-Xarid (госзакупки)",
-  "origin": "xt-xarid.uz",
-  "titleRu": "Закупка аппаратно-программного комплекса для обработки данных",
-  "title": "[xtxarid] Аппаратно-программный комплекс",
-  "summaryRu": "Тендер на закупку одного аппаратно-программного комплекса (устройство автоматической обработки данных). Бюджет: 11 269 287,33 сум. Заказчик, сроки подачи и прочие детали в источнике не указаны.",
-  "buyer": null,
+  "source": "TenderWeek",
+  "origin": "TenderWeek",
+  "titleRu": "Продление технической поддержки серверов Dell",
+  "title": "[TW] ПРОДЛЕНИЕ: Продление технической поддержки серверов",
+  "summaryRu": "АКБ «Капиталбанк» объявляет тендер на продление технической поддержки серверов Dell на 2026 год. Заказчик предусмотрел оплату 100% по факту поставки через аккредитив. Бюджет, точные сроки подачи и полные условия указаны в приложенной тендерной документации.",
+  "buyer": "KAPITALBANK АКБ",
   "deadline": null,
-  "budget": "11 269 287,33 сум (одна единица)",
+  "budget": null,
   "score": 3,
-  "urgency": "низкая",
-  "published": null,
-  "firstSeen": "2026-08-11T11:57:03+00:00",
-  "npaRefs": [],
-  "url": "https://xt-xarid.uz/"
- },
- {
-  "id": "xtxarid-62-01-12-000-00002",
-  "category": "uz_tender",
-  "source": "XT-Xarid (госзакупки)",
-  "origin": "xt-xarid.uz",
-  "titleRu": "Разработка и внедрение автоматизированной системы управления",
-  "title": "[xtxarid] Услуга по разработке и внедрению автоматизированной системы управления",
-  "summaryRu": "Закупка услуги по разработке и внедрению автоматизированной системы управления. Заказчик не указан. Бюджет: 5 375 666,67 сумов. Сроки подачи заявок не приведены в доступных данных.",
-  "buyer": null,
-  "deadline": null,
-  "budget": "5 375 666,67 сумов",
-  "score": 8,
   "urgency": "средняя",
   "published": null,
-  "firstSeen": "2026-08-11T11:56:59+00:00",
+  "firstSeen": "2026-08-11T13:13:32+00:00",
   "npaRefs": [],
-  "url": "https://xt-xarid.uz/"
+  "url": "https://www.tenderweek.com/tender-36185"
  },
  {
-  "id": "xtxarid-62-02-30-000-00001",
+  "id": "xtxarid-8305440",
   "category": "uz_tender",
   "source": "XT-Xarid (госзакупки)",
   "origin": "xt-xarid.uz",
-  "titleRu": "Тендер на техническую поддержку информационных технологий",
-  "title": "[xtxarid] Услуга по технической поддержке информационных технологий",
-  "summaryRu": "Закупка услуг по технической поддержке информационных технологий. Заказчик не указан в доступных данных. Бюджет: 9 835 035,67 сум. Сроки подачи не указаны.",
-  "buyer": null,
+  "titleRu": "Техническая поддержка корпоративных информационных систем Узбекистана",
+  "title": "[xtxarid] Ma’lumotlarni boshqarishning korporativ axborot tizimlarini kompleks texnik qo‘llab-quvvatlash, integratsiyaviy hamkorlik, biznes-jarayonlarni boshqarish va muddati o‘tgan qarzlarni undirish, shu jumladan \"O‘zmilliybank\" AJda ularning uzluksiz ishlashini ta’minlaydigan dasturiy-a",
+  "summaryRu": "АО «Национальный банк ВЭД РУ» закупает комплексную техническую поддержку и постгарантийное обслуживание корпоративных информационных систем управления данными, интеграционного взаимодействия и управления бизнес-процессами, включая систему взыскания просроченных задолженностей в АО «Узмиллийбанк». Бюджет: 9 240 888,33 USD. Статус: рассмотрение возражений к документам; точный срок подачи заявок не указан.",
+  "buyer": "АО «Национальный банк ВЭД РУ»",
   "deadline": null,
-  "budget": "9 835 035,67 сум",
+  "budget": "9 240 888,33 USD",
   "score": 6,
   "urgency": "средняя",
   "published": null,
-  "firstSeen": "2026-08-11T11:56:55+00:00",
+  "firstSeen": "2026-08-11T13:13:20+00:00",
   "npaRefs": [],
-  "url": "https://xt-xarid.uz/"
+  "url": "https://xt-xarid.uz/procedure/8305440/core"
+ },
+ {
+  "id": "xtxarid-8309174",
+  "category": "uz_tender",
+  "source": "XT-Xarid (госзакупки)",
+  "origin": "xt-xarid.uz",
+  "titleRu": "Техподдержка ИТ-инфраструктуры Узбекского национального банка",
+  "title": "[xtxarid] \"O‘zmilliybank\" AJning muhim axborot tizimlari va raqamli xizmatlarining uzluksiz ishlashini ta’minlovchi hisoblash texnikasi, server, tarmoq va telekommunikatsiya infratuzilmasini kompleks texnik qo‘llab-quvvatlash xizmatlarini xarid qilish",
+  "summaryRu": "АО «Национальный банк ВЭД РУ» закупает комплексные услуги технической поддержки критически важных информационных систем, серверов, сетевой и телекоммуникационной инфраструктуры. Бюджет тендера составляет 9 835 035,67 USD. Тендер находится на стадии рассмотрения возражений к документам.",
+  "buyer": "АО «Национальный банк ВЭД РУ» (город Ташкент)",
+  "deadline": null,
+  "budget": "9 835 035,67 USD",
+  "score": 6,
+  "urgency": "средняя",
+  "published": null,
+  "firstSeen": "2026-08-11T13:13:14+00:00",
+  "npaRefs": [],
+  "url": "https://xt-xarid.uz/procedure/8309174/core"
  },
  {
   "id": "tw-36307",
@@ -889,7 +889,7 @@
   "published": "2026-06-30 00:00:00+00:00",
   "firstSeen": "2026-08-11T10:16:16+00:00",
   "npaRefs": [],
-  "url": "https://projects.worldbank.org/en/projects-operations/project-detail/P509487"
+  "url": "https://projects.worldbank.org/en/projects-operations/procurement-detail/OP00454502"
  },
  {
   "id": "wb-op00456288",
@@ -907,7 +907,7 @@
   "published": "2026-07-13 00:00:00+00:00",
   "firstSeen": "2026-08-11T10:16:16+00:00",
   "npaRefs": [],
-  "url": "https://projects.worldbank.org/en/projects-operations/project-detail/P171683"
+  "url": "https://projects.worldbank.org/en/projects-operations/procurement-detail/OP00456288"
  },
  {
   "id": "wb-op00459108",
@@ -925,7 +925,7 @@
   "published": "2026-07-27 00:00:00+00:00",
   "firstSeen": "2026-08-11T10:16:16+00:00",
   "npaRefs": [],
-  "url": "https://projects.worldbank.org/en/projects-operations/project-detail/P179108"
+  "url": "https://projects.worldbank.org/en/projects-operations/procurement-detail/OP00459108"
  },
  {
   "id": "tw-36256",
@@ -961,7 +961,7 @@
   "published": "2026-08-06 00:00:00+00:00",
   "firstSeen": "2026-08-11T10:15:53+00:00",
   "npaRefs": [],
-  "url": "https://projects.worldbank.org/en/projects-operations/project-detail/P158372"
+  "url": "https://projects.worldbank.org/en/projects-operations/procurement-detail/OP00460945"
  },
  {
   "id": "tw-36258",
@@ -1015,7 +1015,7 @@
   "published": "2026-07-14 00:00:00+00:00",
   "firstSeen": "2026-08-11T10:15:32+00:00",
   "npaRefs": [],
-  "url": "https://projects.worldbank.org/en/projects-operations/project-detail/P508451"
+  "url": "https://projects.worldbank.org/en/projects-operations/procurement-detail/OP00454040"
  },
  {
   "id": "wb-op00457367",
@@ -1033,7 +1033,7 @@
   "published": "2026-08-03 00:00:00+00:00",
   "firstSeen": "2026-08-11T10:15:26+00:00",
   "npaRefs": [],
-  "url": "https://projects.worldbank.org/en/projects-operations/project-detail/P168180"
+  "url": "https://projects.worldbank.org/en/projects-operations/procurement-detail/OP00457367"
  },
  {
   "id": "wb-op00461081",
@@ -1051,7 +1051,7 @@
   "published": "2026-08-06 00:00:00+00:00",
   "firstSeen": "2026-08-11T10:15:17+00:00",
   "npaRefs": [],
-  "url": "https://projects.worldbank.org/en/projects-operations/project-detail/P158372"
+  "url": "https://projects.worldbank.org/en/projects-operations/procurement-detail/OP00461081"
  },
  {
   "id": "wb-op00461239",
@@ -1069,7 +1069,7 @@
   "published": "2026-08-07 00:00:00+00:00",
   "firstSeen": "2026-08-11T10:15:09+00:00",
   "npaRefs": [],
-  "url": "https://projects.worldbank.org/en/projects-operations/project-detail/P182105"
+  "url": "https://projects.worldbank.org/en/projects-operations/procurement-detail/OP00461239"
  },
  {
   "id": "wb-op00461195",
@@ -1087,7 +1087,7 @@
   "published": "2026-08-07 00:00:00+00:00",
   "firstSeen": "2026-08-11T10:15:00+00:00",
   "npaRefs": [],
-  "url": "https://projects.worldbank.org/en/projects-operations/project-detail/P182054"
+  "url": "https://projects.worldbank.org/en/projects-operations/procurement-detail/OP00461195"
  },
  {
   "id": "wb-op00454073",
@@ -1105,7 +1105,7 @@
   "published": "2026-07-22 00:00:00+00:00",
   "firstSeen": "2026-08-11T10:14:51+00:00",
   "npaRefs": [],
-  "url": "https://projects.worldbank.org/en/projects-operations/project-detail/P176060"
+  "url": "https://projects.worldbank.org/en/projects-operations/procurement-detail/OP00454073"
  },
  {
   "id": "wb-op00458239",
@@ -1123,7 +1123,7 @@
   "published": "2026-07-22 00:00:00+00:00",
   "firstSeen": "2026-08-11T10:14:40+00:00",
   "npaRefs": [],
-  "url": "https://projects.worldbank.org/en/projects-operations/project-detail/P181602"
+  "url": "https://projects.worldbank.org/en/projects-operations/procurement-detail/OP00458239"
  },
  {
   "id": "wb-op00458729",
@@ -1141,7 +1141,7 @@
   "published": "2026-07-24 00:00:00+00:00",
   "firstSeen": "2026-08-11T10:14:27+00:00",
   "npaRefs": [],
-  "url": "https://projects.worldbank.org/en/projects-operations/project-detail/P504420"
+  "url": "https://projects.worldbank.org/en/projects-operations/procurement-detail/OP00458729"
  },
  {
   "id": "wb-op00459063",
@@ -1159,6 +1159,6 @@
   "published": "2026-07-27 00:00:00+00:00",
   "firstSeen": "2026-08-11T10:14:17+00:00",
   "npaRefs": [],
-  "url": "https://projects.worldbank.org/en/projects-operations/project-detail/P171683"
+  "url": "https://projects.worldbank.org/en/projects-operations/procurement-detail/OP00459063"
  }
 ]

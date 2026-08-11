@@ -12,18 +12,17 @@ export default function PublicLayout({
     <>
       <header className="site-header">
         <div className="container">
-          <Link href="/" style={{ textDecoration: "none" }}>
+          <Link href="/app" style={{ textDecoration: "none" }}>
             <span className="wordmark">
               TopAdvisor <span>· Tenders</span>
             </span>
           </Link>
           <nav className="site-nav">
-            <Link href="/">Лента</Link>
-            <Link href="/npa">НПА</Link>
-            <Link href="/analytics">Аналитика</Link>
             <Link href="/app" className="nav-cta">
-              Кабинет →
+              ← В кабинет
             </Link>
+            <Link href="/app/npa">НПА</Link>
+            <Link href="/app/analytics">Аналитика</Link>
           </nav>
         </div>
       </header>

@@ -6,6 +6,7 @@ import {
   CATEGORY_LABEL,
   deadlineStatus,
   fmtDate,
+  sourceLinkLabel,
   stripRawTitle,
   type Category,
 } from "@/lib/types";
@@ -15,6 +16,7 @@ export interface CabTender {
   id: string;
   category: Category;
   source: string;
+  origin: string;
   title: string;
   titleRu: string | null;
   url: string;
@@ -28,6 +30,8 @@ export interface CabTender {
   eligibility: string | null;
   docsChecklist: string[];
   firstSeen: string;
+  portalOnly?: boolean;
+  lotNumber?: string | null;
 }
 export interface CabState {
   userId: string;
@@ -455,10 +459,10 @@ export function Workspace({
 
             <div className="ws-links">
               <a href={sel.url} target="_blank" rel="noopener noreferrer" className="btn">
-                Первоисточник ↗
+                {sourceLinkLabel(sel)}
               </a>
               <a href={`/t/${sel.id}`} target="_blank" className="btn ghost">
-                Публичная карточка
+                Полная карточка
               </a>
             </div>
           </>

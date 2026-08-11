@@ -115,8 +115,15 @@ def _buttons(item: dict) -> list:
     btns = []
     if config.SITE_BASE_URL:
         slug = dedupe.item_slug(item)
-        btns.append(("Разбор на сайте", f"{config.SITE_BASE_URL}/t/{slug}"))
-    btns.append(("Источник", item["url"]))
+        btns.append(("Разбор в кабинете", f"{config.SITE_BASE_URL}/t/{slug}"))
+    meta = item.get("meta") or {}
+    if meta.get("portal_only"):
+        num = str(meta.get("number") or "")[:25]
+        btns.append((f"Портал · лот № {num}" if num else "Портал ↗", item["url"]))
+    elif item.get("origin") == "TenderWeek":
+        btns.append(("TenderWeek (нужен вход) ↗", item["url"]))
+    else:
+        btns.append(("Источник ↗", item["url"]))
     return btns
 
 

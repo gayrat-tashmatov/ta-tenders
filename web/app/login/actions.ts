@@ -4,7 +4,9 @@ import { redirect } from "next/navigation";
 import { isDemo, supabaseServer } from "@/lib/supabase/server";
 
 export async function signIn(_prev: { error: string } | null, formData: FormData) {
-  if (isDemo()) redirect("/app");
+  const rawNext = String(formData.get("next") ?? "/app");
+  const next = rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/app";
+  if (isDemo()) redirect(next);
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL)
     return { error: "Кабинет ещё не подключён — добавьте ключи Supabase" };
   const email = String(formData.get("email") ?? "").trim();
@@ -23,7 +25,7 @@ export async function signIn(_prev: { error: string } | null, formData: FormData
       return { error: "Неверный e-mail или пароль" };
     return { error: `Ошибка входа: ${error.message}` };
   }
-  redirect("/app");
+  redirect(next);
 }
 
 export async function signOut() {

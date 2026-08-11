@@ -28,14 +28,16 @@ TITLE_KEYS = ("name", "title", "subject", "lot_name", "lotname", "purchase_name"
 ID_KEYS = ("id", "lot_id", "lotid", "tender_id", "tenderid", "notice_id", "display_no",
            "number", "guid", "code", "reg_number", "regnumber")
 DEADLINE_KEYS = ("end_date", "enddate", "deadline", "date_end", "dateend", "clarific_date",
-                 "finish_date", "finishdate", "trade_end", "date_finish", "closing_date")
+                 "finish_date", "finishdate", "trade_end", "date_finish", "closing_date",
+                 "close_at", "closing_at", "close_date")
 # «Признак» настоящего тендера — чтобы не путать со справочником категорий (id+name).
 SIGNAL_KEYS = DEADLINE_KEYS + ("start_date", "startdate", "display_no", "cost", "amount",
                                "price", "start_price", "seller_name", "buyer_name", "buyer",
-                               "publication-date", "noticedate")
+                               "publication-date", "noticedate", "publicated_at", "totalcost")
 BUYER_KEYS = ("seller_name", "buyer_name", "buyer", "organization", "customer_name",
               "contact_organization", "purchaser", "org_name")
-COST_KEYS = ("cost", "amount", "price", "budget", "start_price", "sum", "start_cost")
+COST_KEYS = ("cost", "amount", "price", "budget", "start_price", "sum", "start_cost",
+             "totalcost", "total_cost")
 REGION_KEYS = ("region_name", "district_name", "location", "place", "region")
 CURR_KEYS = ("currency_codeabc", "currency_code", "currency_name", "currency")
 
@@ -101,7 +103,7 @@ def _render(page, url, captured):
     try:
         return page.eval_on_selector_all(
             "a[href*='tender'],a[href*='lot'],a[href*='view'],a[href*='detail'],"
-            "a[href*='notice'],a[href*='csrn'],a[href*='Notice']",
+            "a[href*='notice'],a[href*='csrn'],a[href*='Notice'],a[href*='procedure']",
             "els=>els.map(e=>({href:e.href,text:(e.innerText||'').trim()})).filter(x=>x.text)")
     except Exception:
         return []
@@ -131,14 +133,24 @@ def _kw_match(text, keywords) -> bool:
     return any(k in t for k in keywords)
 
 
+def _norm_txt(s: str) -> str:
+    return re.sub(r"[^a-zа-яё0-9]+", "", (s or "").lower())
+
+
 def _build(src, records, dom, mk, region_match, max_items):
     intl = src["cat"] == config.CAT_INTL
     consulting = src.get("consulting_only", False)
-    dom_by_num = {}
+    pk = src.get("prefer_key")
+    if pk and any(pk in d for d in records):
+        records = [d for d in records if pk in d]
+    dom_by_num, dom_by_text = {}, []
     for l in dom:
         m = re.search(r"(\d{5,})", l["href"])
         if m:
             dom_by_num[m.group(1)] = l["href"]
+        t = _norm_txt(l["text"])
+        if len(t) >= 15:                      # осмысленный текст ссылки → матч по названию
+            dom_by_text.append((t, l["href"]))
 
     items = []
     for d in records:
@@ -153,7 +165,16 @@ def _build(src, records, dom, mk, region_match, max_items):
             meta["kw_match"] = True   # прошёл словарь консалтинга/ИТ → floor в run.py
         num = meta.get("number", "")
         url = (src["detail_url"].format(id=num) if src.get("detail_url") and num
-               else dom_by_num.get(num) or src["url"])
+               else dom_by_num.get(num))
+        if not url:                            # матч по названию (xt-xarid: /procedure/{id}/core)
+            tn = _norm_txt(title)
+            for dt, href in dom_by_text:
+                if tn[:40] and (tn[:40] in dt or dt[:40] in tn):
+                    url = href
+                    break
+        if not url:
+            url = src["url"]
+            meta["portal_only"] = True         # прямой ссылки нет — ведём на портал, покажем №
         items.append(mk(src["source"], src["cat"], src["origin"],
                         f"[{src['key']}] {title}", url, None,
                         summary=_summary(title, meta)[:600], full_text=blob[:2500], meta=meta,
