@@ -127,6 +127,33 @@ export default async function ItemPage({
         </div>
       )}
 
+      {(it.legalAspects?.length ?? 0) > 0 && (
+        <div className="section">
+          <h2>⚖️ Юридические аспекты</h2>
+          <ul>
+            {it.legalAspects!.map((l) => (
+              <li key={l}>{linkifyActs(l, idx, it.id)}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {(it.actionItems?.length ?? 0) > 0 && (
+        <div className="section">
+          <h2>Шаги для участия</h2>
+          <ol className="num-list">
+            {it.actionItems!.map((a) => (
+              <li key={a}>{a}</li>
+            ))}
+          </ol>
+          {it.contact && (
+            <p style={{ marginTop: 8 }}>
+              <b>Контакт:</b> {it.contact}
+            </p>
+          )}
+        </div>
+      )}
+
       {it.npaRefs.length > 0 && (
         <div className="section">
           <h2>Связанные НПА</h2>

@@ -30,6 +30,9 @@ export interface FullItem extends FeedItem {
   eligibility: string | null;
   docsChecklist: string[];
   recommendation: string | null;
+  legalAspects?: string[];
+  actionItems?: string[];
+  contact?: string | null;
   summary: string | null;
   portalOnly?: boolean;
   lotNumber?: string | null;

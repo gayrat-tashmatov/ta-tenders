@@ -366,7 +366,64 @@ def fetch_tenderweek_public(pages: int | None = None) -> list:
     return items
 
 
-# ─────────────────────────── 7. Новостные RSS ───────────────────────────
+# ─────────────────────────── 7. uzjobs.uz — вакансии консультантов (RSS) ───────────────────────────
+def fetch_uzjobs(limit: int = 40) -> list:
+    """RSS uzjobs.uz; оставляем консультантские/экспертные позиции (JOB_KEYWORDS)."""
+    items = []
+    try:
+        r = requests.get(config.UZJOBS_RSS, headers=config.HTTP_HEADERS,
+                         timeout=config.HTTP_TIMEOUT)
+        parsed = feedparser.parse(r.content)
+        for e in parsed.entries[:limit]:
+            title = e.get("title", "")
+            link = e.get("link", "")
+            if not title or not link:
+                continue
+            blob = f"{title} {e.get('summary', '')}".lower()
+            if not any(k in blob for k in config.JOB_KEYWORDS):
+                continue
+            m = re.search(r"vakansy_view-(\d+)", link)
+            summary = strip_html(e.get("summary", ""))
+            items.append(_mk(
+                "UzJobs", config.CAT_JOB, "uzjobs.uz",
+                f"[UzJobs] {re.sub(r'^(Вакансия|Vacancy):\s*', '', title).strip()[:240]}",
+                link, _parse_rss_date(e), summary=summary, full_text=summary,
+                uid=f"uzjobs:{m.group(1)}" if m else None))
+        log.info("UzJobs: %d (консультанты/эксперты)", len(items))
+    except Exception as e:
+        log.warning("UzJobs FAIL: %s", e)
+    return items
+
+
+# ─────────────────────────── Полный текст страницы (для глубокого анализа) ───────────────────────────
+_FULLTEXT_SKIP = ("tenderweek.com", "etender.uzex.uz", "xarid.uzex.uz",
+                  "xt-xarid.uz", "t.me")   # SPA или стены логина — там нечего забирать
+
+
+def fetch_full_page_text(url: str) -> str:
+    """Основной текст страницы (как в v4): для новостей и server-rendered извещений
+    (UNGM, UNDP, uzjobs). Возвращает '' при любых проблемах."""
+    if not url or any(d in url for d in _FULLTEXT_SKIP):
+        return ""
+    try:
+        r = requests.get(url, headers=config.HTTP_HEADERS, timeout=config.HTTP_TIMEOUT)
+        r.raise_for_status()
+        r.encoding = r.apparent_encoding
+        soup = BeautifulSoup(r.text, "lxml")
+        for tag in soup(["script", "style", "nav", "header", "footer", "aside", "iframe"]):
+            tag.decompose()
+        for sel in ("article", ".article-body", ".post-content", ".news-content",
+                    "[itemprop='articleBody']", "main"):
+            el = soup.select_one(sel)
+            if el and len(el.get_text(strip=True)) > 150:
+                return el.get_text("\n", strip=True)[:4500]
+        body = soup.find("body")
+        return body.get_text("\n", strip=True)[:4500] if body else ""
+    except Exception:
+        return ""
+
+
+# ─────────────────────────── 8. Новостные RSS ───────────────────────────
 def fetch_news_rss() -> list:
     items, s = [], _session()
     for feed in config.RSS_FEEDS:
@@ -398,6 +455,7 @@ def collect_all() -> list:
     items += fetch_ted()
     items += fetch_undp()
     items += fetch_mfi_rss()
+    items += fetch_uzjobs()
     items += fetch_tenderweek_public()
     try:
         from headless import collect_all_headless    # playwright опционален

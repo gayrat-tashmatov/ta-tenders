@@ -197,6 +197,94 @@ def _build(src, records, dom, mk, region_match, max_items):
     return items
 
 
+_UN_AGENCIES = ("UNDP", "UNICEF", "UNOPS", "UNFPA", "UNHCR", "UNESCO", "UNIDO",
+                "UN WOMEN", "UNWOMEN", "WFP", "FAO", "ILO", "IOM", "WHO", "WIPO",
+                "ITC", "IFAD", "UNAIDS", "UNU", "UN ", "МОТ", "ПРООН")
+
+
+def _ungm_rows(page) -> list:
+    return page.evaluate("""() => {
+      const seen = new Set(); const out = [];
+      document.querySelectorAll("a[href*='/Public/Notice/']").forEach(a => {
+        const href = a.getAttribute('href');
+        if (!/\\/Public\\/Notice\\/\\d+/.test(href) || seen.has(href)) return;
+        seen.add(href);
+        let el = a;
+        for (let i = 0; i < 8 && el.parentElement; i++) {
+          el = el.parentElement;
+          if (el.innerText && el.innerText.trim().length > 120) break;
+        }
+        out.push({href, text: (el.innerText || '').trim().slice(0, 700)});
+      });
+      return out;
+    }""")
+
+
+def _collect_ungm(ctx, mk, region_match, max_items) -> list:
+    """UNGM (вся система ООН: ПРООН, МОТ, IOM, FAO, ЮНИСЕФ, WFP…):
+    для каждой страны из UNGM_COUNTRIES — выбрать её в фильтре, нажать Search,
+    разобрать строки результатов (title/deadline/agency/reference)."""
+    items, seen_ids = [], set()
+    for country in config.UNGM_COUNTRIES:
+        page = ctx.new_page()
+        try:
+            page.goto("https://www.ungm.org/Public/Notice",
+                      wait_until="domcontentloaded", timeout=60000)
+            page.wait_for_timeout(3000)
+            # всплывающий диалог перекрывает страницу — закрываем
+            try:
+                page.keyboard.press("Escape")
+                page.evaluate("document.querySelectorAll('.ui-widget-overlay, .ui-dialog')"
+                              ".forEach(e => e.remove())")
+            except Exception:
+                pass
+            # фильтр страны: автокомплит → первый пункт
+            page.fill("#selNoticeCountry-input", country)
+            page.wait_for_timeout(1500)
+            page.keyboard.press("ArrowDown")
+            page.keyboard.press("Enter")
+            page.wait_for_timeout(800)
+            page.click("button:has-text('Search')", timeout=8000, force=True)
+            page.wait_for_timeout(5000)
+            rows = _ungm_rows(page)
+            n = 0
+            for r in rows:
+                m_id = re.search(r"/Public/Notice/(\d+)", r["href"])
+                nid = m_id.group(1) if m_id else None
+                if not nid or nid in seen_ids:
+                    continue
+                seen_ids.add(nid)
+                lines = [l.strip() for l in r["text"].split("\n") if l.strip()]
+                title = next(
+                    (l for l in lines
+                     if len(l) >= 15 and "GMT" not in l and "Expires" not in l
+                     and not re.search(r"\d{1,2}-[A-Za-z]{3}-\d{4}", l)),
+                    lines[0] if lines else "UN notice")
+                agency = next((a for a in _UN_AGENCIES
+                               if any(a.lower() in l.lower() for l in lines)),
+                              "").strip() or "UN"
+                m_dl = re.search(r"\b(\d{1,2}[-–][A-Za-z]{3}[-–]\d{4})\b", r["text"])
+                items.append(mk(
+                    f"UNGM · {agency}", config.CAT_INTL, "ungm.org",
+                    f"[UN·{country[:3].upper()}] {title[:230]}",
+                    f"https://www.ungm.org{r['href']}", None,
+                    summary=" · ".join(lines[:6])[:700], full_text=r["text"][:2500],
+                    uid=f"ungm:{nid}",
+                    meta={"deadline": m_dl.group(1) if m_dl else None,
+                          "agency": agency, "country": country}))
+                n += 1
+                if len(items) >= max_items:
+                    break
+            log.info("headless ungm [%s]: строк=%d → %d", country, len(rows), n)
+        except Exception as e:
+            log.warning("headless ungm [%s] FAIL: %s", country, e)
+        finally:
+            page.close()
+        if len(items) >= max_items:
+            break
+    return items
+
+
 def run_headless(keys=None, force=False) -> list:
     """Собрать headless-источники. keys=None → все из HEADLESS_ON. force=True → игнор флага."""
     from sources import _mk, _region_match
@@ -221,8 +309,11 @@ def run_headless(keys=None, force=False) -> list:
             ctx = browser.new_context(user_agent=config.HTTP_HEADERS["User-Agent"],
                                       locale="ru-RU")
             for s in srcs:
-                captured = []
                 try:
+                    if s.get("custom") == "ungm":
+                        items += _collect_ungm(ctx, _mk, _region_match, config.HEADLESS_MAX)
+                        continue
+                    captured = []
                     page = ctx.new_page()
                     dom = _render(page, s["url"], captured)
                     page.close()

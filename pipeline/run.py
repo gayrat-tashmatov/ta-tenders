@@ -133,6 +133,13 @@ def run(send_telegram: bool = True):
                 store.mark_seen(it)
                 continue
 
+            # Полный текст страницы для глубокого анализа (news, UNGM, UNDP, uzjobs):
+            # снippet'а мало — дотягиваем статью/извещение, как делал v4.
+            if len(it.get("full_text") or "") < 700:
+                page_text = sources.fetch_full_page_text(it.get("url", ""))
+                if len(page_text) > len(it.get("full_text") or ""):
+                    it["full_text"] = page_text
+
             analysis = llm.analyze(it)
             analyzed += 1
             # реквизит, который нашла модель, но пропустил regex

@@ -26,6 +26,8 @@ function loadTenders(): CabTender[] {
     recommendation: it.recommendation,
     eligibility: it.eligibility,
     docsChecklist: it.docsChecklist,
+    legalAspects: it.legalAspects,
+    actionItems: it.actionItems,
     firstSeen: it.firstSeen,
   }));
 }

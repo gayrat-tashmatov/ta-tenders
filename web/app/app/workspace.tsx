@@ -29,6 +29,8 @@ export interface CabTender {
   recommendation: string | null;
   eligibility: string | null;
   docsChecklist: string[];
+  legalAspects?: string[];
+  actionItems?: string[];
   firstSeen: string;
   portalOnly?: boolean;
   lotNumber?: string | null;
@@ -446,6 +448,26 @@ export function Workspace({
               <div className="ws-block reco">
                 <h3>🎯 Рекомендация</h3>
                 <p>{sel.recommendation}</p>
+              </div>
+            )}
+            {(sel.legalAspects?.length ?? 0) > 0 && (
+              <div className="ws-block">
+                <h3>⚖️ Юридические аспекты</h3>
+                <ul>
+                  {sel.legalAspects!.map((l) => (
+                    <li key={l}>{l}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {(sel.actionItems?.length ?? 0) > 0 && (
+              <div className="ws-block">
+                <h3>Шаги для участия</h3>
+                <ul>
+                  {sel.actionItems!.map((a) => (
+                    <li key={a}>{a}</li>
+                  ))}
+                </ul>
               </div>
             )}
 

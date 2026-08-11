@@ -126,7 +126,7 @@ TENDERWEEK_PAGES = int(os.getenv("TENDERWEEK_PAGES", "5"))   # главная + 
 
 # ─────────────────────────── Headless (JS-SPA через Playwright) ───────────────────────────
 HEADLESS_ENABLED = os.getenv("HEADLESS_ENABLED", "0") == "1"
-HEADLESS_ON = [x.strip() for x in os.getenv("HEADLESS_ON", "etender,xtxarid,ebrd").split(",") if x.strip()]
+HEADLESS_ON = [x.strip() for x in os.getenv("HEADLESS_ON", "etender,xtxarid,ebrd,ungm").split(",") if x.strip()]
 HEADLESS_MAX = int(os.getenv("HEADLESS_MAX", "120"))
 ETENDER_LIST_URL = os.getenv("ETENDER_LIST_URL", "https://etender.uzex.uz/lots/1/0")
 
@@ -143,9 +143,32 @@ HEADLESS_SOURCES = [
      "cat": CAT_INTL,
      "url": "https://ecepp.ebrd.com/delta/noticeSearchResults.html",
      "consulting_only": True},
+    # UNGM — агрегатор закупок ВСЕЙ системы ООН (ПРООН, МОТ, IOM, FAO, ЮНИСЕФ, WFP…).
+    # Список грузится после клика «Search» → свой сценарий (custom) в headless.py.
+    {"key": "ungm", "source": "UNGM (система ООН)", "origin": "ungm.org",
+     "cat": CAT_INTL, "url": "https://www.ungm.org/Public/Notice", "custom": "ungm"},
+    # Кандидаты (SPA, generic-перехват; включаются добавлением ключа в HEADLESS_ON):
+    {"key": "tenderasia", "source": "Tender.asia (агрегатор УЗ)", "origin": "tender.asia",
+     "cat": CAT_UZTEND, "url": "https://tender.asia/", "consulting_only": True},
+    {"key": "shaffof", "source": "ShaffofXarid (открытые закупки)", "origin": "shaffofxarid.uz",
+     "cat": CAT_UZTEND, "url": "https://shaffofxarid.uz/", "consulting_only": True},
     {"key": "regulation", "source": "regulation.gov.uz (проекты НПА)", "origin": "regulation.gov.uz",
      "cat": CAT_LAW, "url": os.getenv("REGULATION_URL", "https://regulation.gov.uz/ru"),
      "require_signal": False},
+]
+
+# Страны для поиска на UNGM (фильтр «Beneficiary country»)
+UNGM_COUNTRIES = [c.strip() for c in os.getenv(
+    "UNGM_COUNTRIES",
+    "Uzbekistan,Kyrgyzstan,Tajikistan,Kazakhstan,Turkmenistan").split(",") if c.strip()]
+
+# ─────────────────────────── uzjobs.uz — вакансии консультантов (RSS) ───────────────────────────
+UZJOBS_RSS = "https://www.uzjobs.uz/rss_vak.cgi"
+JOB_KEYWORDS = [
+    "консультант", "consultant", "маслаҳатчи", "maslahatchi",
+    "эксперт", "expert", "advisor", "советник",
+    "аналитик", "analyst", "юрист", "legal", "lawyer",
+    "project officer", "программный специалист",
 ]
 
 # ─────────────────────────── Фильтры-словари ───────────────────────────
@@ -241,7 +264,10 @@ URL: {url}
   "eligibility": "<требования к участникам из текста (опыт, обороты, лицензии) или null>",
   "docs_checklist": ["<список документов для подачи, только если перечислены в тексте>"],
   "consulting_recommendation": "<конкретная услуга, которую можно предложить, 1 предложение>",
-  "urgency": "<высокая|средняя|низкая>"
+  "legal_aspects": ["<юридические аспекты: что требуется по закону, риски, комплаенс — только если следуют из текста, 0–3 пункта>"],
+  "action_items": ["<конкретные шаги для участия: с кем связаться, что подготовить, 0–3 пункта — только из текста>"],
+  "contact_suggestion": "<контакт/ведомство для связи из текста или null>",
+  "urgency": "<критическая|высокая|средняя|низкая>"
 }}"""
 
 # ─────────────────────────── Промпт аналитического дайджеста НПА ───────────────────────────

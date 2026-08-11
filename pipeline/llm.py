@@ -141,8 +141,9 @@ def analyze(item: dict) -> dict:
             data["relevance_score"] = int(data.get("relevance_score"))
         except (TypeError, ValueError):
             data["relevance_score"] = int(item.get("score", 6))
-        if not isinstance(data.get("docs_checklist"), list):
-            data["docs_checklist"] = []
+        for key in ("docs_checklist", "legal_aspects", "action_items"):
+            if not isinstance(data.get(key), list):
+                data[key] = []
         return data
     except Exception as e:
         log.warning("LLM-анализ FAIL: %s", e)

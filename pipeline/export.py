@@ -62,6 +62,9 @@ def _row_to_item(r) -> dict:
         "eligibility": analysis.get("eligibility"),
         "docsChecklist": analysis.get("docs_checklist") or [],
         "recommendation": analysis.get("consulting_recommendation"),
+        "legalAspects": analysis.get("legal_aspects") or [],
+        "actionItems": analysis.get("action_items") or [],
+        "contact": analysis.get("contact_suggestion"),
         "urgency": analysis.get("urgency"),
         "summary": r["summary"],
     }
