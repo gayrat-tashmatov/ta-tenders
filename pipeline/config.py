@@ -165,6 +165,11 @@ CONSULTING_KEYWORDS = [
     "consultanc", "consulting", "advisor", "advisory", "supervision",
     "technical assistance", "technical cooperation", "capacity building",
     "project implementation support", " pis ",
+    # ИТ-услуги — профиль «разработка ИС» (LLM-фильтр отсеет нерелевантное)
+    "разработк", "внедрени", "автоматизирован", "информационн", "программн",
+    "цифров", "техническ", "поддержк", "сопровожден",
+    "dasturiy", "axborot tizim", "avtomatlash", "raqamli", "ishlab chiq",
+    "software", "information system", "digital",
 ]
 
 # ─────────────────────────── Профиль компании ───────────────────────────
