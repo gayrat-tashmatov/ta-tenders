@@ -149,6 +149,8 @@ def _build(src, records, dom, mk, region_match, max_items):
         if consulting and not _kw_match(title, config.CONSULTING_KEYWORDS):  # консалтинг: по названию
             continue
         meta = _enrich(d)
+        if consulting:
+            meta["kw_match"] = True   # прошёл словарь консалтинга/ИТ → floor в run.py
         num = meta.get("number", "")
         url = (src["detail_url"].format(id=num) if src.get("detail_url") and num
                else dom_by_num.get(num) or src["url"])

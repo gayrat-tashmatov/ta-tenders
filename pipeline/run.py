@@ -112,6 +112,11 @@ def run(send_telegram: bool = True):
             return
 
         llm.filter_batch(fresh)
+        # Лоты, прошедшие словарь консалтинга/ИТ (headless), гарантированно идут
+        # на LLM-разбор: он и решит, отправлять ли (relevance_score ≥ 7).
+        for it in fresh:
+            if it.get("meta", {}).get("kw_match") and it["category"] == config.CAT_UZTEND:
+                it["score"] = max(it.get("score", 0), config.MIN_SCORE_FOR_DEEP)
         before = len(fresh)
         fresh = dedupe.dedup_within_run(fresh)
         log.info("После дедупа внутри запуска: %d из %d", len(fresh), before)
