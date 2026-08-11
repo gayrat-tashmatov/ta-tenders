@@ -12,6 +12,7 @@ venv/
 data/monitor.log
 data/*.db-shm
 data/*.db-wal
+data/*_capture.json
 
 # node / next
 web/node_modules/
