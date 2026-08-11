@@ -1,0 +1,63 @@
+# Сбор → дедуп → LLM-анализ → экспорт для сайта → Telegram → коммит данных.
+# Пуш данных автоматически запускает деплой сайта на Vercel (репо подключён к Vercel).
+#
+# Secrets (Settings → Secrets and variables → Actions):
+#   ANTHROPIC_API_KEY, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, SITE_BASE_URL
+#   (опционально: HEALTHCHECK_URL)
+
+name: monitor
+
+on:
+  schedule:
+    # 08:00, 12:00, 16:00, 20:00 по Ташкенту (UTC+5). Cron в Actions задаётся в UTC
+    # и может задерживаться на минуты — для дайджестов это не критично.
+    - cron: "0 3,7,11,15 * * *"
+  workflow_dispatch: {}
+
+concurrency:
+  group: monitor
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pipeline/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          pip install -r pipeline/requirements.txt
+          pip install playwright
+          playwright install --with-deps chromium
+
+      - name: Run pipeline
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          SITE_BASE_URL: ${{ secrets.SITE_BASE_URL }}
+          HEALTHCHECK_URL: ${{ secrets.HEALTHCHECK_URL }}
+          HEADLESS_ENABLED: "1"
+          HEADLESS_ON: "etender,xtxarid,ebrd"
+        run: python pipeline/run.py --run
+
+      - name: Commit data
+        run: |
+          git config user.name "ta-tenders-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/monitor.db web/data
+          if git diff --cached --quiet; then
+            echo "Нет изменений данных"
+          else
+            git commit -m "data: обновление $(date -u +'%Y-%m-%d %H:%M UTC')"
+            git push
+          fi
