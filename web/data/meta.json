@@ -1,16 +1,16 @@
 {
- "updatedAt": "2026-08-12T08:19:29+00:00",
+ "updatedAt": "2026-08-12T11:47:37+00:00",
  "counts": {
-  "feed": 99,
-  "items": 99,
+  "feed": 101,
+  "items": 101,
   "npa": 28,
-  "insights": 1
+  "insights": 2
  },
  "stats": {
-  "items": 381,
-  "seen": 1148,
+  "items": 442,
+  "seen": 1298,
   "npa": 28,
   "mentions": 0,
-  "notified": 36
+  "notified": 40
  }
 }
