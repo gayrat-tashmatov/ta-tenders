@@ -1,5 +1,23 @@
 [
  {
+  "id": "etender-506786",
+  "category": "uz_tender",
+  "source": "UZEX e-Tender (конкурс)",
+  "origin": "etender.uzex.uz",
+  "titleRu": "Закупка контента и дизайна ESG-стратегии и CSR-отчёта Узбектелекома",
+  "title": "[etender] “O‘zbektelekom” AKning ESG strategiyasi, 2025-yil uchun Korporativ Ijtimoiy Mas’uliyat (CSR) va Barqaror rivojlanish hisobotlari bo‘yicha kontent tayyorlash va dizayn xizmatlarini xarid qilish",
+  "summaryRu": "«Узбектелеком» АК закупает услуги по разработке контента и дизайна ESG-стратегии, корпоративного отчёта об общественной ответственности (CSR) и отчёта об устойчивом развитии на 2025 год. Бюджет тендера составляет 325 000 000 сумов. Срок подачи заявок: с 10 по 17 августа 2026 года.",
+  "buyer": "\"O`ZBEKTELEKOM \" AJ",
+  "deadline": "2026-08-17",
+  "budget": "325 000 000 узбекских сумов",
+  "score": 7,
+  "urgency": "средняя",
+  "published": null,
+  "firstSeen": "2026-08-16T15:21:10+00:00",
+  "npaRefs": [],
+  "url": "https://etender.uzex.uz/lot/506786"
+ },
+ {
   "id": "u-c6bda228ce0299b0",
   "category": "news",
   "source": "Kun.uz",
@@ -1420,23 +1438,5 @@
   "firstSeen": "2026-08-11T16:02:51+00:00",
   "npaRefs": [],
   "url": "https://www.ungm.org/Public/Notice/308944"
- },
- {
-  "id": "tw-36309",
-  "category": "uz_tender",
-  "source": "TenderWeek",
-  "origin": "TenderWeek",
-  "titleRu": "Консалтинговые услуги по разработке проекта озеленения канала Полвон",
-  "title": "[TW] Консалтинговые услуги",
-  "summaryRu": "Закупка консалтинговых услуг для разработки детального рабочего проекта и сметы по преобразованию 2,4-километровой насыпи канала Полвон в зелёную зону. Заказчик — ГРП «Программа Комплексного Развития Городов». Финансирование за счёт займа Азиатского банка развития (АБР). Точные сумма и сроки подачи в доступном тексте отсутствуют.",
-  "buyer": "ГРП Программа Комплексного Развития Городов",
-  "deadline": null,
-  "budget": null,
-  "score": 7,
-  "urgency": "средняя",
-  "published": null,
-  "firstSeen": "2026-08-11T16:02:42+00:00",
-  "npaRefs": [],
-  "url": "https://www.tenderweek.com/tender-36309"
  }
 ]
