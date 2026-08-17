@@ -1,5 +1,23 @@
 [
  {
+  "id": "u-2d09b1d3dfb3922f",
+  "category": "news",
+  "source": "Nuz.uz",
+  "origin": "Nuz.uz",
+  "titleRu": "Массовая переоценка недвижимости Ташкента: кадастр отстаёт от рынка в 7–14 раз",
+  "title": "Кадастр не догоняет рынок: недвижимость в Ташкенте стоит  в разы дороже",
+  "summaryRu": "Министерство экономики и финансов Узбекистана завершило первый этап массовой оценки недвижимости в Ташкенте (2025–2026 годы). Переоценено более 600 тысяч квартир (кадастровая стоимость выросла с 57,8 до 426,7 трлн сумов) и свыше 213 тысяч индивидуальных домов (с 39,1 до 548,4 трлн сумов). Реализация проводится в соответствии с Указом Президента от 5 марта 2025 года.",
+  "buyer": "Министерство экономики и финансов Республики Узбекистан",
+  "deadline": "2025–2026 (первый этап завершён)",
+  "budget": null,
+  "score": 8,
+  "urgency": "средняя",
+  "published": "2026-08-17 12:56:03+00:00",
+  "firstSeen": "2026-08-17T15:25:13+00:00",
+  "npaRefs": [],
+  "url": "https://nuz.uz/2026/08/17/kadastr-ne-dogonyaet-rynok-nedvizhimost-v-tashkente-stoit-v-razy-dorozhe/"
+ },
+ {
   "id": "u-4a29d32d075f56ca",
   "category": "news",
   "source": "UzA.uz",
@@ -1042,41 +1060,5 @@
   "firstSeen": "2026-08-12T16:00:04+00:00",
   "npaRefs": [],
   "url": "https://www.ungm.org/Public/Notice/307369"
- },
- {
-  "id": "etender-506012",
-  "category": "uz_tender",
-  "source": "UZEX e-Tender (конкурс)",
-  "origin": "etender.uzex.uz",
-  "titleRu": "Переидентификация опасных производств ООО «Узтрансгаз»",
-  "title": "[etender] “O‘ztransgaz” AJ tarkibiy tuzilmasi xavfli ishlab chiqarish obyektlarini sanoat xavfsizligi ekspertizasi doirasida qayta identifikatsiyadan o‘tkazish bo‘yicha.",
-  "summaryRu": "ООО «Узтрансгаз» проводит переидентификацию опасных производственных объектов в структуре компании в рамках промышленной экспертизы безопасности. Заказчик: ООО «Узтрансгаз» (Ташкентская область, Юқоричирчиқский район). Бюджет: 320 000 000 узбекских сумов. Срок подачи предложений: с 3 августа по 12 августа 2026 года.",
-  "buyer": "\"O`ZTRANSGAZ\" AJ",
-  "deadline": "2026-08-12",
-  "budget": "320 000 000 узбекских сумов",
-  "score": 6,
-  "urgency": "средняя",
-  "published": null,
-  "firstSeen": "2026-08-12T11:46:56+00:00",
-  "npaRefs": [],
-  "url": "https://etender.uzex.uz/lot/506012"
- },
- {
-  "id": "tw-36314",
-  "category": "uz_tender",
-  "source": "TenderWeek",
-  "origin": "TenderWeek",
-  "titleRu": "Консультант по программе хорошего управления GIZ в Узбекистане",
-  "title": "[TW] Консультационные услуги",
-  "summaryRu": "GIZ (Германское общество по международному сотрудничеству) ищет индивидуального консультанта высокой квалификации для проекта «Good governance program in Uzbekistan» (PN: G-011839-001). Номер тендера: 7000020815. Категория: консультационные услуги, оценочные услуги, сертификация.",
-  "buyer": "Германское Общество по Международному Сотрудничеству (GIZ)",
-  "deadline": null,
-  "budget": null,
-  "score": 9,
-  "urgency": "высокая",
-  "published": null,
-  "firstSeen": "2026-08-12T11:46:49+00:00",
-  "npaRefs": [],
-  "url": "https://www.tenderweek.com/tender-36314"
  }
 ]
