@@ -83,9 +83,13 @@ class Store:
 
     # ─────────────── Дедуп-ключи ───────────────
     def _keys(self, item: dict) -> list:
-        keys = []
+        """Ключи «просмотрено». Если у записи есть стабильный ID источника (uid) —
+        дедупим ТОЛЬКО по нему: у извещений одного проекта (WB) и лотов с типовыми
+        названиями (UZEX/TenderWeek) URL и текст совпадают, а лоты — разные.
+        URL/контент-хеши остаются для записей без uid (новости из RSS)."""
         if item.get("uid"):
-            keys.append("uid:" + item["uid"])
+            return ["uid:" + item["uid"]]
+        keys = []
         if item.get("url"):
             keys.append("url:" + dedupe.url_hash(item["url"]))
         keys.append("content:" + dedupe.content_hash(item.get("title", ""),
