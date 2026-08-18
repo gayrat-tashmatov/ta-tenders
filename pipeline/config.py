@@ -34,7 +34,7 @@ SITE_BASE_URL = os.getenv("SITE_BASE_URL", "").rstrip("/")
 MAX_AGE_DAYS = int(os.getenv("MAX_AGE_DAYS", "5"))    # свежесть новостей
 NEAR_DUP_DAYS = 14                                     # окно семантического дедупа против истории
 SEEN_NEWS_PRUNE_DAYS = 60                              # seen для новостей; тендеры/НПА — вечные
-ANALYZE_MAX = int(os.getenv("ANALYZE_MAX", "40"))      # потолок LLM-анализов за один запуск
+ANALYZE_MAX = int(os.getenv("ANALYZE_MAX", "60"))      # потолок LLM-анализов за один запуск (Haiku ≈ $0.01/шт)
 TIMEZONE = "Asia/Tashkent"
 
 MODEL_FILTER = os.getenv("MODEL_FILTER", "claude-haiku-4-5-20251001")
@@ -122,7 +122,7 @@ UNDP_URL = "https://procurement-notices.undp.org/"
 # Листинг главной страницы ПУБЛИЧНЫЙ и содержит: заказчик, №, название, описание,
 # категорию и дату. Полные тексты этих же тендеров даёт первоисточник (etender/xarid).
 TENDERWEEK_URL = "https://www.tenderweek.com/"
-TENDERWEEK_PAGES = int(os.getenv("TENDERWEEK_PAGES", "5"))   # главная + ?page=2..N
+TENDERWEEK_PAGES = int(os.getenv("TENDERWEEK_PAGES", "10"))  # главная + ?page=2..N (лента уходит в архив быстро)
 
 # ─────────────────────────── Headless (JS-SPA через Playwright) ───────────────────────────
 HEADLESS_ENABLED = os.getenv("HEADLESS_ENABLED", "0") == "1"

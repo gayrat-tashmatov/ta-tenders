@@ -378,6 +378,13 @@ a.chip:hover { background: var(--accent-100); text-decoration: none; transform: 
 
 .cab-section { padding-top: 6px; padding-bottom: 44px; flex: 1; overflow-y: auto; }
 
+.health-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.health-table th { text-align: left; font-size: 11px; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--text-soft); padding: 6px 10px;
+  border-bottom: 1px solid var(--divider); }
+.health-table td { padding: 8px 10px; border-bottom: 1px solid var(--divider); }
+.health-table tr:last-child td { border-bottom: none; }
+
 /* Планшет/мобайл */
 @media (max-width: 1080px) {
   .ws { grid-template-columns: 204px 1fr; }

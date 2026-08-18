@@ -449,20 +449,36 @@ def fetch_news_rss() -> list:
 
 
 # ─────────────────────────── Оркестратор сбора ───────────────────────────
+# Статистика последнего сбора: origin → сколько элементов отдал источник в ЭТОМ прогоне.
+# Ноль там, где обычно есть данные, — сигнал тихой поломки (показывается в кабинете).
+LAST_COLLECT_STATS: dict = {}
+
+
+def _tally(items: list) -> list:
+    for it in items:
+        LAST_COLLECT_STATS[it["origin"]] = LAST_COLLECT_STATS.get(it["origin"], 0) + 1
+    return items
+
+
 def collect_all() -> list:
+    LAST_COLLECT_STATS.clear()
+    # источники, которые обязаны что-то отдать: заводим нули, чтобы поломка была видна
+    for o in ("World Bank", "TenderWeek", "lex.uz", "ungm.org", "etender.uzex.uz",
+              "xt-xarid.uz", "uzjobs.uz", "Gazeta.uz", "Spot.uz", "Kun.uz"):
+        LAST_COLLECT_STATS.setdefault(o, 0)
     items = []
-    items += fetch_worldbank()
-    items += fetch_ted()
-    items += fetch_undp()
-    items += fetch_mfi_rss()
-    items += fetch_uzjobs()
-    items += fetch_tenderweek_public()
+    items += _tally(fetch_worldbank())
+    items += _tally(fetch_ted())
+    items += _tally(fetch_undp())
+    items += _tally(fetch_mfi_rss())
+    items += _tally(fetch_uzjobs())
+    items += _tally(fetch_tenderweek_public())
     try:
         from headless import collect_all_headless    # playwright опционален
-        items += collect_all_headless()
+        items += _tally(collect_all_headless())
     except Exception as e:
         log.warning("headless источники недоступны: %s", e)
-    items += fetch_lexuz_telegram()
-    items += fetch_news_rss()
+    items += _tally(fetch_lexuz_telegram())
+    items += _tally(fetch_news_rss())
     log.info("ИТОГО собрано: %d элементов", len(items))
     return items

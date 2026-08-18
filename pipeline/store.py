@@ -62,6 +62,14 @@ class Store:
             PRIMARY KEY (npa_key, item_id)
         );
 
+        CREATE TABLE IF NOT EXISTS source_health (
+            origin TEXT PRIMARY KEY,
+            last_run TEXT,                 -- когда источник опрашивали в последний раз
+            last_count INTEGER,            -- сколько отдал в последний прогон
+            last_nonzero TEXT,             -- когда в последний раз отдал > 0
+            total_items INTEGER DEFAULT 0  -- всего записей в items от этого источника
+        );
+
         CREATE TABLE IF NOT EXISTS insights (
             id TEXT PRIMARY KEY,           -- 'law-2026-08-11'
             kind TEXT,                     -- 'law' (дальше: 'tenders', 'market')
@@ -170,6 +178,21 @@ class Store:
                   - timedelta(days=config.SEEN_NEWS_PRUNE_DAYS)).isoformat()
         self.db.execute("DELETE FROM seen WHERE category=? AND first_seen < ?",
                         (config.CAT_NEWS, cutoff))
+        self.db.commit()
+
+    def record_health(self, collect_stats: dict):
+        """Записать статистику последнего сбора по источникам."""
+        now = _now()
+        for origin, n in collect_stats.items():
+            total = self.db.execute(
+                "SELECT COUNT(*) FROM items WHERE origin=?", (origin,)).fetchone()[0]
+            prev = self.db.execute(
+                "SELECT last_nonzero FROM source_health WHERE origin=?", (origin,)).fetchone()
+            last_nz = now if n > 0 else (prev["last_nonzero"] if prev else None)
+            self.db.execute(
+                "INSERT OR REPLACE INTO source_health"
+                "(origin, last_run, last_count, last_nonzero, total_items) VALUES (?,?,?,?,?)",
+                (origin, now, int(n), last_nz, total))
         self.db.commit()
 
     def stats(self) -> dict:

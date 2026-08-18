@@ -70,6 +70,7 @@ def run(send_telegram: bool = True):
             _ping(fail=True)
             return
 
+        store.record_health(sources.LAST_COLLECT_STATS)
         history = store.recent_tokens()
         fresh, mentions_only = [], 0
         from datetime import datetime, timezone, timedelta
@@ -90,13 +91,19 @@ def run(send_telegram: bool = True):
                 continue
 
             # НОВАЯ публикация про уже известный акт → упоминание к карточке,
-            # не отдельная запись (это и убирает повторы НПА).
-            if it["npa_refs"] and store.npa_lookup(it["npa_refs"]):
+            # не отдельная запись (это и убирает повторы НПА). Только для НОВОСТЕЙ:
+            # сам акт (lex.uz) — всегда своя карточка.
+            if (it["category"] == config.CAT_NEWS and it["npa_refs"]
+                    and store.npa_lookup(it["npa_refs"])):
                 store.npa_add_mention(it["npa_refs"], it)
                 store.mark_seen(it)
                 mentions_only += 1
                 continue
-            if dedupe.is_near_dup(it, history):
+            # Семантический дедуп — ТОЛЬКО для новостей (одна тема из разных СМИ).
+            # Тендеры/НПА/вакансии дедупятся строго по uid/URL: у госзакупок
+            # шаблонные названия («Консультационные услуги»), и по словам они
+            # ложно склеивались — так терялись реальные лоты (баг до 18.08).
+            if it["category"] == config.CAT_NEWS and dedupe.is_near_dup(it, history):
                 store.mark_seen(it)
                 continue
             fresh.append(it)
@@ -118,16 +125,22 @@ def run(send_telegram: bool = True):
             if it.get("meta", {}).get("kw_match") and it["category"] == config.CAT_UZTEND:
                 it["score"] = max(it.get("score", 0), config.MIN_SCORE_FOR_DEEP)
         before = len(fresh)
-        fresh = dedupe.dedup_within_run(fresh)
-        log.info("После дедупа внутри запуска: %d из %d", len(fresh), before)
+        news_part = [it for it in fresh if it["category"] == config.CAT_NEWS]
+        other_part = [it for it in fresh if it["category"] != config.CAT_NEWS]
+        fresh = other_part + dedupe.dedup_within_run(news_part)
+        log.info("После дедупа новостей внутри запуска: %d из %d", len(fresh), before)
 
         processed, analyzed = [], 0
+        # Тендеры/НПА/вакансии — на сайт ВСЕ (оценка влияет только на Telegram и
+        # порядок). Разбор LLM получают релевантные (score ≥ MIN_SCORE_FOR_DEEP)
+        # и, отдельно, все тендеры в пределах бюджета анализов.
         for it in sorted(fresh, key=lambda x: -x.get("score", 0)):
             score = it.get("score", 0)
-            if score < config.MIN_SCORE_FOR_DEEP or analyzed >= config.ANALYZE_MAX:
+            is_tender = it["category"] in (config.CAT_INTL, config.CAT_UZTEND, config.CAT_JOB)
+            want_deep = (score >= config.MIN_SCORE_FOR_DEEP or is_tender) \
+                and analyzed < config.ANALYZE_MAX
+            if not want_deep:
                 store.save_item(it, score, None, it["npa_refs"], notified=False)
-                if it["category"] != config.CAT_NEWS or score >= config.SITE_MIN_NEWS_SCORE:
-                    pass  # запись уже в базе, попадёт на сайт по правилам экспорта
                 if it["category"] == config.CAT_LAW and it["npa_refs"]:
                     store.npa_register(it["npa_refs"], it)
                 store.mark_seen(it)

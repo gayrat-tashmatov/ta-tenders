@@ -114,10 +114,20 @@ def export_all(store: Store) -> list:
                     "sources": json.loads(r["sources"] or "[]")})
 
     stats = store.stats()
+    health = []
+    try:
+        for r in store.db.execute(
+                "SELECT origin, last_run, last_count, last_nonzero, total_items "
+                "FROM source_health ORDER BY total_items DESC").fetchall():
+            health.append({"origin": r["origin"], "lastRun": r["last_run"],
+                           "lastCount": r["last_count"], "lastNonzero": r["last_nonzero"],
+                           "total": r["total_items"]})
+    except Exception:
+        pass
     meta = {"updatedAt": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             "counts": {"feed": len(feed), "items": len(items), "npa": len(npa),
                        "insights": len(ins)},
-            "stats": stats}
+            "stats": stats, "health": health}
 
     for name, data in (("feed.json", feed), ("items.json", items),
                        ("npa.json", npa), ("insights.json", ins), ("meta.json", meta)):
