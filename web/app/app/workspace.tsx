@@ -96,6 +96,11 @@ export function Workspace({
   const [, startTransition] = useTransition();
   // локальный оверлей поверх серверного состояния — мгновенный отклик UI
   const [local, setLocal] = useState<Record<string, Partial<CabState>>>({});
+  const [saveError, setSaveError] = useState<string | null>(null);
+  function report(p: Promise<{ ok: boolean; error?: string }>) {
+    p.then((r) => setSaveError(r.ok ? null : r.error ?? "Не сохранилось"))
+      .catch((e) => setSaveError(String(e)));
+  }
 
   const nameOf = useMemo(
     () => new Map(profiles.map((p) => [p.id, p.fullName || "коллега"])),
@@ -219,16 +224,16 @@ export function Workspace({
     const s = my(t.id);
     if ((s.status ?? "new") === "new") {
       patch(t.id, { status: "viewed" });
-      startTransition(() => void setStatus(t.id, "viewed"));
+      startTransition(() => report(setStatus(t.id, "viewed", title(t))));
     }
   }
   function onStatus(id: string, status: string) {
     patch(id, { status });
-    startTransition(() => void setStatus(id, status));
+    startTransition(() => report(setStatus(id, status, title(tenders.find((x) => x.id === id)!))));
   }
   function onStar(id: string, saved: boolean) {
     patch(id, { saved });
-    startTransition(() => void toggleSaved(id, saved));
+    startTransition(() => report(toggleSaved(id, saved, title(tenders.find((x) => x.id === id)!))));
   }
 
   return (
@@ -305,6 +310,12 @@ export function Workspace({
           <div className="ws-demo-note">
             Демо-режим: статусы и звёздочки не сохраняются, пока не подключён
             Supabase.
+          </div>
+        )}
+        {saveError && (
+          <div className="ws-error-note">
+            ⚠ {saveError}. Если это первое сохранение — выполните миграцию
+            supabase/migration_002_history.sql (см. README).
           </div>
         )}
         {shown.length === 0 && <div className="empty">В этой папке пусто.</div>}
@@ -474,6 +485,7 @@ export function Workspace({
             <NoteBox
               key={sel.id}
               tenderId={sel.id}
+              tenderTitle={title(sel)}
               initial={selState.note ?? ""}
               demo={demo}
               onSaved={(v) => patch(sel.id, { note: v })}
@@ -496,17 +508,20 @@ export function Workspace({
 
 function NoteBox({
   tenderId,
+  tenderTitle,
   initial,
   demo,
   onSaved,
 }: {
   tenderId: string;
+  tenderTitle: string;
   initial: string;
   demo: boolean;
   onSaved: (v: string) => void;
 }) {
   const [val, setVal] = useState(initial);
   const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
   const dirty = val !== initial;
   return (
     <div className="ws-block">
@@ -522,13 +537,14 @@ function NoteBox({
         disabled={!dirty || saving}
         onClick={async () => {
           setSaving(true);
-          await saveNote(tenderId, val);
-          onSaved(val);
+          const r = await saveNote(tenderId, val, tenderTitle);
+          if (r.ok) onSaved(val); else setErr(r.error ?? "Не сохранилось");
           setSaving(false);
         }}
       >
         {saving ? "Сохраняем…" : dirty ? "Сохранить заметку" : "Сохранено"}
       </button>
+      {err && <div className="ws-error-note">⚠ {err}</div>}
     </div>
   );
 }

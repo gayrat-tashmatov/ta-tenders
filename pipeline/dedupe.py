@@ -147,3 +147,14 @@ def dedup_within_run(items: list, thr: float = 0.45) -> list:
     for it in kept:
         it.pop("_toks", None)
     return kept
+
+
+# ─────────────────────────── Товарные закупки — не наш профиль ───────────────────────────
+def is_goods_procurement(item: dict) -> bool:
+    """True, если это закупка товаров/оборудования без услуговой составляющей."""
+    if item.get("category") not in (config.CAT_UZTEND, config.CAT_INTL):
+        return False
+    title = (item.get("title") or "").lower()
+    if any(k in title for k in config.SERVICE_KEYWORDS):
+        return False
+    return any(k in title for k in config.GOODS_KEYWORDS)

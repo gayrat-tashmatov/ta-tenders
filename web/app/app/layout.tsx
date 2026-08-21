@@ -20,6 +20,7 @@ export default async function AppLayout({
           <Link href="/app">Тендеры</Link>
           <Link href="/app/npa">НПА</Link>
           <Link href="/app/analytics">Аналитика</Link>
+          <Link href="/app/activity">Активность</Link>
           <Link href="/app/health">Источники</Link>
         </nav>
         <div className="cab-user">

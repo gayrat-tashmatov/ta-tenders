@@ -128,25 +128,50 @@ def _buttons(item: dict) -> list:
 
 
 def card(item: dict, a: dict) -> tuple:
-    """Короткая карточка: суть в 2–3 строках, детали — на сайте."""
+    """Структурная карточка: с первого взгляда понятно КТО объявил, ЧТО нужно,
+    ЗАЧЕМ это нам, СРОКИ и ЧТО ДЕЛАТЬ. Детали — в кабинете."""
     head = _headline(item, a)
-    lines = [f"{_ICON.get(item['category'], '•')} <b>{esc(head)}</b>"]
+    cat = item["category"]
+    kind = {config.CAT_INTL: "Международный тендер", config.CAT_UZTEND: "Тендер · Узбекистан",
+            config.CAT_LAW: "Новый НПА", config.CAT_JOB: "Позиция эксперта"}.get(cat, "Материал")
+    lines = [f"{_ICON.get(cat, '•')} <b>{esc(head)}</b>",
+             f"<i>{esc(kind)} · {esc(item['origin'])}</i>", ""]
 
-    meta = [esc(item["origin"])]
+    # КТО и ЧТО
+    who = a.get("target_entity")
+    if who:
+        lines.append(f"<b>Кто:</b> {esc(_trim(who, 90))}")
+    what = a.get("summary_ru")
+    if what:
+        lines.append(f"<b>Что нужно:</b> {esc(_trim(what, 420))}")
+
+    # СРОКИ и ДЕНЬГИ — одной строкой
+    facts = []
     dl = _short_date(a.get("deadline_info") or item.get("meta", {}).get("deadline"))
     if dl:
-        meta.append(f"до {dl}")
-    te = a.get("target_entity")
-    if te and esc(te).lower() not in esc(head).lower():
-        meta.append("заказчик " + esc(_trim(te, 55)))
-    lines.append(f"<i>{' · '.join(meta)}</i>")
+        facts.append(f"⏳ до {dl}")
+    if a.get("budget_info"):
+        facts.append(f"💰 {esc(_trim(a['budget_info'], 50))}")
+    urg = (a.get("urgency") or "").lower()
+    if urg in ("критическая", "высокая"):
+        facts.append("🔥 срочно")
+    if facts:
+        lines.append(" · ".join(facts))
 
-    s = a.get("summary_ru")
-    if s:
-        lines.append(f"\n{esc(_trim(s, 400))}")
+    # ЗАЧЕМ НАМ и ЧТО ДЕЛАТЬ
     rec = a.get("consulting_recommendation")
     if rec and rec != "Изучить условия":
-        lines.append(f"🎯 {esc(_trim(rec, 240))}")
+        lines.append(f"\n<b>Зачем нам:</b> {esc(_trim(rec, 260))}")
+    elig = a.get("eligibility")
+    if elig:
+        lines.append(f"<b>Требования:</b> {esc(_trim(elig, 200))}")
+    steps = [x for x in (a.get("action_items") or []) if x][:2]
+    if steps:
+        lines.append("<b>Что делать:</b> " + " → ".join(esc(_trim(x, 110)) for x in steps))
+
+    score = a.get("relevance_score") or item.get("score")
+    if score:
+        lines.append(f"\n<i>релевантность {esc(score)}/10</i>")
     return "\n".join(lines), _buttons(item)
 
 

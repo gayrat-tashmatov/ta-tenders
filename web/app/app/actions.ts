@@ -3,14 +3,21 @@
 import { revalidatePath } from "next/cache";
 import { isDemo, supabaseServer } from "@/lib/supabase/server";
 
-async function upsertState(tenderId: string, patch: Record<string, unknown>) {
-  if (isDemo()) return; // демо: состояние не сохраняется
+export type ActionResult = { ok: boolean; error?: string };
+
+async function upsertState(
+  tenderId: string,
+  patch: Record<string, unknown>,
+  log: { action: string; value?: string | null; title?: string },
+): Promise<ActionResult> {
+  if (isDemo()) return { ok: true }; // демо: состояние не сохраняется
   const supabase = await supabaseServer();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return;
-  await supabase.from("tender_state").upsert(
+  if (!user) return { ok: false, error: "Сессия истекла — войдите заново" };
+
+  const { error } = await supabase.from("tender_state").upsert(
     {
       user_id: user.id,
       tender_id: tenderId,
@@ -19,17 +26,33 @@ async function upsertState(tenderId: string, patch: Record<string, unknown>) {
     },
     { onConflict: "user_id,tender_id" },
   );
+  if (error) {
+    console.error("tender_state upsert failed:", error.message);
+    return { ok: false, error: `Не сохранилось: ${error.message}` };
+  }
+
+  // История действий — не блокирует основное сохранение, если таблицы ещё нет
+  const { error: logErr } = await supabase.from("activity_log").insert({
+    user_id: user.id,
+    tender_id: tenderId,
+    tender_title: log.title ?? null,
+    action: log.action,
+    value: log.value ?? null,
+  });
+  if (logErr) console.warn("activity_log insert failed:", logErr.message);
+
   revalidatePath("/app");
+  return { ok: true };
 }
 
-export async function setStatus(tenderId: string, status: string) {
-  await upsertState(tenderId, { status });
+export async function setStatus(tenderId: string, status: string, title?: string) {
+  return upsertState(tenderId, { status }, { action: "status", value: status, title });
 }
 
-export async function toggleSaved(tenderId: string, saved: boolean) {
-  await upsertState(tenderId, { saved });
+export async function toggleSaved(tenderId: string, saved: boolean, title?: string) {
+  return upsertState(tenderId, { saved }, { action: saved ? "saved" : "unsaved", title });
 }
 
-export async function saveNote(tenderId: string, note: string) {
-  await upsertState(tenderId, { note });
+export async function saveNote(tenderId: string, note: string, title?: string) {
+  return upsertState(tenderId, { note }, { action: "note", value: note, title });
 }

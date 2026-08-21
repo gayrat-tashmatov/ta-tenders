@@ -72,7 +72,7 @@ def run(send_telegram: bool = True):
 
         store.record_health(sources.LAST_COLLECT_STATS)
         history = store.recent_tokens()
-        fresh, mentions_only = [], 0
+        fresh, mentions_only, goods_skipped = [], 0, 0
         from datetime import datetime, timezone, timedelta
         cutoff = datetime.now(timezone.utc) - timedelta(days=config.MAX_AGE_DAYS)
 
@@ -85,6 +85,12 @@ def run(send_telegram: bool = True):
                     continue
 
             it["npa_refs"] = dedupe.extract_npa_refs(it.get("title"), it.get("full_text"))
+
+            # Закупки товаров/оборудования — не наш профиль: отсекаем на входе.
+            if dedupe.is_goods_procurement(it):
+                store.mark_seen(it)
+                goods_skipped += 1
+                continue
 
             # Повтор той же записи (тот же uid/URL/текст) — просто пропуск.
             if store.is_seen(it):
@@ -108,8 +114,8 @@ def run(send_telegram: bool = True):
                 continue
             fresh.append(it)
 
-        log.info("После свежести+дедупа: %d из %d (+%d упоминаний НПА)",
-                 len(fresh), len(raw), mentions_only)
+        log.info("После свежести+дедупа: %d из %d (+%d упоминаний НПА, %d товарных отсечено)",
+                 len(fresh), len(raw), mentions_only, goods_skipped)
 
         if not fresh:
             if send_telegram:
