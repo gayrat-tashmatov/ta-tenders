@@ -10,7 +10,7 @@ import {
   stripRawTitle,
   type Category,
 } from "@/lib/types";
-import { saveNote, setStatus, toggleSaved } from "./actions";
+import { markAllViewed, saveNote, setStatus, toggleSaved } from "./actions";
 
 export interface CabTender {
   id: string;
@@ -227,6 +227,20 @@ export function Workspace({
       startTransition(() => report(setStatus(t.id, "viewed", title(t))));
     }
   }
+  function onMarkAllRead() {
+    const targets = shown.filter((t) => (my(t.id).status ?? "new") === "new");
+    if (targets.length === 0) return;
+    const scopeLabel =
+      FOLDERS.find((f) => f.key === folder)?.label ?? folder;
+    setLocal((prev) => {
+      const next = { ...prev };
+      for (const t of targets) next[t.id] = { ...next[t.id], status: "viewed" };
+      return next;
+    });
+    startTransition(() =>
+      report(markAllViewed(targets.map((t) => t.id), `${scopeLabel} (${targets.length})`)),
+    );
+  }
   function onStatus(id: string, status: string) {
     patch(id, { status });
     startTransition(() => report(setStatus(id, status, title(tenders.find((x) => x.id === id)!))));
@@ -278,6 +292,15 @@ export function Workspace({
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
+          {shown.some((t) => (my(t.id).status ?? "new") === "new") && (
+            <button
+              className="btn small ghost"
+              onClick={onMarkAllRead}
+              title="Пометить все новые тендеры в текущем списке как просмотренные"
+            >
+              ✓ Всё прочитано ({shown.filter((t) => (my(t.id).status ?? "new") === "new").length})
+            </button>
+          )}
           <select
             className="ws-select"
             value={src}

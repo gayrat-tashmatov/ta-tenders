@@ -56,3 +56,39 @@ export async function toggleSaved(tenderId: string, saved: boolean, title?: stri
 export async function saveNote(tenderId: string, note: string, title?: string) {
   return upsertState(tenderId, { note }, { action: "note", value: note, title });
 }
+
+/** «Всё прочитано»: пачкой перевести новые тендеры в «Просмотрен». Одна запись в историю. */
+export async function markAllViewed(
+  tenderIds: string[],
+  scope: string,
+): Promise<ActionResult & { count?: number }> {
+  if (isDemo()) return { ok: true, count: tenderIds.length };
+  if (tenderIds.length === 0) return { ok: true, count: 0 };
+  const supabase = await supabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Сессия истекла — войдите заново" };
+
+  const now = new Date().toISOString();
+  const { error } = await supabase.from("tender_state").upsert(
+    tenderIds.map((id) => ({
+      user_id: user.id,
+      tender_id: id,
+      status: "viewed",
+      updated_at: now,
+    })),
+    { onConflict: "user_id,tender_id", ignoreDuplicates: false },
+  );
+  if (error) return { ok: false, error: `Не сохранилось: ${error.message}` };
+
+  await supabase.from("activity_log").insert({
+    user_id: user.id,
+    tender_id: "*",
+    tender_title: scope,
+    action: "mark_all_viewed",
+    value: String(tenderIds.length),
+  });
+  revalidatePath("/app");
+  return { ok: true, count: tenderIds.length };
+}

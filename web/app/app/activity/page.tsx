@@ -10,6 +10,7 @@ const ACTION_LABEL: Record<string, string> = {
   saved: "сохранил(а) ⭐",
   unsaved: "убрал(а) из сохранённых",
   note: "написал(а) заметку",
+  mark_all_viewed: "отметил(а) всё прочитанным",
 };
 const STATUS_LABEL: Record<string, string> = {
   new: "Новый", viewed: "Просмотрен", working: "В работе", submitted: "Подан",
@@ -76,7 +77,11 @@ export default async function ActivityPage() {
                 <li key={r.id}>
                   <span className="activity-time">{r.created_at.slice(11, 16)}</span>
                   <b>{who}</b> {what}{val ? <> → <b>{val}</b></> : null}:{" "}
-                  <Link href={`/t/${r.tender_id}`}>{r.tender_title ?? r.tender_id}</Link>
+                  {r.tender_id === "*" ? (
+                    <span>{r.tender_title ?? ""} — {r.value} шт.</span>
+                  ) : (
+                    <Link href={`/t/${r.tender_id}`}>{r.tender_title ?? r.tender_id}</Link>
+                  )}
                 </li>
               );
             })}
