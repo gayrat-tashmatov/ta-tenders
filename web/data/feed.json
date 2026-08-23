@@ -1824,23 +1824,5 @@
   "firstSeen": "2026-08-19T11:25:28+00:00",
   "npaRefs": [],
   "url": "https://projects.worldbank.org/en/projects-operations/procurement-detail/OP00463221"
- },
- {
-  "id": "tw-36344",
-  "category": "uz_tender",
-  "source": "TenderWeek",
-  "origin": "TenderWeek",
-  "titleRu": "Закупка резиновых формовых сапог Asia Trans Gas",
-  "title": "[TW] Закупка сапог резиновых формовых",
-  "summaryRu": "ООО \"Asia Trans Gas\" объявляет закупку резиновых формовых сапог. Заказчик относится к категории специальной одежды и средств индивидуальной защиты. В тексте не указаны сумма контракта, количество единиц и точный срок подачи предложений.",
-  "buyer": "Asia Trans Gas СП ООО",
-  "deadline": null,
-  "budget": null,
-  "score": 2,
-  "urgency": "низкая",
-  "published": null,
-  "firstSeen": "2026-08-18T15:36:01+00:00",
-  "npaRefs": [],
-  "url": "https://www.tenderweek.com/tender-36344"
  }
 ]
