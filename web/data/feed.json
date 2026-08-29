@@ -1,5 +1,23 @@
 [
  {
+  "id": "u-7a4b5966e8c3c598",
+  "category": "news",
+  "source": "Kun.uz",
+  "origin": "Kun.uz",
+  "titleRu": "DP World инвестирует 288 млн долл. в логистический центр Ташкента",
+  "title": "Toshkentda 288 mln dollarlik yirik logistika markazi quriladi.",
+  "summaryRu": "Компания DP World планирует построить крупный логистический центр в Ташкенте с инвестициями в размере 288 млн долларов. Строительство должно начаться в октябре текущего года. Центр будет обслуживать до 20 млн тонн грузов и 150 тысяч контейнеров в год.",
+  "buyer": "DP World (BAA)",
+  "deadline": "октябрь текущего года (начало строительства)",
+  "budget": "288 млн долларов",
+  "score": 7,
+  "urgency": "высокая",
+  "published": "2026-08-29 05:40:00+00:00",
+  "firstSeen": "2026-08-29T09:45:43+00:00",
+  "npaRefs": [],
+  "url": "https://kun.uz/news/2026/08/29/toshkentda-288-mln-dollarlik-yirik-logistika-markazi-quriladi"
+ },
+ {
   "id": "etender-508168",
   "category": "uz_tender",
   "source": "UZEX e-Tender (конкурс)",
