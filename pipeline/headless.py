@@ -243,28 +243,38 @@ def _collect_ungm(ctx, mk, region_match, max_items) -> list:
             # так утекали Африка/ЛатАм под тегом [UN·KAZ]).
             selected = False
             for attempt in range(3):
-                page.fill("#selNoticeCountry-input", "")
-                page.fill("#selNoticeCountry-input", country)
-                page.wait_for_timeout(1500 + attempt * 800)
                 try:
+                    page.fill("#selNoticeCountry-input", country)
+                    # ждём именно появления пункта, а не фиксированную паузу
+                    page.wait_for_selector(f"li.ui-menu-item >> text={country}",
+                                           timeout=4000 + attempt * 2000)
                     page.click(f"li.ui-menu-item >> text={country}", timeout=2500)
                 except Exception:
                     page.keyboard.press("ArrowDown")
                     page.keyboard.press("Enter")
                 page.wait_for_timeout(700)
-                sel_val = page.evaluate(
-                    "() => (document.querySelector('#isCountrySelected')||{}).value || "
-                    "(document.querySelector('#selNoticeCountry')||{}).value || ''")
-                chosen = page.evaluate(
-                    "() => (document.querySelector('#selNoticeCountry-input')||{}).value || ''")
-                if str(sel_val).lower() not in ("", "false", "0") or country.lower() in chosen.lower():
+                chk = page.evaluate(
+                    "() => ({sel: (document.querySelector('#isCountrySelected')||{}).value || '',"
+                    "        id: (document.querySelector('#selNoticeCountry')||{}).value || '',"
+                    "        inp: (document.querySelector('#selNoticeCountry-input')||{}).value || ''})")
+                if str(chk.get("sel")) == "1" or (chk.get("id") and country.lower() in str(chk.get("inp")).lower()):
                     selected = True
                     break
+                # сброс перед новой попыткой
+                try:
+                    page.fill("#selNoticeCountry-input", "")
+                    page.wait_for_timeout(600)
+                except Exception:
+                    pass
             if not selected:
                 log.warning("headless ungm [%s]: страна не выбралась — пропуск, чтобы не тянуть глобальную ленту", country)
                 continue
             page.click("button:has-text('Search')", timeout=8000, force=True)
-            page.wait_for_timeout(5000)
+            try:
+                page.wait_for_load_state("networkidle", timeout=15000)
+            except Exception:
+                pass
+            page.wait_for_timeout(2500)
             rows = _ungm_rows(page)
             # страховка: строки, где явно названа чужая страна и нет нашей — выкидываем
             _cn = country.lower()

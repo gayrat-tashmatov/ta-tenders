@@ -155,8 +155,14 @@ def is_goods_procurement(item: dict) -> bool:
     if item.get("category") not in (config.CAT_UZTEND, config.CAT_INTL):
         return False
     title = (item.get("title") or "").lower()
+    meta = item.get("meta") or {}
+    # UNDP: тип процедуры говорит сам за себя — ITB (торги на товары/работы) и RFQ
+    # (котировки на поставку) не бывают консалтингом; RFP/IC/EOI — оставляем.
     if any(k in title for k in config.SERVICE_KEYWORDS):
-        return False
+        return False                      # разработка ИС/консалтинг — даже если процедура RFQ
+    proc = str(meta.get("process") or meta.get("notice_type") or "").upper()
+    if proc.startswith(("ITB", "RFQ")) or "INVITATION TO BID" in proc or "REQUEST FOR QUOTATION" in proc:
+        return True
     return any(k in title for k in config.GOODS_KEYWORDS)
 
 

@@ -239,10 +239,13 @@ GOODS_KEYWORDS = [
     "construction of", "renovation", "rehabilitation of", "civil works", "строительств", "ремонт",
     "medicines", "vaccine", "blood", "catering", "hotel", "restauration", "printing", "печат",
     "insurance", "internet services", "firewall", "translation", "photography", "videography",
+    "modernization of", "modernisation of", "construction works", "installation and commissioning",
+    "supply, installation", "protective fencing", "solar systems", "pumping station", "photovoltaic",
 ]
 # Услуговые маркеры, которые «спасают» запись даже при товарном слове в названии.
 SERVICE_KEYWORDS = [
     "консульт", "consult", "услуг", "service", "разработк", "внедрен", "автоматиз",
+    "development of", "information system", "digital platform", "web portal", "database", "e-gov",
     "информационн", "программн", "software", "it-", "ит-", "аудит", "audit", "стратег",
     "исследован", "study", "assessment", "оценк", "тэо", "feasibility", "проектиров",
     "design", "supervision", "надзор", "обучен", "training", "capacity", "technical assistance",
