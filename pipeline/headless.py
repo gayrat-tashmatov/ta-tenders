@@ -238,15 +238,39 @@ def _collect_ungm(ctx, mk, region_match, max_items) -> list:
                               ".forEach(e => e.remove())")
             except Exception:
                 pass
-            # фильтр страны: автокомплит → первый пункт
-            page.fill("#selNoticeCountry-input", country)
-            page.wait_for_timeout(1500)
-            page.keyboard.press("ArrowDown")
-            page.keyboard.press("Enter")
-            page.wait_for_timeout(800)
+            # фильтр страны: автокомплит → первый пункт; до 3 попыток, проверяем,
+            # что страна реально выбрана (иначе UNGM отдаёт ГЛОБАЛЬНУЮ ленту —
+            # так утекали Африка/ЛатАм под тегом [UN·KAZ]).
+            selected = False
+            for attempt in range(3):
+                page.fill("#selNoticeCountry-input", "")
+                page.fill("#selNoticeCountry-input", country)
+                page.wait_for_timeout(1500 + attempt * 800)
+                try:
+                    page.click(f"li.ui-menu-item >> text={country}", timeout=2500)
+                except Exception:
+                    page.keyboard.press("ArrowDown")
+                    page.keyboard.press("Enter")
+                page.wait_for_timeout(700)
+                sel_val = page.evaluate(
+                    "() => (document.querySelector('#isCountrySelected')||{}).value || "
+                    "(document.querySelector('#selNoticeCountry')||{}).value || ''")
+                chosen = page.evaluate(
+                    "() => (document.querySelector('#selNoticeCountry-input')||{}).value || ''")
+                if str(sel_val).lower() not in ("", "false", "0") or country.lower() in chosen.lower():
+                    selected = True
+                    break
+            if not selected:
+                log.warning("headless ungm [%s]: страна не выбралась — пропуск, чтобы не тянуть глобальную ленту", country)
+                continue
             page.click("button:has-text('Search')", timeout=8000, force=True)
             page.wait_for_timeout(5000)
             rows = _ungm_rows(page)
+            # страховка: строки, где явно названа чужая страна и нет нашей — выкидываем
+            _cn = country.lower()
+            rows = [r for r in rows
+                    if _cn in r["text"].lower() or region_match(r["text"])
+                    or not any(k in r["text"].lower() for k in config.OFFREGION_KEYWORDS)]
             n = 0
             for r in rows:
                 m_id = re.search(r"/Public/Notice/(\d+)", r["href"])

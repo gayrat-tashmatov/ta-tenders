@@ -181,6 +181,28 @@ REGION_KEYWORDS = [
     "dushanbe", "bishkek", "almaty", "astana",
 ]
 
+# Чужие регионы: международные извещения, где явно названа страна вне ЦА и НЕ названа наша.
+OFFREGION_KEYWORDS = [
+    # Африка
+    "nigeria", "kenya", "ethiopia", "tanzania", "uganda", "ghana", "senegal", "mali", "niger ",
+    "burkina", "benin", "togo", "cameroon", "cameroun", "tchad", "chad ", "sudan", "somalia",
+    "zimbabwe", "zambia", "malawi", "mozambique", "angola", "rwanda", "burundi", "congo",
+    "madagascar", "sierra leone", "liberia", "guinea", "gambia", "côte d", "cote d", "ivoire",
+    "south africa", "lesotho", "eswatini", "botswana", "namibia", "djibouti", "eritrea",
+    "morocco", "maroc", "algeria", "tunisia", "tunisie", "libya", "egypt", "égypte", "mauritania",
+    "africa", "afrique", "ouidah", "dakar", "nairobi", "lagos", "kampala", "addis",
+    # Латинская Америка и Карибы
+    "brazil", "brasil", "argentina", "chile", "peru", "perú", "colombia", "bolivia", "ecuador",
+    "venezuela", "paraguay", "uruguay", "mexico", "méxico", "guatemala", "honduras", "nicaragua",
+    "el salvador", "costa rica", "panama", "panamá", "cuba", "haiti", "haïti", "dominican",
+    "jamaica", "guyana", "suriname", "latin america", "américa latina", "caribbean", "caribe",
+    # Прочая Азия/Океания/Ближний Восток вне ЦА
+    "philippines", "maasin", "cagayan", "sorsogon", "indonesia", "vietnam", "viet nam",
+    "cambodia", "myanmar", "thailand", "bangkok", "bangladesh", "sri lanka", "nepal", "bhutan",
+    "pakistan", "india ", "papua", "fiji", "timor", "mongolia", "palestin", "gaza", "yemen",
+    "iraq", "syria", "lebanon", "jordan", "libya", "afghanistan",
+]
+
 CONSULTING_KEYWORDS = [
     "konsalting", "консалтинг", "konsultats", "консультац", "konsultativ", "консультатив",
     "maslahat", "маслаҳат", "маслахат", "audit", "аудит", "strategi", "стратеги",
@@ -210,6 +232,13 @@ GOODS_KEYWORDS = [
     "supply of", "procurement of", "invitation for bids", "itb ", "goods", "equipment",
     "vehicles", "furniture", "materials", "spare parts", "delivery of",
     "jihoz", "uskuna", "xarid qilish", "yetkazib berish", "mahsulot", "texnika",
+    # пропущенные ранее формы (21.08 → 03.09: «Закупка авто», «планшетов», «канцелярии»)
+    "закупка ", "закупку ", "приобретен", "оснащен", "планшет", "ноутбук", "смартфон",
+    "канцеляр", "стеллаж", "дезинфекц", "автотранспорт", "автобус", "трактор", "станок",
+    "терминал", "техническая поддержка и обслуживание оборудования", "maintenance services for ict equipment",
+    "construction of", "renovation", "rehabilitation of", "civil works", "строительств", "ремонт",
+    "medicines", "vaccine", "blood", "catering", "hotel", "restauration", "printing", "печат",
+    "insurance", "internet services", "firewall", "translation", "photography", "videography",
 ]
 # Услуговые маркеры, которые «спасают» запись даже при товарном слове в названии.
 SERVICE_KEYWORDS = [
@@ -252,6 +281,10 @@ FILTER_PROMPT = """Ты — СТРОГИЙ фильтр релевантност
 - Мировые новости без Узбекистана, аналитика, мнения, макростатистика (ВВП, курсы) → 1
 - Общие совещания без конкретных проектов/бюджетов → 2
 - Розница, спорт, погода, криминал; закупка товаров/стройматериалов без ИТ/консалтинга → 1
+- ЛЮБАЯ поставка/закупка оборудования, техники, авто, мебели, ПО «в коробке», стройка,
+  ремонт, кейтеринг, печать, страхование — даже для госоргана или ООН → 1
+- Международное извещение про ДРУГУЮ страну/регион (Африка, Латинская Америка, ЮВА,
+  Ближний Восток) без Узбекистана/ЦА → 1, независимо от темы
 
 ИСКЛЮЧЕНИЕ: тендеры МФО (World Bank, EBRD, ADB, UNDP, AIIB, IsDB) на консалтинг/ТА,
 связанные с Узбекистаном или ЦА, — автоматически 9–10.
@@ -322,3 +355,14 @@ INSIGHT_PROMPT = """Ты — старший юрист-аналитик конс
   "business_impact": ["<3–5 пунктов: что это значит для бизнеса — конкретно>"],
   "how_to_prepare": ["<3–4 практических шага: что стоит сделать компаниям>"]
 }}"""
+
+
+# ─────────────────────────── Карта доноров (03.09.2026) ───────────────────────────
+# Подключено: World Bank (API), UNGM = вся система ООН (ПРООН, ЮНИСЕФ, МОТ, ФАО, IOM, WFP,
+#   ЮНЕСКО, UN Women, UNOPS, ВОЗ… — headless по 5 странам ЦА), UNDP (прямой сайт),
+#   IsDB (loc=UZ), EBRD ECEPP (headless), AIIB (RSS), EU TED (API), TenderWeek/etender/xt-xarid.
+# Закрыто анти-ботом (403 даже для браузера) — только через e-mail-алерты аккаунта:
+#   UNIDO (закупки идут ТАКЖЕ через UNGM → покрыто), ADB CMS/CSRN (консалтинг ADB через
+#   CSRN требует логина; проекты по УЗ — через ADB e-mail alerts), DevelopmentAid, Devex.
+# Не имеют открытого потока по УЗ: GIZ (только DE-портал без фильтра страны), KfW, AFD, EIB.
+DONOR_MAP_NOTE = "см. комментарий выше"

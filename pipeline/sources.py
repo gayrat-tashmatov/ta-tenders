@@ -177,41 +177,123 @@ def fetch_ted(limit: int = 30) -> list:
 
 # ─────────────────────────── 3. UNDP Procurement ───────────────────────────
 def fetch_undp(max_items: int = 40) -> list:
+    """UNDP Procurement Notices. Сайт игнорирует фильтр страны и отдаёт мировую
+    ленту; внутри — плоский поток текстовых узлов вида
+    Title | <название> | Ref No | <ref> | UNDP Office/Country | UNDP-UZB/UZBEKISTAN | …
+    Режем поток по «Title» и берём только записи с офисом UZB."""
     items = []
     try:
-        r = requests.get(config.UNDP_URL, headers=config.HTTP_HEADERS,
-                         timeout=config.HTTP_TIMEOUT)
+        r = requests.get(config.UNDP_URL.rstrip("/") + "/search.cfm",
+                         params={"search_country": "UZB"},
+                         headers=config.HTTP_HEADERS, timeout=60)
         r.raise_for_status()
         soup = BeautifulSoup(r.text, "lxml")
-        seen = set()
-        for a in soup.find_all("a", href=True):
-            if "notice" not in a["href"].lower():
+        box = soup.select_one(".vacanciesTable") or soup
+        # плоский список (текст, ссылка) в порядке документа
+        stream = []
+        for el in box.descendants:
+            if getattr(el, "name", None) == "a" and el.get("href") and "view_notice" in el["href"]:
+                stream.append(("A", el.get_text(" ", strip=True), el["href"]))
+            elif isinstance(el, str):
+                t = el.strip()
+                if t:
+                    stream.append(("T", t, None))
+        # группируем по блокам между «Title»
+        blocks, cur = [], None
+        for kind, txt, href in stream:
+            if kind == "T" and txt == "Title":
+                if cur:
+                    blocks.append(cur)
+                cur = {"texts": [], "href": None, "title": None}
                 continue
-            ctx = a
-            for _ in range(3):
-                if ctx.parent:
-                    ctx = ctx.parent
-            ctx_text = ctx.get_text(" ", strip=True)[:800]
-            if not re.search(r"uzbekistan|UNDP-UZB", ctx_text, re.I):
+            if cur is None:
                 continue
-            href = a["href"]
-            url = href if href.startswith("http") else \
-                config.UNDP_URL.rstrip("/") + "/" + href.lstrip("/")
-            if url in seen:
+            if kind == "A":
+                if cur["href"] is None:
+                    cur["href"] = href
+                if cur["title"] is None and len(txt) > 8:
+                    cur["title"] = txt
+            else:
+                if cur["title"] is None and txt not in ("Ref No",) and len(txt) > 8:
+                    cur["title"] = txt          # заголовок идёт текстом сразу после «Title»
+                else:
+                    cur["texts"].append(txt)
+        if cur:
+            blocks.append(cur)
+        for b in blocks:
+            tx = b["texts"]
+            f = {}
+            for i, t in enumerate(tx):
+                if t in ("Ref No", "UNDP Office/Country", "Process", "Deadline", "Posted") and i + 1 < len(tx):
+                    f[t] = tx[i + 1]
+            office = f.get("UNDP Office/Country", "")
+            if "UZB" not in office.upper() or not b["title"]:
                 continue
-            seen.add(url)
-            m = re.search(r"notice_id=(\d+)", url)
-            title = a.get_text(" ", strip=True) or "UNDP notice"
+            ref = f.get("Ref No", "")
+            m = re.search(r"notice_id=(\d+)", b["href"] or "")
+            url = (b["href"] if b["href"] and b["href"].startswith("http") else
+                   config.UNDP_URL.rstrip("/") + "/" + b["href"].lstrip("/") if b["href"] else
+                   config.UNDP_URL.rstrip("/") + f"/search.cfm?search_ref={ref}")
+            proc = f.get("Process", "")
             items.append(_mk(
-                "UNDP", config.CAT_INTL, "UNDP", f"[UNDP] {title}", url,
-                summary=ctx_text[:600], full_text=ctx_text[:2000],
-                uid=f"undp:{m.group(1)}" if m else None,
-                meta={"country": "Uzbekistan"}))
+                "UNDP", config.CAT_INTL, "UNDP", f"[UNDP] {b['title'][:230]}", url,
+                summary=f"{proc}. Заказчик: ПРООН Узбекистан. Ref: {f.get('Ref No','')}. Дедлайн: {f.get('Deadline','')}",
+                full_text=f"{b['title']}. {proc}. {office}. Ref {f.get('Ref No','')}. Deadline {f.get('Deadline','')}. Posted {f.get('Posted','')}",
+                uid=f"undp:{m.group(1)}" if m else (f"undp:{ref}" if ref else None),
+                meta={"country": "Uzbekistan", "deadline": f.get("Deadline"),
+                      "reference": f.get("Ref No"), "process": proc}))
             if len(items) >= max_items:
                 break
         log.info("UNDP: %d (по Узбекистану)", len(items))
     except Exception as e:
         log.warning("UNDP FAIL: %s", e)
+    return items
+
+
+def fetch_isdb(max_items: int = 30) -> list:
+    """IsDB Project Procurement — фильтр loc=UZ. Карточка: название | статус |
+    тип (EOI/GPN/…) | страна | дедлайн. Берём только Active."""
+    items = []
+    try:
+        r = requests.get("https://www.isdb.org/project-procurement/tenders",
+                         params={"loc": "UZ", "status": "All"},
+                         headers=config.HTTP_HEADERS, timeout=config.HTTP_TIMEOUT)
+        r.raise_for_status()
+        soup = BeautifulSoup(r.text, "lxml")
+        seen = set()
+        for a in soup.find_all("a", href=True):
+            h = a["href"]
+            if "/project-procurement/tenders/" not in h and "/appels-doffres/" not in h:
+                continue
+            title = a.get_text(" ", strip=True)
+            if len(title) < 20 or h in seen:
+                continue
+            seen.add(h)
+            card = a
+            for _ in range(4):
+                card = card.parent if card.parent else card
+            parts = [p.strip() for p in card.get_text("|", strip=True).split("|") if p.strip()]
+            status = next((p for p in parts if p in ("Active", "Closed")), "")
+            if status == "Closed":
+                continue
+            ttype = next((p for p in parts if p in ("Expression of Interest", "General Procurement Notice",
+                                                     "Request for Proposal", "Invitation for Bids",
+                                                     "Contract Award", "Specific Procurement Notice")), "")
+            if ttype == "Contract Award":
+                continue
+            dl = next((p for p in parts if re.match(r"\d{1,2} \w+ \d{4}$", p)), None)
+            url = h if h.startswith("http") else "https://www.isdb.org" + h
+            items.append(_mk(
+                "IsDB", config.CAT_INTL, "isdb.org", f"[IsDB] {title[:230]}", url,
+                summary=f"{ttype}. Узбекистан. Дедлайн: {dl or '—'}",
+                full_text=f"{title}. {ttype}. Uzbekistan. Deadline {dl or ''}",
+                uid=f"isdb:{h.rstrip('/').split('/')[-1][:80]}",
+                meta={"country": "Uzbekistan", "deadline": dl, "notice_type": ttype}))
+            if len(items) >= max_items:
+                break
+        log.info("IsDB: %d активных по Узбекистану", len(items))
+    except Exception as e:
+        log.warning("IsDB FAIL: %s", e)
     return items
 
 
@@ -463,13 +545,14 @@ def _tally(items: list) -> list:
 def collect_all() -> list:
     LAST_COLLECT_STATS.clear()
     # источники, которые обязаны что-то отдать: заводим нули, чтобы поломка была видна
-    for o in ("World Bank", "TenderWeek", "lex.uz", "ungm.org", "etender.uzex.uz",
+    for o in ("World Bank", "TenderWeek", "lex.uz", "ungm.org", "etender.uzex.uz", "UNDP", "isdb.org",
               "xt-xarid.uz", "uzjobs.uz", "Gazeta.uz", "Spot.uz", "Kun.uz"):
         LAST_COLLECT_STATS.setdefault(o, 0)
     items = []
     items += _tally(fetch_worldbank())
     items += _tally(fetch_ted())
     items += _tally(fetch_undp())
+    items += _tally(fetch_isdb())
     items += _tally(fetch_mfi_rss())
     items += _tally(fetch_uzjobs())
     items += _tally(fetch_tenderweek_public())

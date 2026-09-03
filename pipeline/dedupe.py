@@ -158,3 +158,14 @@ def is_goods_procurement(item: dict) -> bool:
     if any(k in title for k in config.SERVICE_KEYWORDS):
         return False
     return any(k in title for k in config.GOODS_KEYWORDS)
+
+
+def is_off_region(item: dict) -> bool:
+    """Международное извещение про чужую страну (Африка, ЛатАм, ЮВА…) без нашей."""
+    if item.get("category") != config.CAT_INTL:
+        return False
+    blob = f"{item.get('title','')} {item.get('summary','')[:600]}".lower()
+    ours = any(k in blob for k in config.REGION_KEYWORDS)
+    if ours:
+        return False
+    return any(k in blob for k in config.OFFREGION_KEYWORDS)

@@ -72,7 +72,7 @@ def run(send_telegram: bool = True):
 
         store.record_health(sources.LAST_COLLECT_STATS)
         history = store.recent_tokens()
-        fresh, mentions_only, goods_skipped = [], 0, 0
+        fresh, mentions_only, goods_skipped, offregion_skipped = [], 0, 0, 0
         from datetime import datetime, timezone, timedelta
         cutoff = datetime.now(timezone.utc) - timedelta(days=config.MAX_AGE_DAYS)
 
@@ -86,6 +86,11 @@ def run(send_telegram: bool = True):
 
             it["npa_refs"] = dedupe.extract_npa_refs(it.get("title"), it.get("full_text"))
 
+            # Чужой регион (Африка/ЛатАм/ЮВА без упоминания ЦА) — не наш рынок.
+            if dedupe.is_off_region(it):
+                store.mark_seen(it)
+                offregion_skipped += 1
+                continue
             # Закупки товаров/оборудования — не наш профиль: отсекаем на входе.
             if dedupe.is_goods_procurement(it):
                 store.mark_seen(it)
@@ -114,8 +119,8 @@ def run(send_telegram: bool = True):
                 continue
             fresh.append(it)
 
-        log.info("После свежести+дедупа: %d из %d (+%d упоминаний НПА, %d товарных отсечено)",
-                 len(fresh), len(raw), mentions_only, goods_skipped)
+        log.info("После свежести+дедупа: %d из %d (+%d упоминаний НПА, %d товарных, %d чужой регион)",
+                 len(fresh), len(raw), mentions_only, goods_skipped, offregion_skipped)
 
         if not fresh:
             if send_telegram:
