@@ -1693,23 +1693,5 @@
   "firstSeen": "2026-09-02T07:40:12+00:00",
   "npaRefs": [],
   "url": "https://www.tenderweek.com/tender-36417"
- },
- {
-  "id": "etender-508937",
-  "category": "uz_tender",
-  "source": "UZEX e-Tender (конкурс)",
-  "origin": "etender.uzex.uz",
-  "titleRu": "Переаудит истёкших международных сертификатов в Мубараке",
-  "title": "[etender] Muborak GQIZda muddati o‘tgan xalqaro  Sertifikatlarni qayta sertifikatlash auditini o‘tkazish",
-  "summaryRu": "Закупка услуги по проведению аудита переаттестации истёкших международных сертификатов. Заказчик — АО «Узбекнефтгаз» (Мубарак, Кашкадарьинская область). Бюджет: 52 169 094 узбекских сумов. Срок подачи предложений: с 24 августа по 2 сентября 2026 года.",
-  "buyer": "\"O'ZBEKNEFTGAZ\" AJ",
-  "deadline": "2026-09-02",
-  "budget": "52 169 094 узбекских сумов",
-  "score": 6,
-  "urgency": "средняя",
-  "published": null,
-  "firstSeen": "2026-09-02T07:40:06+00:00",
-  "npaRefs": [],
-  "url": "https://etender.uzex.uz/lot/508937"
  }
 ]
