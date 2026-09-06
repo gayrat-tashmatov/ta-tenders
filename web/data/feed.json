@@ -1,5 +1,23 @@
 [
  {
+  "id": "ungm-312078",
+  "category": "international_tender",
+  "source": "UNGM · UN",
+  "origin": "ungm.org",
+  "titleRu": "Набор агентства коммуникации для организации благотворительного гала-концерта",
+  "title": "[UN·TUR] Recrutement d’une agence de communication et évènementielle pour l’organisation de la Soirée de Gala de mobilisation de ressources N°LRFPS-2026- 9200279",
+  "summaryRu": "ЮНИСЕФ Того объявляет тендер на привлечение агентства коммуникации и организации событий для проведения благотворительного гала-концерта по мобилизации ресурсов. Заказчик: ЮНИСЕФ. Бюджет: не указан. Срок подачи предложений: 14 сентября 2026 года.",
+  "buyer": "ЮНИСЕФ Того (UNICEF Togo)",
+  "deadline": "2026-09-14",
+  "budget": null,
+  "score": 7,
+  "urgency": "средняя",
+  "published": null,
+  "firstSeen": "2026-09-06T07:40:18+00:00",
+  "npaRefs": [],
+  "url": "https://www.ungm.org/Public/Notice/312078"
+ },
+ {
   "id": "u-8698944fa917801c",
   "category": "news",
   "source": "Podrobno.uz",
@@ -1693,41 +1711,5 @@
   "firstSeen": "2026-09-02T07:40:06+00:00",
   "npaRefs": [],
   "url": "https://etender.uzex.uz/lot/508937"
- },
- {
-  "id": "ungm-311933",
-  "category": "international_tender",
-  "source": "UNGM · UN",
-  "origin": "ungm.org",
-  "titleRu": "Техсодействие CTCN: AI-платформа управления климатическими данными Таджикистана",
-  "title": "[UN·TAJ] Enhancing Weather and Climate Data Management Innovation in Tajikistan through an AI and Observation-Based High-Resolution Data Management Platform.",
-  "summaryRu": "ООН (UNEP/CTCN) приглашает консультационные фирмы подать Expression of Interest для оказания технической помощи Таджикистану по разработке AI-enabled системы управления климатическими данными и усилению институциональных возможностей. Сумма не указана. Дедлайн подачи: 04 сентября 2026 года (23:59 GMT-4).",
-  "buyer": "UN Secretariat (UNON), от имени CTCN/UNEP; Национальное уполномоченное учреждение (NDE) Таджикистана",
-  "deadline": "2026-09-04",
-  "budget": null,
-  "score": 9,
-  "urgency": "средняя",
-  "published": null,
-  "firstSeen": "2026-09-01T15:26:23+00:00",
-  "npaRefs": [],
-  "url": "https://www.ungm.org/Public/Notice/311933"
- },
- {
-  "id": "ungm-311346",
-  "category": "international_tender",
-  "source": "UNGM · UNDP",
-  "origin": "ungm.org",
-  "titleRu": "UNDP конкурс инноваций восстановления земель Аральского моря 2026",
-  "title": "[UN·UZB] UNDP UZBEKISTAN ARAL SEA WETLANDS INNOVATION CHALLENGE 2026",
-  "summaryRu": "ПРООН объявляет конкурс инновационных решений для восстановления деградированных и засоленных земель в нижнем течении Амударьи. Заказчик — UNDP при поддержке Национального комитета по экологии Узбекистана и Global Environment Facility. Общий фонд: до USD 40 000 (четыре премии по USD 10 000 каждая), срок подачи предложений — 04 сентября 2026 г.",
-  "buyer": "UNDP Uzbekistan, National Committee on Ecology and Climate Change",
-  "deadline": "2026-09-04",
-  "budget": "USD 40 000 (четыре премии по USD 10 000 каждая, исключая НДС)",
-  "score": 7,
-  "urgency": "высокая",
-  "published": null,
-  "firstSeen": "2026-09-01T15:26:00+00:00",
-  "npaRefs": [],
-  "url": "https://www.ungm.org/Public/Notice/311346"
  }
 ]
