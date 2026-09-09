@@ -147,6 +147,9 @@ def card(item: dict, a: dict) -> tuple:
 
     # СРОКИ и ДЕНЬГИ — одной строкой
     facts = []
+    pub = _short_date(item.get("meta", {}).get("published") or item.get("published"))
+    if pub:
+        facts.append(f"📅 опубл. {pub}")
     dl = _short_date(a.get("deadline_info") or item.get("meta", {}).get("deadline"))
     if dl:
         facts.append(f"⏳ до {dl}")

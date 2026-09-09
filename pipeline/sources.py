@@ -505,6 +505,74 @@ def fetch_full_page_text(url: str) -> str:
         return ""
 
 
+# ─────────────────────────── 9. etender.uzex.uz — прямой API (вся лента) ───────────────────────────
+def fetch_etender_api(max_items: int | None = None) -> list:
+    """Конкурсы UZEX e-Tender через POST TradeList (пагинация From/To).
+    Причина: раздел «Активные лоты» отсортирован по ДАТЕ ОКОНЧАНИЯ, headless видел
+    первые 20 = закрывающиеся сегодня → 74 из 117 лотов ловились в день дедлайна.
+    Здесь — вся активная лента; start_date становится датой публикации."""
+    import json as _json
+    max_items = max_items or config.ETENDER_API_MAX
+    items = []
+    hdr = {**config.HTTP_HEADERS, "Content-Type": "application/json; charset=UTF-8",
+           "language": "uzb", "Origin": "https://etender.uzex.uz",
+           "Referer": "https://etender.uzex.uz/"}
+    try:
+        got, frm, page = [], 1, 300
+        while frm <= max_items:
+            r = requests.post(config.ETENDER_API_URL, headers=hdr, timeout=40,
+                              json={"TypeId": 1, "From": frm,
+                                    "To": min(frm + page - 1, max_items), "System_Id": 0})
+            r.raise_for_status()
+            data = r.json()
+            chunk = data if isinstance(data, list) else []
+            got += chunk
+            if len(chunk) < page:
+                break
+            frm += page
+
+        def _dt(v):
+            try:
+                return datetime.fromisoformat(str(v)[:19]).replace(tzinfo=timezone.utc)
+            except Exception:
+                return None
+
+        seen = set()
+        for d in got:
+            lid = str(d.get("id") or d.get("lot_id") or "")
+            if not lid or lid in seen:
+                continue
+            seen.add(lid)
+            title = str(d.get("name") or d.get("lot_name") or d.get("title") or "").strip()
+            if not title or not any(k in title.lower() for k in config.CONSULTING_KEYWORDS):
+                continue
+            start = _dt(d.get("start_date"))
+            buyer = (d.get("customer_name") or d.get("buyer_name") or d.get("seller_name")
+                     or d.get("organization"))
+            cost = d.get("cost") or d.get("start_price") or d.get("amount")
+            meta = {"deadline": str(d.get("end_date") or "")[:19] or None,
+                    "published": start.isoformat() if start else None,
+                    "buyer": buyer, "cost": cost,
+                    "currency": d.get("currency_name") or "UZS",
+                    "region": d.get("region_name"), "number": lid, "kw_match": True}
+            bits = [title]
+            if buyer:
+                bits.append(f"Заказчик: {buyer}")
+            if cost:
+                bits.append(f"Сумма: {cost} {meta['currency']}")
+            if meta.get("region"):
+                bits.append(f"Регион: {meta['region']}")
+            items.append(_mk("UZEX e-Tender (конкурс)", config.CAT_UZTEND, "etender.uzex.uz",
+                             f"[etender] {title[:280]}", f"https://etender.uzex.uz/lot/{lid}",
+                             start, summary=". ".join(bits)[:800],
+                             full_text=_json.dumps(d, ensure_ascii=False)[:2500],
+                             uid=f"etender:{lid}", meta=meta))
+        log.info("etender API: лента=%d → консалтинг/ИТ %d", len(got), len(items))
+    except Exception as e:
+        log.warning("etender API FAIL: %s", e)
+    return items
+
+
 # ─────────────────────────── 8. Новостные RSS ───────────────────────────
 def fetch_news_rss() -> list:
     items, s = [], _session()
@@ -556,6 +624,7 @@ def collect_all() -> list:
     items += _tally(fetch_mfi_rss())
     items += _tally(fetch_uzjobs())
     items += _tally(fetch_tenderweek_public())
+    items += _tally(fetch_etender_api())
     try:
         from headless import collect_all_headless    # playwright опционален
         items += _tally(collect_all_headless())

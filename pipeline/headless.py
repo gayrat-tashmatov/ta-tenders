@@ -275,6 +275,16 @@ def _collect_ungm(ctx, mk, region_match, max_items) -> list:
             except Exception:
                 pass
             page.wait_for_timeout(2500)
+            # Список по 15 строк, догружается прокруткой; лента отсортирована по истечению —
+            # без прокрутки видим только «умирающие» извещения.
+            prev = -1
+            for _ in range(8):
+                cnt = page.evaluate("document.querySelectorAll(\"a[href*='/Public/Notice/']\").length")
+                if cnt == prev or cnt >= config.HEADLESS_MAX:
+                    break
+                prev = cnt
+                page.evaluate("window.scrollTo(0, document.documentElement.scrollHeight)")
+                page.wait_for_timeout(2500)
             rows = _ungm_rows(page)
             # страховка: строки, где явно названа чужая страна и нет нашей — выкидываем
             _cn = country.lower()

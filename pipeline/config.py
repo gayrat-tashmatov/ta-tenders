@@ -126,9 +126,15 @@ TENDERWEEK_PAGES = int(os.getenv("TENDERWEEK_PAGES", "10"))  # главная + 
 
 # ─────────────────────────── Headless (JS-SPA через Playwright) ───────────────────────────
 HEADLESS_ENABLED = os.getenv("HEADLESS_ENABLED", "0") == "1"
-HEADLESS_ON = [x.strip() for x in os.getenv("HEADLESS_ON", "etender,xtxarid,ebrd,ungm").split(",") if x.strip()]
+HEADLESS_ON = [x.strip() for x in os.getenv("HEADLESS_ON", "xtxarid,ebrd,ungm").split(",") if x.strip()]
 HEADLESS_MAX = int(os.getenv("HEADLESS_MAX", "120"))
 ETENDER_LIST_URL = os.getenv("ETENDER_LIST_URL", "https://etender.uzex.uz/lots/1/0")
+# etender: прямой API списка (POST TradeList, пагинация From/To). Лента отсортирована
+# по ДАТЕ ОКОНЧАНИЯ — первые 20 = закрывающиеся сегодня. Поэтому берём всю ленту.
+ETENDER_API_URL = "https://apietender.uzex.uz/api/common/TradeList"
+ETENDER_API_MAX = int(os.getenv("ETENDER_API_MAX", "600"))     # активных лотов за раз
+# Telegram: не слать лоты, у которых до дедлайна меньше N часов — не успеть.
+NOTIFY_MIN_HOURS_LEFT = int(os.getenv("NOTIFY_MIN_HOURS_LEFT", "24"))
 
 HEADLESS_SOURCES = [
     {"key": "etender", "source": "UZEX e-Tender (конкурс)", "origin": "etender.uzex.uz",

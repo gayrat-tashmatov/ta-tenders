@@ -23,6 +23,7 @@ export interface CabTender {
   buyer: string | null;
   budget: string | null;
   deadline: string | null;
+  published: string | null;
   score: number | null;
   summaryRu: string | null;
   siteBrief: string | null;
@@ -371,6 +372,7 @@ export function Workspace({
                     {CATEGORY_ICON[t.category]} {t.source}
                   </span>
                   {t.buyer && <span>· {t.buyer.slice(0, 45)}</span>}
+                  {t.published && <span>· опубл. {fmtDate(t.published)}</span>}
                   {team && team.length > 0 && (
                     <span className="who">ведёт: {team.join(", ")}</span>
                   )}
@@ -420,6 +422,11 @@ export function Workspace({
               {sel.budget && (
                 <div>
                   <b>Бюджет:</b> {sel.budget}
+                </div>
+              )}
+              {sel.published && (
+                <div>
+                  <b>Опубликовано:</b> {fmtDate(sel.published)}
                 </div>
               )}
               {sel.deadline && (

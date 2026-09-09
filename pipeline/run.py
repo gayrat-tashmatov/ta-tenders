@@ -59,6 +59,28 @@ def _alert(msg: str):
         pass
 
 
+def _hours_left(it: dict):
+    """Часов до дедлайна по meta.deadline (ISO / ДД.ММ.ГГГГ); None — дедлайн неизвестен."""
+    import re as _re
+    from datetime import datetime as _dt, timezone as _tz
+    raw = str((it.get("meta") or {}).get("deadline") or "")
+    m = _re.search(r"(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2}))?", raw)
+    if not m:
+        m2 = _re.search(r"(\d{2})[./](\d{2})[./](\d{4})", raw)
+        if not m2:
+            return None
+        y, mo, d, hh, mm = int(m2.group(3)), int(m2.group(2)), int(m2.group(1)), 23, 59
+    else:
+        y, mo, d = int(m.group(1)), int(m.group(2)), int(m.group(3))
+        hh, mm = (int(m.group(4)), int(m.group(5))) if m.group(4) else (23, 59)
+    try:
+        # дедлайны порталов — по Ташкенту (UTC+5)
+        due = _dt(y, mo, d, hh, mm, tzinfo=_tz.utc) - __import__("datetime").timedelta(hours=5)
+        return (due - _dt.now(_tz.utc)).total_seconds() / 3600
+    except Exception:
+        return None
+
+
 # ─────────────────────────── Полный цикл ───────────────────────────
 def run(send_telegram: bool = True):
     store = Store()
@@ -181,6 +203,11 @@ def run(send_telegram: bool = True):
                 final = max(final, score)
 
             will_notify = final >= config.MIN_SCORE_FOR_NOTIFY
+            # Почти истёкший дедлайн — в канал не шлём (не успеть), на сайт — да.
+            hrs = _hours_left(it)
+            if hrs is not None and hrs < config.NOTIFY_MIN_HOURS_LEFT:
+                will_notify = False
+                log.info("пропуск TG (дедлайн через %.0f ч): %s", hrs, it["title"][:60])
             store.save_item(it, final, analysis, it["npa_refs"], notified=False)
             if it["category"] == config.CAT_LAW and it["npa_refs"]:
                 store.npa_register(it["npa_refs"], it)

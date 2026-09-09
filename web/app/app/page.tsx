@@ -20,6 +20,7 @@ function loadTenders(): CabTender[] {
     buyer: it.buyer,
     budget: it.budget,
     deadline: it.deadline,
+    published: it.published,
     score: it.score,
     summaryRu: it.summaryRu,
     siteBrief: it.siteBrief,
