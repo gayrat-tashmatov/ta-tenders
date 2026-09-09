@@ -350,7 +350,8 @@ def run_headless(keys=None, force=False) -> list:
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True,
                                         args=["--no-sandbox", "--disable-dev-shm-usage"])
-            ctx = browser.new_context(user_agent=config.HTTP_HEADERS["User-Agent"],
+            ctx = browser.new_context(viewport={"width": 1400, "height": 900},
+                                      user_agent=config.HTTP_HEADERS["User-Agent"],
                                       locale="ru-RU")
             for s in srcs:
                 try:
