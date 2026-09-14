@@ -229,7 +229,9 @@ CONSULTING_KEYWORDS = [
 # Мы консалтинг: поставки техники, стройматериалов, мебели, продуктов — не наш профиль.
 # Отсекаются на входе (до LLM), если в названии есть товарный маркер и НЕТ услугового.
 GOODS_KEYWORDS = [
-    "поставк", "закупка оборудован", "закуп ", "приобретение", "оборудовани", "техник",
+    "поставк", "закупка оборудован", "закуп ", "приобретение", "оборудовани",
+    # «техник» целиком — нельзя: режет «техническое обследование», «техник-иқтисодий асос», «Техник топшириқ»
+    "техника", "техники", "оргтехник", "вычислительн",
     "инструмент", "материал", "металлопрокат", "мебел", "запасн", "запчаст", "топлив",
     "продукт", "продовольств", "автомобил", "транспортн", "спецтехник", "реагент",
     "огнетушител", "манометр", "кабел", "труб", "краск", "грунтовк", "сиз ", "спецодежд",
@@ -237,12 +239,18 @@ GOODS_KEYWORDS = [
     "медицинск", "лекарств", "камер", "сканер", "lidar", "балансировщик",
     "supply of", "procurement of", "invitation for bids", "itb ", "goods", "equipment",
     "vehicles", "furniture", "materials", "spare parts", "delivery of",
-    "jihoz", "uskuna", "xarid qilish", "yetkazib berish", "mahsulot", "texnika",
+    # узбекские формы. «xarid qilish» («закупить») стоит в КАЖДОМ лоте etender, в т.ч.
+    # «...xizmatini xarid qilish» — 14.09 из-за него улетело ТЭО (TIA). Убрано.
+    "jihoz", "uskuna", "yetkazib berish", "mahsulot", "texnika", "avtomobil", "avtovoz",
+    "mebel", "qurilma", "ehtiyot qism", "kompyuter", "printer", "kabel", "quvur", "boyoq",
+    "oziq-ovqat", "dori-darmon", "yoqilgi", "kanselyariya", "материаллар", "жиҳоз", "ускуна",
+    "маҳсулот", "автомобил", "мебел",
     # пропущенные ранее формы (21.08 → 03.09: «Закупка авто», «планшетов», «канцелярии»)
     "закупка ", "закупку ", "приобретен", "оснащен", "планшет", "ноутбук", "смартфон",
     "канцеляр", "стеллаж", "дезинфекц", "автотранспорт", "автобус", "трактор", "станок",
-    "терминал", "техническая поддержка и обслуживание оборудования", "maintenance services for ict equipment",
+    "терминал", "лифт", "elevator", "техническая поддержка и обслуживание оборудования", "maintenance services for ict equipment",
     "construction of", "renovation", "rehabilitation of", "civil works", "строительств", "ремонт",
+    "qurilish", "tamirlash", "қурилиш", "таъмирлаш",
     "medicines", "vaccine", "blood", "catering", "hotel", "restauration", "printing", "печат",
     "insurance", "internet services", "firewall", "translation", "photography", "videography",
     "modernization of", "modernisation of", "construction works", "installation and commissioning",
@@ -250,13 +258,22 @@ GOODS_KEYWORDS = [
 ]
 # Услуговые маркеры, которые «спасают» запись даже при товарном слове в названии.
 SERVICE_KEYWORDS = [
-    "консульт", "consult", "услуг", "service", "разработк", "внедрен", "автоматиз",
+    "консульт", "consult", "услуг", "services", "service provider", "разработк", "внедрен", "автоматиз",
     "development of", "information system", "digital platform", "web portal", "database", "e-gov",
     "информационн", "программн", "software", "it-", "ит-", "аудит", "audit", "стратег",
     "исследован", "study", "assessment", "оценк", "тэо", "feasibility", "проектиров",
     "design", "supervision", "надзор", "обучен", "training", "capacity", "technical assistance",
     "техсодейств", "expression of interest", "reoi", "eoi", "individual consultant",
-    "advisor", "эксперт", "юрид", "legal", "maslahat", "konsalting", "dasturiy", "axborot tizim",
+    "advisor", "эксперт", "юрид", "legal", "call for external collaborator",
+    "обследовани", "сертификац", "экспертиз", "методик", "испытани", "техническое задание",
+    # узбекский (латиница и кириллица). Апострофы вырезаются перед сравнением (см. dedupe).
+    "maslahat", "konsalting", "dasturiy", "axborot tizim", "xizmat", "ishlab chiqish",
+    "tadqiqot", "ilmiy", "iqtisodiy asos", "(tia)", "loyiha hujjat", "loyihalash", "ekspertiza",
+    "baholash", "strategiya", "sertifikat", "tekshiruv", "xulosa", "metodika", "oqitish",
+    "trening", "audit", "huquqiy", "yuridik", "tahlil",
+    "маслаҳат", "хизмат", "ишлаб чиқиш", "тадқиқот", "илмий", "иқтисодий асос", "(тиа)",
+    "лойиҳа ҳужжат", "лойиҳалаш", "экспертиза", "баҳолаш", "стратегия", "сертификат",
+    "текширув", "хулоса", "методика", "ўқитиш", "ҳуқуқий", "юридик", "таҳлил", "техник топшириқ",
 ]
 
 # ─────────────────────────── Профиль компании ───────────────────────────

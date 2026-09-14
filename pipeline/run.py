@@ -109,13 +109,14 @@ def run(send_telegram: bool = True):
             it["npa_refs"] = dedupe.extract_npa_refs(it.get("title"), it.get("full_text"))
 
             # Чужой регион (Африка/ЛатАм/ЮВА без упоминания ЦА) — не наш рынок.
+            # Отсечённое словарями НЕ помечаем seen: проверка дешёвая (без LLM), а
+            # при смягчении словаря лоты всплывают сами. 09.09 так навсегда «увидели»
+            # ТЭО и НИР, которые резал «xarid qilish» (см. README, 14.09).
             if dedupe.is_off_region(it):
-                store.mark_seen(it)
                 offregion_skipped += 1
                 continue
             # Закупки товаров/оборудования — не наш профиль: отсекаем на входе.
             if dedupe.is_goods_procurement(it):
-                store.mark_seen(it)
                 goods_skipped += 1
                 continue
 

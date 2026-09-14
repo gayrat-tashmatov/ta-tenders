@@ -17,8 +17,11 @@ from store import Store
 
 log = logging.getLogger("export")
 
-FEED_LIMIT = 500          # свежих карточек в ленте
-ITEMS_LIMIT = 800         # полных записей (страницы)
+FEED_LIMIT = 2000         # карточек в ленте (все тендеры/НПА + релевантные новости)
+ITEMS_LIMIT = 2000        # тендеры/НПА/позиции (не-новости) за NONNEWS_DAYS
+NEWS_LIMIT = 300          # релевантных новостей (score ≥ SITE_MIN_NEWS_SCORE)
+NONNEWS_DAYS = 120        # глубина витрины для тендеров/НПА
+EXPIRED_KEEP_DAYS = 30    # закрытые тендеры держим ещё месяц («завершён»), потом снимаем
 
 _MONTHS = {m: i + 1 for i, m in enumerate(
     ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"])}
@@ -74,15 +77,30 @@ def export_all(store: Store) -> list:
     """Пишет web/data/*.json; возвращает items (их же зеркалим в Supabase)."""
     config.WEB_DATA_DIR.mkdir(parents=True, exist_ok=True)
 
+    # Тендеры/НПА/позиции выбираем ОТДЕЛЬНО от новостей. До 14.09 бралось «последние 800
+    # записей любой категории» — новостей копится ~150/день (все хранятся для дедупа),
+    # и окно в 800 покрывало ~5 дней: 480 живых тендеров выпали с сайта («нет тендеров»).
+    from datetime import datetime, timedelta, timezone
+    now = datetime.now(timezone.utc)
+    keep_since = (now - timedelta(days=NONNEWS_DAYS)).isoformat()
+    expired_before = (now - timedelta(days=EXPIRED_KEEP_DAYS)).strftime("%Y-%m-%d")
     rows = store.db.execute(
-        "SELECT * FROM items ORDER BY first_seen DESC LIMIT ?", (ITEMS_LIMIT,)).fetchall()
+        "SELECT * FROM items WHERE category != ? AND first_seen >= ? "
+        "ORDER BY first_seen DESC LIMIT ?",
+        (config.CAT_NEWS, keep_since, ITEMS_LIMIT)).fetchall()
+    rows += store.db.execute(
+        "SELECT * FROM items WHERE category = ? AND score >= ? "
+        "ORDER BY first_seen DESC LIMIT ?",
+        (config.CAT_NEWS, config.SITE_MIN_NEWS_SCORE, NEWS_LIMIT)).fetchall()
     items = []
     for r in rows:
         it = _row_to_item(r)
-        # новости на сайт — только релевантные; тендеры/НПА/позиции — все
-        if it["category"] == config.CAT_NEWS and (it["score"] or 0) < config.SITE_MIN_NEWS_SCORE:
+        # давно закрытые тендеры (дедлайн прошёл > EXPIRED_KEEP_DAYS дней назад) — с сайта долой
+        dl = (it.get("deadline") or "")[:10]
+        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", dl) and dl < expired_before:
             continue
         items.append(it)
+    items.sort(key=lambda x: x.get("firstSeen") or "", reverse=True)
 
     feed = [{k: it.get(k) for k in
              ("id", "category", "source", "origin", "titleRu", "title", "summaryRu",

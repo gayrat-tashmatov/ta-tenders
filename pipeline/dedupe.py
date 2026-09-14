@@ -150,11 +150,19 @@ def dedup_within_run(items: list, thr: float = 0.45) -> list:
 
 
 # ─────────────────────────── Товарные закупки — не наш профиль ───────────────────────────
+_APOS_RE = re.compile(r"[’‘ʼ`´'ʻ]")
+
+
+def _norm_apos(text: str) -> str:
+    """Узбекская латиница пишет o‘/g‘/ta’mirlash пятью разными апострофами — вырезаем все."""
+    return _APOS_RE.sub("", text)
+
+
 def is_goods_procurement(item: dict) -> bool:
     """True, если это закупка товаров/оборудования без услуговой составляющей."""
     if item.get("category") not in (config.CAT_UZTEND, config.CAT_INTL):
         return False
-    title = (item.get("title") or "").lower()
+    title = _norm_apos((item.get("title") or "").lower())
     meta = item.get("meta") or {}
     # UNDP: тип процедуры говорит сам за себя — ITB (торги на товары/работы) и RFQ
     # (котировки на поставку) не бывают консалтингом; RFP/IC/EOI — оставляем.
