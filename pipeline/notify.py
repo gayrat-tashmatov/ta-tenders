@@ -153,6 +153,9 @@ def card(item: dict, a: dict) -> tuple:
     dl = _short_date(a.get("deadline_info") or item.get("meta", {}).get("deadline"))
     if dl:
         facts.append(f"⏳ до {dl}")
+    upd = _short_date(item.get("meta", {}).get("updated"))
+    if upd:
+        facts.append(f"🔄 обновлено {upd}")
     if a.get("budget_info"):
         facts.append(f"💰 {esc(_trim(a['budget_info'], 50))}")
     urg = (a.get("urgency") or "").lower()

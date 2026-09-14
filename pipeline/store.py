@@ -88,7 +88,11 @@ class Store:
         названиями (UZEX/TenderWeek) URL и текст совпадают, а лоты — разные.
         URL/контент-хеши остаются для записей без uid (новости из RSS)."""
         if item.get("uid"):
-            return ["uid:" + item["uid"]]
+            # Продление/обновление лота (TenderWeek: «Обновлено dd.mm.yyyy») — новое событие:
+            # ключ с датой обновления, запись в items при этом ПЕРЕЗАПИСЫВАЕТСЯ (тот же id/slug),
+            # дубля на сайте нет, а в канал уходит карточка «ПРОДЛЕНИЕ: …» с новым дедлайном.
+            upd = (item.get("meta") or {}).get("updated")
+            return ["uid:" + item["uid"] + (f"#upd:{upd}" if upd else "")]
         keys = []
         if item.get("url"):
             keys.append("url:" + dedupe.url_hash(item["url"]))

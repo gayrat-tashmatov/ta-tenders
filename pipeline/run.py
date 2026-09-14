@@ -202,6 +202,11 @@ def run(send_telegram: bool = True):
                 final = score
             if it["category"] == config.CAT_INTL:
                 final = max(final, score)
+            # TenderWeek: рубрика «Консультационные услуги» / «Финансовые услуги» и т.п. — это
+            # наш профиль по определению, а описание в листинге обрезано (детали за логином),
+            # и модель ставила 6 одинаковым «Консультационные услуги» от ГРП. Не теряем.
+            if it.get("meta", {}).get("consulting_cat"):
+                final = max(final, config.MIN_SCORE_FOR_NOTIFY)
 
             will_notify = final >= config.MIN_SCORE_FOR_NOTIFY
             # Почти истёкший дедлайн — в канал не шлём (не успеть), на сайт — да.

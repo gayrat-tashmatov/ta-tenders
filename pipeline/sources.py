@@ -367,6 +367,14 @@ def fetch_lexuz_telegram(limit: int = 25) -> list:
 
 
 # ─────────────────────────── 6. TenderWeek — ПУБЛИЧНЫЙ листинг ───────────────────────────
+_TW_DATE_RE = re.compile(r"\d{2}[./]\d{2}[./]\d{4}")
+# Рубрики TenderWeek, которые по определению услуги/консалтинг: лоты из них всегда идут
+# на LLM-разбор и не режутся словарём товарки.
+_TW_SERVICE_CATS = ("Консультационные услуги", "Финансовые услуги", "Программное обеспечение",
+                    "Образование, наука", "Государственные и социальные услуги",
+                    "Юридические", "Маркетинг", "Реклама")
+
+
 def _tw_parse_row(a, base="https://www.tenderweek.com") -> dict | None:
     """Строка листинга: заказчик | №ID | название | описание… | категория | дата."""
     href = a.get("href", "")
@@ -387,37 +395,60 @@ def _tw_parse_row(a, base="https://www.tenderweek.com") -> dict | None:
     txt = row.get_text(" | ", strip=True)
     parts = [p.strip() for p in txt.split("|") if p.strip()]
 
-    buyer, title, desc, categ, published = "", "", "", "", None
+    # Карточка (шаблон tenderweek_2026): заказчик | №ID | название | описание… |
+    # категория (может быть 2–3) | Опубликовано | дата | [Обновлено | дата] | Истекает | дата
+    buyer, title, desc, published, updated, deadline = "", "", "", None, None, None
+    categs: list[str] = []
     idx_num = next((i for i, p in enumerate(parts) if p == f"№{tid}"), None)
     if idx_num is not None:
         buyer = parts[idx_num - 1] if idx_num >= 1 else ""
         title = parts[idx_num + 1] if idx_num + 1 < len(parts) else ""
         desc = parts[idx_num + 2] if idx_num + 2 < len(parts) else ""
-        categ = parts[idx_num + 3] if idx_num + 3 < len(parts) else ""
+        for p in parts[idx_num + 3:]:
+            if p.startswith(("Опубликован", "Обновлен", "Истекает")) or _TW_DATE_RE.fullmatch(p):
+                break
+            categs.append(p)
     else:
         title = a.get_text(strip=True)
 
-    dm = re.search(r"Опубликован[оа]?:?\s*(\d{2})[./](\d{2})[./](\d{4})", txt)
-    if dm:
-        try:
-            published = datetime(int(dm.group(3)), int(dm.group(2)), int(dm.group(1)),
-                                 tzinfo=timezone.utc)
-        except Exception:
-            pass
-    ddm = re.search(r"Истекает:?\s*(\d{2}[./]\d{2}[./]\d{4})", txt)
-
-    if not title or len(title) < 8:
+    def _date_after(label: str):
+        # части идут раздельно: «Опубликовано», «14.09.2026» — старый regex по «Опубликовано: dd.mm»
+        # не срабатывал, и у всех TW-лотов published/deadline были пустыми (до 14.09.2026)
+        for i, p in enumerate(parts):
+            if p.startswith(label) and i + 1 < len(parts) and _TW_DATE_RE.fullmatch(parts[i + 1]):
+                return parts[i + 1]
         return None
+
+    pub_s, upd_s, dl_s = _date_after("Опубликован"), _date_after("Обновлен"), _date_after("Истекает")
+    for src in (pub_s,):
+        if src:
+            try:
+                d, m_, y = src.replace("/", ".").split(".")
+                published = datetime(int(y), int(m_), int(d), tzinfo=timezone.utc)
+            except Exception:
+                pass
+    if dl_s:
+        d, m_, y = dl_s.replace("/", ".").split(".")
+        deadline = f"{y}-{m_}-{d}"
+
+    # «Аудит», «Оценка», «Двери» — короткие названия бывают; раньше порог 8 символов
+    # молча выбрасывал их (14.09: пропал REoI на аудит проекта ФАР).
+    if not title or len(title) < 3:
+        return None
+    categ = "; ".join(categs)
+    consulting_cat = any(k in categ for k in _TW_SERVICE_CATS)
     summary_bits = [b for b in (buyer and f"Заказчик: {buyer}",
                                 categ and f"Категория: {categ}",
+                                upd_s and f"Обновлено: {upd_s}",
                                 desc) if b]
     return _mk("TenderWeek", config.CAT_UZTEND, "TenderWeek",
                f"[TW] {title[:240]}", url, published,
                summary=". ".join(summary_bits)[:800],
                full_text=f"{title}. {'. '.join(summary_bits)}",
                uid=f"tw:{tid}",
-               meta={"buyer": buyer, "tw_category": categ,
-                     "deadline": ddm.group(1) if ddm else None})
+               meta={"buyer": buyer, "tw_category": categ, "deadline": deadline,
+                     "updated": upd_s, "kw_match": consulting_cat,
+                     "consulting_cat": consulting_cat})
 
 
 def fetch_tenderweek_public(pages: int | None = None) -> list:

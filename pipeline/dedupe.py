@@ -164,6 +164,8 @@ def is_goods_procurement(item: dict) -> bool:
         return False
     title = _norm_apos((item.get("title") or "").lower())
     meta = item.get("meta") or {}
+    if meta.get("consulting_cat"):
+        return False                      # рубрика площадки говорит «услуги» — словарь не применяем
     # UNDP: тип процедуры говорит сам за себя — ITB (торги на товары/работы) и RFQ
     # (котировки на поставку) не бывают консалтингом; RFP/IC/EOI — оставляем.
     if any(k in title for k in config.SERVICE_KEYWORDS):
