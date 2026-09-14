@@ -1,6 +1,19 @@
 import { NextResponse } from "next/server";
+import fs from "node:fs";
+import path from "node:path";
 
 export const dynamic = "force-dynamic";
+
+/** Время последнего экспорта пайплайна (web/data/meta.json) — свежесть данных на сайте. */
+function dataMeta(): { updatedAt: string | null; counts: Record<string, number> | null } {
+  try {
+    const raw = fs.readFileSync(path.join(process.cwd(), "data", "meta.json"), "utf-8");
+    const m = JSON.parse(raw) as { updatedAt?: string; counts?: Record<string, number> };
+    return { updatedAt: m.updatedAt ?? null, counts: m.counts ?? null };
+  } catch {
+    return { updatedAt: null, counts: null };
+  }
+}
 
 /** Диагностика подключения кабинета: /api/health */
 export function GET() {
@@ -26,5 +39,7 @@ export function GET() {
             ? "legacy (anon или service?)"
             : "неизвестный формат",
     env: process.env.VERCEL_ENV ?? "local",
+    commit: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? null,   // какой коммит собран
+    data: dataMeta(),                                                 // когда пайплайн обновил данные
   });
 }
