@@ -1,150 +1,157 @@
 {
- "updatedAt": "2026-09-15T07:54:55+00:00",
+ "updatedAt": "2026-09-15T13:43:56+00:00",
  "counts": {
-  "feed": 680,
-  "items": 680,
-  "npa": 89,
-  "insights": 24
+  "feed": 703,
+  "items": 703,
+  "npa": 106,
+  "insights": 25
  },
  "stats": {
-  "items": 5908,
-  "seen": 13083,
-  "npa": 89,
+  "items": 6010,
+  "seen": 13301,
+  "npa": 106,
   "mentions": 2,
-  "notified": 391
+  "notified": 404
  },
  "health": [
   {
    "origin": "Kun.uz",
-   "lastRun": "2026-09-15T07:51:11+00:00",
+   "lastRun": "2026-09-15T13:40:03+00:00",
    "lastCount": 15,
-   "lastNonzero": "2026-09-15T07:51:11+00:00",
-   "total": 1194
+   "lastNonzero": "2026-09-15T13:40:03+00:00",
+   "total": 1209
   },
   {
    "origin": "UzDaily EN",
-   "lastRun": "2026-09-15T07:51:11+00:00",
+   "lastRun": "2026-09-15T13:40:03+00:00",
    "lastCount": 20,
-   "lastNonzero": "2026-09-15T07:51:11+00:00",
-   "total": 1033
+   "lastNonzero": "2026-09-15T13:40:03+00:00",
+   "total": 1036
   },
   {
    "origin": "Podrobno.uz",
-   "lastRun": "2026-09-15T07:51:11+00:00",
+   "lastRun": "2026-09-15T13:40:03+00:00",
    "lastCount": 30,
-   "lastNonzero": "2026-09-15T07:51:11+00:00",
-   "total": 796
+   "lastNonzero": "2026-09-15T13:40:03+00:00",
+   "total": 804
   },
   {
    "origin": "UzA.uz",
-   "lastRun": "2026-09-15T07:51:11+00:00",
+   "lastRun": "2026-09-15T13:40:03+00:00",
    "lastCount": 20,
-   "lastNonzero": "2026-09-15T07:51:11+00:00",
-   "total": 768
+   "lastNonzero": "2026-09-15T13:40:03+00:00",
+   "total": 776
   },
   {
    "origin": "Spot.uz",
-   "lastRun": "2026-09-15T07:51:11+00:00",
+   "lastRun": "2026-09-15T13:40:03+00:00",
    "lastCount": 20,
-   "lastNonzero": "2026-09-15T07:51:11+00:00",
-   "total": 524
+   "lastNonzero": "2026-09-15T13:40:03+00:00",
+   "total": 527
   },
   {
    "origin": "Gazeta.uz",
-   "lastRun": "2026-09-15T07:51:11+00:00",
+   "lastRun": "2026-09-15T13:40:03+00:00",
    "lastCount": 20,
-   "lastNonzero": "2026-09-15T07:51:11+00:00",
-   "total": 443
+   "lastNonzero": "2026-09-15T13:40:03+00:00",
+   "total": 446
   },
   {
    "origin": "Nuz.uz",
-   "lastRun": "2026-09-15T07:51:11+00:00",
+   "lastRun": "2026-09-15T13:40:03+00:00",
    "lastCount": 20,
-   "lastNonzero": "2026-09-15T07:51:11+00:00",
-   "total": 393
+   "lastNonzero": "2026-09-15T13:40:03+00:00",
+   "total": 401
   },
   {
    "origin": "etender.uzex.uz",
-   "lastRun": "2026-09-15T07:51:11+00:00",
+   "lastRun": "2026-09-15T13:40:03+00:00",
    "lastCount": 74,
-   "lastNonzero": "2026-09-15T07:51:11+00:00",
-   "total": 209
+   "lastNonzero": "2026-09-15T13:40:03+00:00",
+   "total": 216
   },
   {
    "origin": "ungm.org",
-   "lastRun": "2026-09-15T07:51:11+00:00",
-   "lastCount": 58,
-   "lastNonzero": "2026-09-15T07:51:11+00:00",
-   "total": 168
+   "lastRun": "2026-09-15T13:40:03+00:00",
+   "lastCount": 59,
+   "lastNonzero": "2026-09-15T13:40:03+00:00",
+   "total": 170
   },
   {
    "origin": "TenderWeek",
-   "lastRun": "2026-09-15T07:51:11+00:00",
-   "lastCount": 75,
-   "lastNonzero": "2026-09-15T07:51:11+00:00",
+   "lastRun": "2026-09-15T13:40:03+00:00",
+   "lastCount": 70,
+   "lastNonzero": "2026-09-15T13:40:03+00:00",
    "total": 131
   },
   {
    "origin": "lex.uz",
-   "lastRun": "2026-09-15T07:51:11+00:00",
+   "lastRun": "2026-09-15T13:40:03+00:00",
    "lastCount": 20,
-   "lastNonzero": "2026-09-15T07:51:11+00:00",
-   "total": 54
+   "lastNonzero": "2026-09-15T13:40:03+00:00",
+   "total": 60
   },
   {
    "origin": "Review.uz",
-   "lastRun": "2026-09-15T07:51:11+00:00",
+   "lastRun": "2026-09-15T13:40:03+00:00",
    "lastCount": 40,
-   "lastNonzero": "2026-09-15T07:51:11+00:00",
-   "total": 48
+   "lastNonzero": "2026-09-15T13:40:03+00:00",
+   "total": 49
   },
   {
    "origin": "World Bank",
-   "lastRun": "2026-09-15T07:51:11+00:00",
+   "lastRun": "2026-09-15T13:40:03+00:00",
    "lastCount": 36,
-   "lastNonzero": "2026-09-15T07:51:11+00:00",
+   "lastNonzero": "2026-09-15T13:40:03+00:00",
    "total": 33
   },
   {
    "origin": "Gazeta Экономика",
-   "lastRun": "2026-09-15T07:51:11+00:00",
+   "lastRun": "2026-09-15T13:40:03+00:00",
    "lastCount": 20,
-   "lastNonzero": "2026-09-15T07:51:11+00:00",
+   "lastNonzero": "2026-09-15T13:40:03+00:00",
    "total": 18
   },
   {
    "origin": "uzjobs.uz",
-   "lastRun": "2026-09-15T07:51:11+00:00",
+   "lastRun": "2026-09-15T13:40:03+00:00",
    "lastCount": 3,
-   "lastNonzero": "2026-09-15T07:51:11+00:00",
+   "lastNonzero": "2026-09-15T13:40:03+00:00",
    "total": 10
   },
   {
    "origin": "UNDP",
-   "lastRun": "2026-09-15T07:51:11+00:00",
+   "lastRun": "2026-09-15T13:40:03+00:00",
    "lastCount": 15,
-   "lastNonzero": "2026-09-15T07:51:11+00:00",
-   "total": 5
+   "lastNonzero": "2026-09-15T13:40:03+00:00",
+   "total": 6
   },
   {
    "origin": "xt-xarid.uz",
-   "lastRun": "2026-09-15T07:51:11+00:00",
+   "lastRun": "2026-09-15T13:40:03+00:00",
    "lastCount": 2,
-   "lastNonzero": "2026-09-15T07:51:11+00:00",
-   "total": 4
-  },
-  {
-   "origin": "Tashkent Times",
-   "lastRun": "2026-09-15T07:51:11+00:00",
-   "lastCount": 4,
-   "lastNonzero": "2026-09-15T07:51:11+00:00",
+   "lastNonzero": "2026-09-15T13:40:03+00:00",
    "total": 4
   },
   {
    "origin": "AIIB Procurement",
-   "lastRun": "2026-09-15T07:51:11+00:00",
+   "lastRun": "2026-09-15T13:40:03+00:00",
    "lastCount": 2,
-   "lastNonzero": "2026-09-15T07:51:11+00:00",
+   "lastNonzero": "2026-09-15T13:40:03+00:00",
+   "total": 4
+  },
+  {
+   "origin": "Tashkent Times",
+   "lastRun": "2026-09-15T13:40:03+00:00",
+   "lastCount": 4,
+   "lastNonzero": "2026-09-15T13:40:03+00:00",
+   "total": 4
+  },
+  {
+   "origin": "isdb.org",
+   "lastRun": "2026-09-15T13:40:03+00:00",
+   "lastCount": 2,
+   "lastNonzero": "2026-09-15T13:40:03+00:00",
    "total": 2
   },
   {
@@ -152,13 +159,6 @@
    "lastRun": "2026-09-07T16:18:33+00:00",
    "lastCount": 1,
    "lastNonzero": "2026-09-07T16:18:33+00:00",
-   "total": 1
-  },
-  {
-   "origin": "isdb.org",
-   "lastRun": "2026-09-15T07:51:11+00:00",
-   "lastCount": 2,
-   "lastNonzero": "2026-09-15T07:51:11+00:00",
    "total": 1
   }
  ]
