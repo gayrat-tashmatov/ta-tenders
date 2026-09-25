@@ -1,5 +1,23 @@
 [
  {
+  "id": "u-cfc88df35442f0c7",
+  "category": "news",
+  "source": "Podrobno.uz",
+  "origin": "Podrobno.uz",
+  "titleRu": "Гонконгские компании предложили Smart City решения Ташкенту",
+  "title": "Гонконгские компании предложили Ташкенту цифровые разработки для транспорта и безопасности",
+  "summaryRu": "Представители Корпорации научных и технологических парков Гонконга (HKSTP) и трех резидентных компаний (eSIX, Cogniser, Showmac) провели встречу с Департаментом цифрового развития хокимията Ташкента в рамках ICT WEEK Uzbekistan 2026. Обсуждались возможности внедрения решений на основе ИИ для транспорта, безопасности, видеонаблюдения и управления городом с последующим пилотным тестированием.",
+  "buyer": "Департамент цифрового развития хокимията столицы Ташкента",
+  "deadline": null,
+  "budget": null,
+  "score": 7,
+  "urgency": "средняя",
+  "published": "2026-09-25 15:37:00+00:00",
+  "firstSeen": "2026-09-25T17:21:23+00:00",
+  "npaRefs": [],
+  "url": "https://podrobno.uz/cat/tehnp/gonkongskie-kompanii-predlozhili-tashkentu-tsifrovye-razrabotki-dlya-transporta-i-bezopasnosti/"
+ },
+ {
   "id": "etender-514276",
   "category": "uz_tender",
   "source": "UZEX e-Tender (конкурс)",
