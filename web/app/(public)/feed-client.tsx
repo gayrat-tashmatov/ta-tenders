@@ -188,7 +188,7 @@ export function FeedClient({
               <span>{it.source}</span>
               {it.buyer && <span>· {it.buyer.slice(0, 60)}</span>}
               {statusBadge(it._status, it._days, dlText)}
-              {it.budget && <span className="badge">💰 {it.budget.slice(0, 40)}</span>}
+              {it.budget && <span className="badge">💰 {String(it.budget).slice(0, 40)}</span>}
             </div>
             <Link href={`/t/${it.id}`} className="card-link">
               <h3 className="card-title">{cleanTitle(it)}</h3>

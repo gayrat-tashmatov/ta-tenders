@@ -27,6 +27,23 @@ _MONTHS = {m: i + 1 for i, m in enumerate(
     ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"])}
 
 
+def _budget_str(v, origin: str | None = None) -> str | None:
+    """Бюджет на сайт — ВСЕГДА строка. etender/xt-xarid отдают стартовую цену числом
+    (meta.cost = 1854000.0); 24.09 сборка Vercel упала на «a.budget.slice is not a function»."""
+    if v is None or v == "":
+        return None
+    if isinstance(v, bool):
+        return None
+    if isinstance(v, (int, float)):
+        s = f"{v:,.0f}".replace(",", " ")
+        return f"{s} сум" if origin in ("etender.uzex.uz", "xt-xarid.uz") else s
+    if isinstance(v, (list, tuple)):
+        return "; ".join(str(x) for x in v if x)[:200] or None
+    if isinstance(v, dict):
+        return "; ".join(f"{k}: {x}" for k, x in v.items() if x)[:200] or None
+    return str(v)
+
+
 def _norm_deadline(v) -> str | None:
     """Приводим дедлайн к YYYY-MM-DD, если формат распознан; иначе исходная строка."""
     if not v:
@@ -61,7 +78,7 @@ def _row_to_item(r) -> dict:
         "summaryRu": analysis.get("summary_ru"),
         "siteBrief": analysis.get("site_brief"),
         "opportunityType": analysis.get("opportunity_type"),
-        "budget": analysis.get("budget_info") or meta.get("cost"),
+        "budget": _budget_str(analysis.get("budget_info") or meta.get("cost"), r["origin"]),
         "eligibility": analysis.get("eligibility"),
         "docsChecklist": analysis.get("docs_checklist") or [],
         "recommendation": analysis.get("consulting_recommendation"),
