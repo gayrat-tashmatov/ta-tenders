@@ -29,6 +29,9 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: main          # верхушка ветки НА МОМЕНТ СТАРТА, а не SHA на момент dispatch:
+          fetch-depth: 10    # два запуска подряд иначе стартуют с одной старой БД (25.09)
 
       - uses: actions/setup-python@v6
         with:
@@ -62,8 +65,16 @@ jobs:
           git config user.email "actions@users.noreply.github.com"
           git add data/monitor.db web/data
           if git diff --cached --quiet; then
-            echo "Нет изменений данных"
-          else
-            git commit -m "data: обновление $(date -u +'%Y-%m-%d %H:%M UTC')"
-            git push
+            echo "Нет изменений данных"; exit 0
           fi
+          git commit -m "data: обновление $(date -u +'%Y-%m-%d %H:%M UTC')"
+          # main мог уйти вперёд (пуш кода во время прогона): переносим наш коммит данных
+          # поверх. При конфликте по данным (бинарная БД, JSON) побеждает наша версия —
+          # она свежее (в rebase «theirs» = переносимый коммит). Иначе прогон падал,
+          # а отправленные в Telegram карточки оставались без пометки → дубли (25.09).
+          for i in 1 2 3; do
+            git push && exit 0
+            git fetch --depth=10 origin main
+            git rebase -X theirs origin/main || { git rebase --abort; exit 1; }
+          done
+          exit 1
