@@ -170,4 +170,7 @@ JSON для сайта, должно иметь фиксированный ти�
 **Расписание, факт за 11–24.09.** GitHub запускает cron этого репо ровно 3 раза в сутки
 (~07:40, ~13:30, ~18:15 UTC) при любом выражении — смена на `17 2,5,8,11,14,17` ничего не
 дала. Точный запуск — через `supabase/migration_003_github_trigger.sql` (pg_cron дёргает
-`workflow_dispatch` по fine-grained токену из Vault).
+`workflow_dispatch` по fine-grained токену из Vault). **Включено 25.09.2026**: тест дал 204,
+прогон стартовал через 10 с. GitHub-cron в `monitor.yml` оставлен как резерв (его прогоны
+дублируются безвредно: `concurrency: monitor`). Проверка триггера в Supabase:
+`select status_code, created from net._http_response order by created desc limit 5`.
