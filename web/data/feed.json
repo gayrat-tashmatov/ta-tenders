@@ -1,5 +1,23 @@
 [
  {
+  "id": "u-e9a44d8f8fbaf86a",
+  "category": "news",
+  "source": "UzDaily EN",
+  "origin": "UzDaily EN",
+  "titleRu": "Узбекистан и АБР ускоряют проекты государственно-частного партнёрства",
+  "title": "Uzbekistan and ADB to accelerate PPP projects",
+  "summaryRu": "Узбекистан и Азиатский банк развития договорились ускорить реализацию проектов ГЧП в образовании, здравоохранении, водоснабжении и теплоэнергетике. Встреча прошла 25 сентября 2026 года между заместителем премьер-министра Джамшидом Кучкаровым и делегацией АБР. Конкретные суммы и сроки в новости не указаны.",
+  "buyer": "Министерство экономики и финансов Узбекистана, Азиатский банк развития",
+  "deadline": null,
+  "budget": null,
+  "score": 7,
+  "urgency": "средняя",
+  "published": "2026-09-26 16:35:00+00:00",
+  "firstSeen": "2026-09-26T17:21:08+00:00",
+  "npaRefs": [],
+  "url": "https://www.uzdaily.uz/en/uzbekistan-and-adb-to-accelerate-ppp-projects/"
+ },
+ {
   "id": "tw-36564",
   "category": "uz_tender",
   "source": "TenderWeek",
