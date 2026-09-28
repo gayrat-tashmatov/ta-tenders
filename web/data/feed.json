@@ -1,5 +1,23 @@
 [
  {
+  "id": "etender-513556",
+  "category": "uz_tender",
+  "source": "UZEX e-Tender (конкурс)",
+  "origin": "etender.uzex.uz",
+  "titleRu": "Разработка технических правил эксплуатации водохранилища Окчобсой",
+  "title": "[etender] Oqchobsoy suv omborining foydalanish texnik koidalari (Pravila texnicheskoy ekspluatasii vodoxralisha) ni ishlab chiqish",
+  "summaryRu": "Заказчик — управление ирригационной системы Ок-Корадаре (Самаркандская область, район Кошработ) — проводит тендер на разработку технических правил эксплуатации водохранилища Окчобсой. Бюджет: 100 000 000 узбекских сумов. Срок подачи заявок: с 27 сентября по 5 октября 2026 года.",
+  "buyer": "Ок-Корадаре ирригация тизими бошкармаси",
+  "deadline": "2026-10-05",
+  "budget": "100 000 000 узбекских сумов",
+  "score": 6,
+  "urgency": "средняя",
+  "published": "2026-09-27 16:01:26+00:00",
+  "firstSeen": "2026-09-28T05:21:20+00:00",
+  "npaRefs": [],
+  "url": "https://etender.uzex.uz/lot/513556"
+ },
+ {
   "id": "u-e9a44d8f8fbaf86a",
   "category": "news",
   "source": "UzDaily EN",
