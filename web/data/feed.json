@@ -1,5 +1,23 @@
 [
  {
+  "id": "etender-512023",
+  "category": "uz_tender",
+  "source": "UZEX e-Tender (конкурс)",
+  "origin": "etender.uzex.uz",
+  "titleRu": "Обязательная экспертиза промышленной безопасности оборудования",
+  "title": "[etender] Amaldagi sanoat xavfsizligi talablariga muvofiq, xizmat muddati me‘yordan oshgan, hamda xavfli ishlab chiqarish obyektlarida ishlayotgan texnik qurilmalar majburiy tartibda sanoat xavfsizligi eksperti",
+  "summaryRu": "Закупка услуг по проведению обязательной экспертизы промышленной безопасности технических устройств на опасных производственных объектах в соответствии с действующими требованиями и сроками. Заказчик: АО «ЯНГИ АНГРЕН ИШИКЛИ ЭЛЕКТР СТАНЦИЯСИ» (Ташкентская область, Оксангаронский район). Бюджет: 917 647 160 сум. Срок подачи предложений: до 7 октября 2026 года.",
+  "buyer": "\"YANGI ANGREN ISSIQLIK ELEKTR STANSIYASI\" AJ",
+  "deadline": "2026-10-07",
+  "budget": "917 647 160 узбекских сум",
+  "score": 6,
+  "urgency": "средняя",
+  "published": "2026-09-29 17:20:23+00:00",
+  "firstSeen": "2026-09-30T05:20:49+00:00",
+  "npaRefs": [],
+  "url": "https://etender.uzex.uz/lot/512023"
+ },
+ {
   "id": "tw-36580",
   "category": "uz_tender",
   "source": "TenderWeek",
