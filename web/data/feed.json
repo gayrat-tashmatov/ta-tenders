@@ -1,5 +1,23 @@
 [
  {
+  "id": "etender-515229",
+  "category": "uz_tender",
+  "source": "UZEX e-Tender (конкурс)",
+  "origin": "etender.uzex.uz",
+  "titleRu": "Техническое обслуживание и поддержка ПО радарных систем",
+  "title": "[etender] Texnik xizmat ko'rsatish, radar tizimlari uchun dasturiy ta'minotni qo'llab-quvvatlash va tezlikni oshirish uchun yo'l harakati qoidalariga rioya qilish",
+  "summaryRu": "Закупка технического обслуживания, поддержки программного обеспечения радарных систем и услуг по обеспечению соблюдения правил дорожного движения. Заказчик — Главное управление внутренних дел города Ташкент. Бюджет: 221 940 000 UZS. Срок подачи предложений: 30 сентября — 8 октября 2026 года.",
+  "buyer": "Главное управление внутренних дел города Ташкент",
+  "deadline": "2026-10-08",
+  "budget": "221 940 000 UZS",
+  "score": 6,
+  "urgency": "средняя",
+  "published": "2026-09-30 15:30:20+00:00",
+  "firstSeen": "2026-10-02T08:39:55+00:00",
+  "npaRefs": [],
+  "url": "https://etender.uzex.uz/lot/515229"
+ },
+ {
   "id": "etender-510668",
   "category": "uz_tender",
   "source": "UZEX e-Tender (конкурс)",
