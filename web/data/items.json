@@ -1,5 +1,47 @@
 [
  {
+  "id": "ungm-316747",
+  "category": "international_tender",
+  "source": "UNGM · UNICEF",
+  "origin": "ungm.org",
+  "title": "[UN·UZB] Maintenance, Enhancement Development, and Market Support of Global Giving Platform 2 (GGP2)",
+  "url": "https://www.ungm.org/Public/Notice/316747",
+  "published": null,
+  "firstSeen": "2026-10-02T21:24:38+00:00",
+  "score": 7,
+  "npaRefs": [],
+  "buyer": "UNICEF (Организация Объединённых Наций)",
+  "deadline": "2026-10-25",
+  "portalOnly": false,
+  "lotNumber": null,
+  "titleRu": "Техсодействие платформе глобального пожертвования ЮНИСЕФ (GGP2)",
+  "summaryRu": "ЮНИСЕФ ищет Optimizely-сертифицированного партнёра для обслуживания, развития и поддержки платформы Global Giving Platform 2 (многоязычная платформа пожертвований на базе Optimizely CMS и Commerce). Долгосрочное соглашение на 3 года с возможностью продления на 2+2 года. Крайний срок: 25 октября 2026 года, 23:59 GMT.",
+  "siteBrief": "ЮНИСЕФ проводит международный тендер на привлечение квалифицированного системного интегратора для долгосрочной поддержки платформы цифровых пожертвований GGP2, которая построена на модульной архитектуре с использованием Optimizely One Platform (CMS и Commerce). Исполнителю потребуется: (1) обеспечивать техническое обслуживание ядра платформы, (2) развивать функциональность при подключении новых рынков (текущие: Филиппины, Таиланд, Уругвай), (3) интегрировать платформу с системами платежных провайдеров и Salesforce CRM, (4) внедрять новые возможности по мере выхода обновлений Optimizely. Партнёр должен быть сертифицирован Optimizely и иметь опыт работы с многосайтовыми, многоязычными e-commerce решениями. Тендер проводится через систему UNICEF e-tendering; доступ и подача предложений — через UNGM портал.",
+  "opportunityType": "техсодействие",
+  "budget": null,
+  "eligibility": "Требуется сертификация Optimizely Implementation Partner; опыт с платформой Optimizely CMS и Commerce; опыт интеграции с системами платежных провайдеров и Salesforce CRM; опыт поддержки многоязычных многосайтовых платформ.",
+  "docsChecklist": [
+   "RFPS503963_ANNEX B - Terms of Reference",
+   "RFPS503963_Annex G - Bid Conference Information",
+   "UNGM Vendor Registration Process",
+   "How to Access UNICEF Tender in UNGM"
+  ],
+  "recommendation": "Предложить услугу технического сопровождения и управления проектами интеграции цифровой платформы для международной организации, включая координацию с многоуровневыми стейкхолдерами и обеспечение соответствия стандартам ООН.",
+  "legalAspects": [
+   "Тендер регулируется процедурами закупок ООН (UNGM); требуется соблюдение стандартов устойчивого развития (SDG 12, климатические показатели).",
+   "Долгосрочное соглашение (LTA) подлежит международному праву и процедурам UNICEF.",
+   "Партнёр должен соответствовать требованиям по защите данных и антикоррупционным нормам ООН."
+  ],
+  "actionItems": [
+   "Подать выражение интереса (Express Interest) через UNGM портал на https://www.ungm.org/Public/Notice/316747",
+   "Получить полную документацию тендера через систему UNICEF e-tendering после регистрации на UNGM",
+   "Подтвердить статус Optimizely Implementation Partner и подготовить кейсы реализации многоязычных платформ e-commerce"
+  ],
+  "contact": "Karla Dalimunthe, pfpprocurement@unicef.org",
+  "urgency": "высокая",
+  "summary": "Maintenance, Enhancement Development, and Market Support of Global Giving Platform 2 (GGP2) · 25-Oct-2026 23:59 (GMT 1.00)\t02-Oct-2026\tUNICEF\tRequest for proposal\tUNICEF- PFP-RFPS-2026-503963\tMultiple destinations"
+ },
+ {
   "id": "etender-510408",
   "category": "uz_tender",
   "source": "UZEX e-Tender (конкурс)",
