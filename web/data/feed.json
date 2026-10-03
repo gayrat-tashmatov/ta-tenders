@@ -1,5 +1,23 @@
 [
  {
+  "id": "u-0f0752c663a0584f",
+  "category": "news",
+  "source": "Kun.uz",
+  "origin": "Kun.uz",
+  "titleRu": "Конституционный суд переходит на цифровые технологии и мобильный доступ",
+  "title": "Konstitutsiyaviy sudda mobil ilova orqali qatnashish mumkin boʻladi.",
+  "summaryRu": "Принят Конституционный закон об обновлении деятельности Конституционного суда Узбекистана с внедрением информационной системы для электронной подачи жалоб, онлайн-участия через видеоконференцию и мобильное приложение, а также трансляции открытых заседаний в интернете. Заказчик — Конституционный суд РУз. Бюджет и сроки реализации в тексте не указаны.",
+  "buyer": "Конституционный суд Республики Узбекистан",
+  "deadline": null,
+  "budget": null,
+  "score": 8,
+  "urgency": "средняя",
+  "published": "2026-10-03 04:35:12+00:00",
+  "firstSeen": "2026-10-03T05:21:16+00:00",
+  "npaRefs": [],
+  "url": "https://kun.uz/news/2026/10/03/konstitutsiyaviy-sudda-mobil-ilova-orqali-qatnashish-mumkin-boladi"
+ },
+ {
   "id": "ungm-316747",
   "category": "international_tender",
   "source": "UNGM · UNICEF",
