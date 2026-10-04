@@ -1,5 +1,44 @@
 [
  {
+  "id": "isdb-individual-consultant-preparation-feasibility-study-and-project-preparation-revi",
+  "category": "international_tender",
+  "source": "IsDB",
+  "origin": "isdb.org",
+  "title": "[IsDB] Individual Consultant for the Preparation of the Feasibility Study and the Project Preparation Review Report (PPRR) and the Project Appraisal Document (PAD)",
+  "url": "https://www.isdb.org/project-procurement/tenders/2026/eoi/individual-consultant-preparation-feasibility-study-and-project-preparation-review",
+  "published": null,
+  "firstSeen": "2026-10-04T08:21:20+00:00",
+  "score": 10,
+  "npaRefs": [],
+  "buyer": "Islamic Development Bank (IsDB)",
+  "deadline": "2026-10-12",
+  "portalOnly": false,
+  "lotNumber": null,
+  "titleRu": "Консультант для разработки ТЭО проекта развития животноводства",
+  "summaryRu": "Исламский банк развития (IsDB) ищет индивидуального консультанта для подготовки технико-хозяйственного обоснования (ТЭО), отчёта о подготовке проекта (PPRR) и документа оценки проекта (PAD) по проекту развития цепочки стоимости животноводства в Узбекистане. Срок подачи заявок: 12 октября 2026 г. Бюджет и объём работ не указаны в анонсе.",
+  "siteBrief": "IsDB объявляет конкурс на привлечение индивидуального консультанта для разработки комплексных проектных документов по развитию животноводческого сектора в Узбекистане. Консультант должен будет подготовить три ключевых документа (ТЭО, PPRR и PAD) согласно стандартам IsDB, провести анализ данных, консультации со стейкхолдерами и участвовать в миссиях банка. Это квалификационное предложение интереса (EOI), позволяющее банку предварительно оценить компетентность кандидатов. Полные требования содержатся в Условиях выполнения работ (TOR), которые доступны по запросу. Подготовка отличной заявки требует понимания методологии банка и опыта в финансировании развития агросектора.",
+  "opportunityType": "техсодействие",
+  "budget": null,
+  "eligibility": "null",
+  "docsChecklist": [
+   "Заполненная форма EOI (Приложение II)",
+   "Условия выполнения работ (TOR) — прилагаются или получаются по запросу"
+  ],
+  "recommendation": "Предложить услугу управления подготовкой проектных документов для финансирования IsDB, включая методологическое сопровождение при разработке ТЭО, PPRR и PAD согласно корпоративной политике банка.",
+  "legalAspects": [
+   "Требуется соответствие Корпоративной политике закупок IsDB при отборе консультанта",
+   "Необходимо подписание соглашения с IsDB в соответствии с условиями банка"
+  ],
+  "actionItems": [
+   "Запросить полный TOR и форму EOI у Данияра Акбасова (dakbassov@isdb.org, копия: arkenzhegulov@isdb.org)",
+   "Подготовить и отправить заполненную форму EOI (Приложение II) указанным контактам не позднее 12 октября 2026 г. 17:00 по алматинскому времени",
+   "Если есть намерение участвовать, согласовать наличие опыта в разработке документов для финансирования международными финансовыми организациями"
+  ],
+  "contact": "Данияр Акбасов, Project Management Specialist, Regional Hub of Almaty, Islamic Development Bank, dakbassov@isdb.org, +7 700 6934801",
+  "urgency": "высокая",
+  "summary": "Expression of Interest. Узбекистан. Дедлайн: 12 October 2026"
+ },
+ {
   "id": "u-0f0752c663a0584f",
   "category": "news",
   "source": "Kun.uz",
