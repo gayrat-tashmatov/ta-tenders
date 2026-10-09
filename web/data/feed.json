@@ -1,5 +1,23 @@
 [
  {
+  "id": "ungm-317580",
+  "category": "international_tender",
+  "source": "UNGM · UNICEF",
+  "origin": "ungm.org",
+  "titleRu": "Разработка коммуникационной стратегии Child-Lens Investing для ЮНИСЕФ",
+  "title": "[UN·UZB] Communication Strategy for Child-Lens Investing (CLI)",
+  "summaryRu": "ЮНИСЕФ объявила международный тендер на разработку коммуникационной стратегии для инициативы Child-Lens Investing (CLI). Заказчик — ЮНИСЕФ, бюджет не указан. Сроки: публикация 09 октября 2026 года, дедлайн подачи предложений 30 октября 2026 года (23:59 GMT+1).",
+  "buyer": "UNICEF",
+  "deadline": "2026-10-30",
+  "budget": null,
+  "score": 7,
+  "urgency": "высокая",
+  "published": null,
+  "firstSeen": "2026-10-09T17:20:56+00:00",
+  "npaRefs": [],
+  "url": "https://www.ungm.org/Public/Notice/317580"
+ },
+ {
   "id": "etender-514483",
   "category": "uz_tender",
   "source": "UZEX e-Tender (конкурс)",
