@@ -1,5 +1,23 @@
 [
  {
+  "id": "tw-36645",
+  "category": "uz_tender",
+  "source": "TenderWeek",
+  "origin": "TenderWeek",
+  "titleRu": "Закупка билетных услуг для СЭС Huadian Джизак 500 МВт",
+  "title": "[TW] Билетные услуги",
+  "summaryRu": "Компания Huadian Jizzakh Solar Power закупает билетные услуги для солнечной электростанции мощностью 500 МВт (ac) в Джизаке. Заказчик опубликовал документацию по закупке. Конкретные суммы, сроки подачи и требования к участникам в представленном тексте отсутствуют.",
+  "buyer": "HUADIAN JIZZAKH SOLAR POWER",
+  "deadline": "2026-10-15",
+  "budget": null,
+  "score": 4,
+  "urgency": "низкая",
+  "published": "2026-10-10 00:00:00+00:00",
+  "firstSeen": "2026-10-10T16:19:10+00:00",
+  "npaRefs": [],
+  "url": "https://www.tenderweek.com/tender-36645"
+ },
+ {
   "id": "u-5979ad02c703242c",
   "category": "news",
   "source": "Gazeta.uz",
