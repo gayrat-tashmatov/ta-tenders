@@ -1,5 +1,23 @@
 [
  {
+  "id": "etender-518671",
+  "category": "uz_tender",
+  "source": "UZEX e-Tender (конкурс)",
+  "origin": "etender.uzex.uz",
+  "titleRu": "Техническое обслуживание LED-экранов Uzbekistan Airways",
+  "title": "[etender] Приобретение услуг по техническому обслуживанию и ремонту LED-экранов административного здания АО «Uzbekistan Airways»",
+  "summaryRu": "АО «Uzbekistan Airways» закупает услуги по техническому обслуживанию и ремонту LED-экранов административного здания. Бюджет закупки составляет 180 000 000 узбекских сумов. Период подачи заявок: 12–19 октября 2026 года.",
+  "buyer": "АО UZBEKISTAN AIRWAYS",
+  "deadline": "2026-10-19",
+  "budget": "180 000 000 узбекских сумов",
+  "score": 3,
+  "urgency": "средняя",
+  "published": "2026-10-12 11:24:17+00:00",
+  "firstSeen": "2026-10-12T11:21:26+00:00",
+  "npaRefs": [],
+  "url": "https://etender.uzex.uz/lot/518671"
+ },
+ {
   "id": "tw-36650",
   "category": "uz_tender",
   "source": "TenderWeek",
