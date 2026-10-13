@@ -107,6 +107,13 @@ def run(send_telegram: bool = True):
                     continue
 
             it["npa_refs"] = dedupe.extract_npa_refs(it.get("title"), it.get("full_text"))
+            # Акт из RSS lex.uz, который реестр уже знает (пришёл раньше из Telegram или на
+            # другом языке) — это та же карточка, второй не нужно.
+            if (it["category"] == config.CAT_LAW and it.get("meta", {}).get("rss_law")
+                    and it["npa_refs"] and store.npa_lookup(it["npa_refs"])):
+                store.mark_seen(it)
+                mentions_only += 1
+                continue
 
             # Чужой регион (Африка/ЛатАм/ЮВА без упоминания ЦА) — не наш рынок.
             # Отсечённое словарями НЕ помечаем seen: проверка дешёвая (без LLM), а
@@ -180,6 +187,12 @@ def run(send_telegram: bool = True):
                 store.mark_seen(it)
                 continue
 
+            if is_tender:
+                rep = store.find_repeat(it)
+                if rep:
+                    it.setdefault("meta", {})["repeat_of"] = rep["number"]
+                    it["meta"]["repeat_seen"] = rep["first_seen"][:10]
+
             # Полный текст страницы для глубокого анализа (news, UNGM, UNDP, uzjobs):
             # снippet'а мало — дотягиваем статью/извещение, как делал v4.
             if len(it.get("full_text") or "") < 700:
@@ -214,6 +227,14 @@ def run(send_telegram: bool = True):
             if hrs is not None and hrs < config.NOTIFY_MIN_HOURS_LEFT:
                 will_notify = False
                 log.info("пропуск TG (дедлайн через %.0f ч): %s", hrs, it["title"][:60])
+            # Старые акты (догон после простоя источника) — на сайт и в реестр, канал не засоряем.
+            pub = it.get("published")
+            if will_notify and it["category"] == config.CAT_LAW and pub is not None:
+                if pub.tzinfo is None:
+                    pub = pub.replace(tzinfo=timezone.utc)
+                if (datetime.now(timezone.utc) - pub).days > config.NOTIFY_LAW_MAX_AGE_DAYS:
+                    will_notify = False
+                    log.info("пропуск TG (акт старше %d дн): %s", config.NOTIFY_LAW_MAX_AGE_DAYS, it["title"][:60])
             store.save_item(it, final, analysis, it["npa_refs"], notified=False)
             if it["category"] == config.CAT_LAW and it["npa_refs"]:
                 store.npa_register(it["npa_refs"], it)

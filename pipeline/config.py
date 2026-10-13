@@ -126,15 +126,16 @@ TENDERWEEK_PAGES = int(os.getenv("TENDERWEEK_PAGES", "10"))  # главная + 
 
 # ─────────────────────────── Headless (JS-SPA через Playwright) ───────────────────────────
 HEADLESS_ENABLED = os.getenv("HEADLESS_ENABLED", "0") == "1"
-HEADLESS_ON = [x.strip() for x in os.getenv("HEADLESS_ON", "xtxarid,ebrd,ungm").split(",") if x.strip()]
+HEADLESS_ON = [x.strip() for x in os.getenv("HEADLESS_ON", "ebrd,ungm").split(",") if x.strip()]
 HEADLESS_MAX = int(os.getenv("HEADLESS_MAX", "120"))
 ETENDER_LIST_URL = os.getenv("ETENDER_LIST_URL", "https://etender.uzex.uz/lots/1/0")
 # etender: прямой API списка (POST TradeList, пагинация From/To). Лента отсортирована
 # по ДАТЕ ОКОНЧАНИЯ — первые 20 = закрывающиеся сегодня. Поэтому берём всю ленту.
 ETENDER_API_URL = "https://apietender.uzex.uz/api/common/TradeList"
-ETENDER_API_MAX = int(os.getenv("ETENDER_API_MAX", "600"))     # активных лотов за раз
+ETENDER_API_MAX = int(os.getenv("ETENDER_API_MAX", "3000"))   # лента > 600 с октября: новые лоты (дальний дедлайн) в хвосте     # активных лотов за раз
 # Telegram: не слать лоты, у которых до дедлайна меньше N часов — не успеть.
 NOTIFY_MIN_HOURS_LEFT = int(os.getenv("NOTIFY_MIN_HOURS_LEFT", "24"))
+NOTIFY_LAW_MAX_AGE_DAYS = int(os.getenv("NOTIFY_LAW_MAX_AGE_DAYS", "7"))  # НПА старше N дней — на сайт и в реестр, но не в канал (догон после простоя)
 
 HEADLESS_SOURCES = [
     {"key": "etender", "source": "UZEX e-Tender (конкурс)", "origin": "etender.uzex.uz",

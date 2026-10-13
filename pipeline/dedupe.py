@@ -69,6 +69,9 @@ _NPA_RE = re.compile(
     r"\b(ЗРУ|ЎРҚ|ORQ|O['ʻ’‘`´]RQ|ZRU|УП|ПФ|UP|PF|ПП|ПҚ|PP|PQ|ПКМ|ВМҚ|PKM|VMQ)"
     r"\s*[-–—]?\s*№?\s*(\d{1,5})\b", re.I | re.U)
 _LEX_RE = re.compile(r"lex\.uz/(?:ru/|uz/|acts?/)?docs?/(-?\d+)", re.I)
+# Ведомственные акты: «рег. № МЮ 3492-2» (RU) = «АВ рег. № 3492-2» (UZ) = «AV reg. № 3492-2».
+# Нужен, чтобы RU- и UZ-версии одного акта из RSS lex.uz склеивались в одну карточку (13.10).
+_REG_RE = re.compile(r"(?:рег|reg)\.?\s*№\s*(?:МЮ|AV|АВ|MYU)?\s*(\d{3,5}(?:-\d{1,3})?)", re.I | re.U)
 
 
 def npa_type_title(key: str) -> str:
@@ -91,6 +94,10 @@ def extract_npa_refs(*texts) -> list:
                 keys.append(k)
     for doc_id in _LEX_RE.findall(blob):
         k = f"LEX-{doc_id.lstrip('-')}"     # в URL id бывает со знаком минус
+        if k not in keys:
+            keys.append(k)
+    for num in _REG_RE.findall(blob):
+        k = f"REG-{num}"
         if k not in keys:
             keys.append(k)
     return keys

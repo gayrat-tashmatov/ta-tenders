@@ -74,6 +74,7 @@ def _row_to_item(r) -> dict:
         "deadline": _norm_deadline(analysis.get("deadline_info") or meta.get("deadline")),
         "portalOnly": bool(meta.get("portal_only")),
         "lotNumber": meta.get("number"),
+        "repeatOf": meta.get("repeat_of"),          # повторная публикация: номер прошлого лота
         "titleRu": analysis.get("title_ru"),
         "summaryRu": analysis.get("summary_ru"),
         "siteBrief": analysis.get("site_brief"),

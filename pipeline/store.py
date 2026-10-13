@@ -175,6 +175,27 @@ class Store:
              int(notified), dedupe.item_slug(item), _now(), dedupe.tokens_str(item)))
         self.db.commit()
 
+    def find_repeat(self, item: dict, days: int = 45) -> dict | None:
+        """Повторная публикация лота: тот же источник и то же название у ДРУГОГО uid за
+        последние N дней (etender/TW переобъявляют несостоявшиеся процедуры — UzAuto ×3 за
+        10 дней, KVARTS ISO ×2). Карточку шлём, но помечаем «🔁 повтор лота №…»."""
+        title, origin, uid = item.get("title") or "", item.get("origin"), item.get("uid")
+        if not title or not origin or not uid:
+            return None
+        row = self.db.execute(
+            """SELECT uid, first_seen, meta FROM items
+               WHERE origin=? AND title=? AND uid!=? AND first_seen >= datetime('now', ?)
+               ORDER BY first_seen DESC LIMIT 1""",
+            (origin, title, uid, f"-{days} days")).fetchone()
+        if not row:
+            return None
+        try:
+            meta = json.loads(row["meta"] or "{}")
+        except Exception:
+            meta = {}
+        return {"uid": row["uid"], "first_seen": row["first_seen"],
+                "number": meta.get("number") or row["uid"].split(":")[-1]}
+
     def set_notified(self, item_id: str):
         self.db.execute("UPDATE items SET notified=1 WHERE id=?", (item_id,))
         self.db.commit()

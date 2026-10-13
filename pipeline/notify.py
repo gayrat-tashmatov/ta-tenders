@@ -156,6 +156,9 @@ def card(item: dict, a: dict) -> tuple:
     upd = _short_date(item.get("meta", {}).get("updated"))
     if upd:
         facts.append(f"🔄 обновлено {upd}")
+    rep = item.get("meta", {}).get("repeat_of")
+    if rep:
+        facts.append(f"🔁 повтор лота №{esc(str(rep))} от {_short_date(item['meta'].get('repeat_seen')) or '?'}")
     if a.get("budget_info"):
         facts.append(f"💰 {esc(_trim(a['budget_info'], 50))}")
     urg = (a.get("urgency") or "").lower()

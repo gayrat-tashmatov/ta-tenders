@@ -15,7 +15,10 @@ import requests
 import feedparser
 from bs4 import BeautifulSoup
 
+import json
+import os
 import config
+import dedupe
 
 log = logging.getLogger("sources")
 
@@ -366,6 +369,136 @@ def fetch_lexuz_telegram(limit: int = 25) -> list:
     return items
 
 
+LEXUZ_RSS = (("ru", "https://lex.uz/ru/rss"), ("uz", "https://lex.uz/rss"))
+
+
+def fetch_lexuz_rss() -> list:
+    """Официальный RSS lex.uz («Законодательство: новости»): RU-лента + UZ-лента для актов
+    без русской версии. С 22.09.2026 веб-превью t.me/s/lexuzofficial перестало обновляться,
+    и поток НПА (а с ним и ежедневная аналитика) встал — обнаружено 13.10.
+    В description — тип акта, номер и даты: «Указ Президента … №УП-217. Дата принятия …».
+    uid = lexuz:<id документа>; RU и UZ версии одного акта имеют РАЗНЫЕ id — склеиваем по
+    реквизиту акта (УП-217 = ПФ-217) внутри выборки и через реестр НПА (run.py, rss_law)."""
+    items, s, seen_refs = [], _session(), set()
+    for lang, url in LEXUZ_RSS:
+        try:
+            r = s.get(url, timeout=config.HTTP_TIMEOUT)
+            parsed = feedparser.parse(r.content)
+            n = 0
+            for e in parsed.entries[:120]:
+                link = e.get("link", "") or e.get("id", "")
+                if link.startswith("/"):
+                    link = "https://lex.uz" + link
+                dm = re.search(r"docs?/(-?\d+)", link)
+                if not dm:
+                    continue
+                doc_id = dm.group(1).lstrip("-")
+                title = strip_html(e.get("title", "")).strip()
+                desc = strip_html(e.get("summary", "") or e.get("description", "")).strip()
+                refs = set(dedupe.extract_npa_refs(f"{title} {desc}", None)) - {f"LEX-{doc_id}"}
+                if refs and refs & seen_refs:
+                    continue                      # тот же акт на другом языке
+                seen_refs |= refs
+                kind = desc.split(".")[0][:120] if desc else ""
+                items.append(_mk(
+                    "lex.uz", config.CAT_LAW, "lex.uz", f"[НПА] {title[:160]}", link,
+                    _parse_rss_date(e),
+                    summary=f"{kind}. {title}" if kind else title,
+                    full_text=f"{title}. {desc} {link}",   # ссылка → ключ LEX-<id> в реестре
+                    uid=f"lexuz:{doc_id}",
+                    meta={"lang": lang, "lex_id": doc_id, "act_info": desc[:300], "rss_law": True}))
+                n += 1
+            log.info("lex.uz RSS %s: %d", lang, n)
+        except Exception as e:
+            log.warning("lex.uz RSS %s FAIL: %s", lang, e)
+    return items
+
+
+def fetch_lexuz() -> list:
+    """НПА: RSS lex.uz; Telegram-канал — только как резерв, если RSS пуст."""
+    items = fetch_lexuz_rss()
+    return items if items else fetch_lexuz_telegram()
+
+
+XTXARID_RPC = "https://api.xt-xarid.uz/rpc"
+XTXARID_MAX = int(os.getenv("XTXARID_MAX", "600"))
+
+
+def fetch_xtxarid_api(max_items: int | None = None) -> list:
+    """xt-xarid.uz напрямую через JSON-RPC «ref ref_tender_public» (тот же вызов, что делает
+    сайт). Главная страница с 05.10.2026 показывает только 6 процедур, и headless-перехват
+    давал 0 — обнаружено 13.10. Страницами по 100 до XTXARID_MAX; уровень процедуры
+    (/procedure/{id}/core), фильтр по словарю консалтинга/ИТ, только с живым дедлайном."""
+    max_items = max_items or XTXARID_MAX
+    items, got = [], []
+    hdr = {**config.HTTP_HEADERS, "Content-Type": "application/json",
+           "Origin": "https://xt-xarid.uz", "Referer": "https://xt-xarid.uz/"}
+    fields = ["id", "name", "status", "publicated_at", "close_at", "totalcost", "currency",
+              "lot_count", "good_count", "green", "lang"]
+    try:
+        offset, page = 0, 100
+        while offset < max_items:
+            body = {"jsonrpc": "2.0", "id": 1, "method": "ref",
+                    "params": {"ref": "ref_tender_public", "op": "read", "limit": page,
+                               "offset": offset, "filters": {}, "fields": fields}}
+            r = requests.post(XTXARID_RPC, headers=hdr, json=body, timeout=40)
+            r.raise_for_status()
+            res = r.json().get("result")
+            rows = res if isinstance(res, list) else ((res or {}).get("data") or [])
+            got += rows
+            if len(rows) < page:
+                break
+            offset += page
+
+        now = datetime.now(timezone.utc)
+        seen = set()
+        for d in got:
+            pid = str(d.get("id") or "")
+            title = str(d.get("name") or "").strip()
+            if not pid or pid in seen or not title:
+                continue
+            seen.add(pid)
+            if not any(k in title.lower() for k in config.CONSULTING_KEYWORDS):
+                continue
+            status = str(d.get("status") or "")
+            if any(s in status for s in ("cancel", "closed", "draft", "finish", "reject")):
+                continue
+            close = None
+            try:
+                close = datetime.fromisoformat(str(d.get("close_at"))[:19]).replace(tzinfo=timezone.utc)
+            except Exception:
+                pass
+            if close and close < now:
+                continue
+            pub = None
+            try:
+                pub = datetime.fromisoformat(str(d.get("publicated_at"))[:19]).replace(tzinfo=timezone.utc)
+            except Exception:
+                pass
+            cost = d.get("totalcost")
+            meta = {"deadline": str(d.get("close_at") or "")[:19] or None,
+                    "published": pub.isoformat() if pub else None,
+                    "cost": cost, "currency": d.get("currency") or "UZS",
+                    "number": pid, "lot_count": d.get("lot_count"), "status": status,
+                    "kw_match": True}
+            bits = [title]
+            if cost:
+                bits.append(f"Сумма: {cost:,.0f} {meta['currency']}".replace(",", " ")
+                            if isinstance(cost, (int, float)) else f"Сумма: {cost} {meta['currency']}")
+            if d.get("lot_count"):
+                bits.append(f"Лотов: {d['lot_count']}")
+            items.append(_mk("XT-Xarid (госзакупки)", config.CAT_UZTEND, "xt-xarid.uz",
+                             f"[xt-xarid] {title[:280]}",
+                             f"https://xt-xarid.uz/procedure/{pid}/core", pub,
+                             summary=". ".join(bits)[:800],
+                             full_text=json.dumps(d, ensure_ascii=False)[:2500],
+                             uid=f"xtxarid:{pid}", meta=meta))
+        log.info("xt-xarid API: лента=%d → консалтинг/ИТ с живым дедлайном %d", len(got), len(items))
+    except Exception as e:
+        log.warning("xt-xarid API FAIL: %s", e)
+    return items
+
+
 # ─────────────────────────── 6. TenderWeek — ПУБЛИЧНЫЙ листинг ───────────────────────────
 _TW_DATE_RE = re.compile(r"\d{2}[./]\d{2}[./]\d{4}")
 # Рубрики TenderWeek, которые по определению услуги/консалтинг: лоты из них всегда идут
@@ -656,12 +789,13 @@ def collect_all() -> list:
     items += _tally(fetch_uzjobs())
     items += _tally(fetch_tenderweek_public())
     items += _tally(fetch_etender_api())
+    items += _tally(fetch_xtxarid_api())
     try:
         from headless import collect_all_headless    # playwright опционален
         items += _tally(collect_all_headless())
     except Exception as e:
         log.warning("headless источники недоступны: %s", e)
-    items += _tally(fetch_lexuz_telegram())
+    items += _tally(fetch_lexuz())
     items += _tally(fetch_news_rss())
     log.info("ИТОГО собрано: %d элементов", len(items))
     return items
