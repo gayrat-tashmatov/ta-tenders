@@ -1,5 +1,125 @@
 [
  {
+  "id": "lexuz-8536018",
+  "category": "legislation",
+  "source": "lex.uz",
+  "origin": "lex.uz",
+  "titleRu": null,
+  "title": "[НПА] Нодавлат жисмоний тарбия ва спорт ташкилотлари, шунингдек, спорт иншоотлари реестрларига доир айрим норматив-ҳуқуқий ҳужжатларни тасдиқлаш тўғрисида",
+  "summaryRu": null,
+  "buyer": null,
+  "deadline": null,
+  "budget": null,
+  "score": 1,
+  "urgency": null,
+  "published": "2026-10-13 19:21:19+00:00",
+  "firstSeen": "2026-10-14T14:21:52+00:00",
+  "npaRefs": [
+   "LEX-8536018"
+  ],
+  "url": "https://lex.uz/docs/8536018"
+ },
+ {
+  "id": "lexuz-8536680",
+  "category": "legislation",
+  "source": "lex.uz",
+  "origin": "lex.uz",
+  "titleRu": null,
+  "title": "[НПА] Ўзбекистон Республикасида бизнесни рўйхатга олишни ўтказиш чора-тадбирлари тўғрисида",
+  "summaryRu": null,
+  "buyer": null,
+  "deadline": null,
+  "budget": null,
+  "score": 2,
+  "urgency": null,
+  "published": "2026-10-09 19:21:19+00:00",
+  "firstSeen": "2026-10-14T14:21:52+00:00",
+  "npaRefs": [
+   "LEX-8536680"
+  ],
+  "url": "https://lex.uz/docs/8536680"
+ },
+ {
+  "id": "lexuz-8536671",
+  "category": "legislation",
+  "source": "lex.uz",
+  "origin": "lex.uz",
+  "titleRu": null,
+  "title": "[НПА] 2027-2028 йилларда Ўзбекистон Республикасида мультииндикатор кластер кузатувини ўтказиш тўғрисида",
+  "summaryRu": null,
+  "buyer": null,
+  "deadline": null,
+  "budget": null,
+  "score": 3,
+  "urgency": null,
+  "published": "2026-10-09 19:21:19+00:00",
+  "firstSeen": "2026-10-14T14:21:52+00:00",
+  "npaRefs": [
+   "LEX-8536671"
+  ],
+  "url": "https://lex.uz/docs/8536671"
+ },
+ {
+  "id": "lexuz-8536685",
+  "category": "legislation",
+  "source": "lex.uz",
+  "origin": "lex.uz",
+  "titleRu": null,
+  "title": "[НПА] Илғор «яшил» технологиялар асосида иссиқхона хўжаликларини ривожлантириш ва аҳоли томорқа ер майдонларидан самарали фойдаланиш бўйича қўшимча чора-тадбирлар тўғ",
+  "summaryRu": null,
+  "buyer": null,
+  "deadline": null,
+  "budget": null,
+  "score": 4,
+  "urgency": null,
+  "published": "2026-10-13 19:21:19+00:00",
+  "firstSeen": "2026-10-14T14:21:52+00:00",
+  "npaRefs": [
+   "PP-371",
+   "LEX-8536685"
+  ],
+  "url": "https://lex.uz/docs/8536685"
+ },
+ {
+  "id": "lexuz-8536690",
+  "category": "legislation",
+  "source": "lex.uz",
+  "origin": "lex.uz",
+  "titleRu": null,
+  "title": "[НПА] О дополнительных мерах по развитию транспортно-логистической системы",
+  "summaryRu": null,
+  "buyer": null,
+  "deadline": null,
+  "budget": null,
+  "score": 5,
+  "urgency": null,
+  "published": "2026-10-12 19:21:19+00:00",
+  "firstSeen": "2026-10-14T14:21:52+00:00",
+  "npaRefs": [
+   "PP-368",
+   "LEX-8536690"
+  ],
+  "url": "https://lex.uz/ru/docs/8536690"
+ },
+ {
+  "id": "u-73a87d30e3a37345",
+  "category": "news",
+  "source": "UzDaily EN",
+  "origin": "UzDaily EN",
+  "titleRu": "Узбекистан и LX разрабатывают национальную систему адресации",
+  "title": "Uzbekistan and LX to Develop a National Address System",
+  "summaryRu": "Узбекистан подписал трёхлетний контракт с южнокорейской корпорацией LX на консультационные услуги по совершенствованию национальной системы адресации. Проект реализуется при участии Всемирного банка в рамках инициативы «Пространственные данные для устойчивого развития регионов». Контракт подписан 13 октября 2026 года.",
+  "buyer": "Государство Узбекистан (Палата государственной кадастра); соисполнитель — LX Corporation (Южная Корея)",
+  "deadline": "2026-10-13",
+  "budget": null,
+  "score": 9,
+  "urgency": "высокая",
+  "published": "2026-10-14 08:00:00+00:00",
+  "firstSeen": "2026-10-14T14:21:52+00:00",
+  "npaRefs": [],
+  "url": "https://www.uzdaily.uz/en/uzbekistan-and-lx-to-develop-a-national-address-system/"
+ },
+ {
   "id": "lexuz-8534710",
   "category": "legislation",
   "source": "lex.uz",
