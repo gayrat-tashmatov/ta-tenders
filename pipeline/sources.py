@@ -91,15 +91,23 @@ def fetch_worldbank(rows: int = 60) -> list:
                     .replace(tzinfo=timezone.utc)
             except Exception:
                 pass
-            title = f"[WB] {ntype}: {n.get('project_name', '')}".strip()
+            # Заголовок — суть задания (bid_description), а не название проекта: иначе
+            # «верификация ESG-отчёта» выглядела как «Electricity Sector Transformation…» (15.10).
+            task = (n.get("bid_description") or "").strip()
+            proj = (n.get("project_name") or "").strip()
+            short_type = {"Request for Expression of Interest": "REoI",
+                          "Invitation for Bids": "IFB"}.get(ntype, ntype)
+            title = (f"[WB] {short_type}: {task}" if task and len(task) > 8
+                     else f"[WB] {ntype}: {proj}").strip()
             body = strip_html(n.get("notice_text", "")) or n.get("bid_description", "")
             items.append(_mk(
                 "World Bank", config.CAT_INTL, "World Bank", title, url, published,
-                summary=n.get("bid_description", ""), full_text=body,
+                summary=f"Проект ВБ: {proj}. {task}".strip(), full_text=body,
                 uid=f"wb:{nid}" if nid else None,
                 meta={"deadline": n.get("submission_deadline_date"),
                       "reference": n.get("bid_reference_no"),
-                      "notice_type": ntype, "project_id": pid,
+                      "notice_type": ntype, "project_id": pid, "project": proj,
+                      "donor": "World Bank",
                       "country": n.get("project_ctry_name")}))
         log.info("World Bank API: %d", len(items))
     except Exception as e:
@@ -499,6 +507,124 @@ def fetch_xtxarid_api(max_items: int | None = None) -> list:
     return items
 
 
+# ─────────────────────────── MangoFetch — агрегатор доноров (публичные страницы стран) ───────────────────────────
+MANGOFETCH_BASE = "https://www.mangofetch.com"
+MANGOFETCH_COUNTRIES = {"Uzbekistan": "UZB", "Kazakhstan": "KAZ", "Kyrgyzstan": "KYR",
+                        "Tajikistan": "TAJ", "Turkmenistan": "TUR"}
+_MF_DONOR_SHORT = {
+    "Asian Development Bank": "ADB", "World Bank": "WB", "Islamic Development Bank": "IsDB",
+    "Asian Infrastructure Investment Bank": "AIIB", "EBRD": "EBRD", "European Union": "EU",
+    "Agence Française de Développement": "AFD", "U.S. Department of State": "US DoS",
+    "UNDP": "UNDP", "UNOPS": "UNOPS", "FAO": "FAO", "ILO": "ILO", "OSCE": "OSCE", "IOM": "IOM",
+    "UNICEF": "UNICEF", "UN-Women": "UNWomen", "UNESCO": "UNESCO", "IAEA": "IAEA",
+    "UN Secretariat": "UN", "UNIDO": "UNIDO", "WHO": "WHO", "WFP": "WFP", "KfW": "KfW", "GIZ": "GIZ"}
+_MF_DATE_FMT = ("%b %d, %Y", "%B %d, %Y", "%Y-%m-%d")
+
+
+def _mf_date(text: str):
+    text = (text or "").strip()
+    for fmt in _MF_DATE_FMT:
+        try:
+            return datetime.strptime(text, fmt).replace(tzinfo=timezone.utc)
+        except ValueError:
+            pass
+    return None
+
+
+def fetch_mangofetch(countries: dict | None = None) -> list:
+    """MangoFetch.com — открытый агрегатор закупок доноров (ВБ, ООН, АБР, ЕБРР, AFD, ЕС…).
+    Главная ценность — АБР: adb.org закрыт для ботов (403), а консалтинг АБР по ЦА —
+    ровно профиль компании (сверка 15.10.2026: 7 открытых извещений АБР по Узбекистану,
+    42 по ЦА, у нас — 0). robots.txt разрешает индексацию страниц, /api/ — нет, его не трогаем.
+    Берём страницы стран (ItemList: до 40 извещений), детали — только по новым (JSON-LD
+    страницы тендера: донор, отрасль, даты, ссылка на оригинал у донора).
+    Дубли с прямыми источниками (UNGM, ВБ, UNDP, IsDB) снимает run.py по похожести названий."""
+    countries = countries or MANGOFETCH_COUNTRIES
+    s = _session()
+    now = datetime.now(timezone.utc)
+    items = []
+    for country, iso in countries.items():
+        try:
+            r = s.get(f"{MANGOFETCH_BASE}/country/{country}", timeout=config.HTTP_TIMEOUT)
+            r.raise_for_status()
+            soup = BeautifulSoup(r.text, "lxml")
+            cards = {}
+            for a in soup.select("a[href^='/tenders/']"):
+                href = a.get("href", "")
+                m = re.fullmatch(r"/tenders/([0-9a-f-]{36})", href)
+                if not m or m.group(1) in cards:
+                    continue
+                card = a
+                for _ in range(4):
+                    if card.parent is not None and len(card.parent.get_text(" ", strip=True)) < 600:
+                        card = card.parent
+                txt = re.sub(r"\s+", " ", card.get_text(" | ", strip=True))
+                cm = re.match(r"(.*?) \| — (.*?) · (.*?) \| · deadline (.*)", txt)
+                if not cm:
+                    continue
+                title, donor, ctry, dl = (x.strip() for x in cm.groups())
+                cards[m.group(1)] = (title, donor, ctry, dl)
+            n = 0
+            for mid, (title, donor, ctry, dl) in cards.items():
+                deadline = _mf_date(dl)
+                if deadline and deadline < now:
+                    continue                                  # закрытые MangoFetch тоже показывает
+                if donor == "World Bank" and country == "Uzbekistan":
+                    continue                                  # ВБ по Узбекистану — прямой API
+                short = _MF_DONOR_SHORT.get(donor, donor.split()[0][:8])
+                items.append(_mk(
+                    f"MangoFetch · {donor}", config.CAT_INTL, "mangofetch.com",
+                    f"[{short}·{iso}] {title}", f"{MANGOFETCH_BASE}/tenders/{mid}", None,
+                    summary=f"Донор: {donor}. Страна: {ctry}. Срок: {dl}.",
+                    full_text=f"{title}. Донор (источник финансирования): {donor}. Страна: {ctry}. Срок подачи: {dl}.",
+                    uid=f"mf:{mid}",
+                    meta={"donor": donor, "country": ctry, "buyer": donor,
+                          "deadline": deadline.strftime("%Y-%m-%d") if deadline else dl,
+                          "mf_url": f"{MANGOFETCH_BASE}/tenders/{mid}", "cross_source": True,
+                          "needs_detail": True}))
+                n += 1
+            log.info("MangoFetch %s: открытых %d (на странице %d)", country, n, len(cards))
+        except Exception as e:
+            log.warning("MangoFetch %s FAIL: %s", country, e)
+    return items
+
+
+def enrich_mangofetch(item: dict) -> None:
+    """Детали тендера MangoFetch (вызывается только для НОВЫХ записей): JSON-LD страницы —
+    дата публикации, отрасль, ссылка на оригинал у донора (её делаем основной ссылкой)."""
+    meta = item.setdefault("meta", {})
+    if not meta.pop("needs_detail", False):
+        return
+    try:
+        r = _session().get(meta.get("mf_url") or item["url"], timeout=config.HTTP_TIMEOUT)
+        soup = BeautifulSoup(r.text, "lxml")
+        for ld in soup.select("script[type='application/ld+json']"):
+            try:
+                data = json.loads(ld.string or "")
+            except Exception:
+                continue
+            for node in (data if isinstance(data, list) else [data]):
+                if isinstance(node, dict) and node.get("@type") == "WebPage":
+                    desc = node.get("description") or ""
+                    pub = _mf_date((node.get("datePublished") or "")[:10])
+                    if pub:
+                        item["published"] = pub
+                        meta["published"] = pub.isoformat()
+                    parts = [x.strip() for x in desc.split("·")]
+                    if len(parts) >= 4:
+                        meta["sector"] = parts[3]
+                    item["summary"] = (item.get("summary") or "") + (f" Отрасль: {meta['sector']}." if meta.get("sector") else "")
+                    item["full_text"] = (item.get("full_text") or "") + f" {desc}"
+        orig = next((a["href"] for a in soup.select("a[href^='http']")
+                     if "mangofetch.com" not in a["href"]
+                     and not any(x in a["href"] for x in ("linkedin.", "wikidata.", "twitter.", "x.com/", "facebook."))), None)
+        if orig:
+            meta["source_url"] = orig
+            item["url"] = orig                          # кнопка «Источник» — сразу к донору
+    except Exception as e:
+        log.warning("MangoFetch детали FAIL %s: %s", item.get("uid"), e)
+
+
 # ─────────────────────────── 6. TenderWeek — ПУБЛИЧНЫЙ листинг ───────────────────────────
 _TW_DATE_RE = re.compile(r"\d{2}[./]\d{2}[./]\d{4}")
 # Рубрики TenderWeek, которые по определению услуги/консалтинг: лоты из них всегда идут
@@ -790,6 +916,12 @@ def collect_all() -> list:
     items += _tally(fetch_tenderweek_public())
     items += _tally(fetch_etender_api())
     items += _tally(fetch_xtxarid_api())
+    items += _tally(fetch_mangofetch())
+    try:
+        import mail_alerts
+        items += _tally(mail_alerts.fetch_mail_alerts())
+    except Exception as e:
+        log.warning("Почтовые рассылки: модуль FAIL: %s", e)
     try:
         from headless import collect_all_headless    # playwright опционален
         items += _tally(collect_all_headless())

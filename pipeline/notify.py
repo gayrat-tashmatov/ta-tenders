@@ -159,6 +159,9 @@ def card(item: dict, a: dict) -> tuple:
     rep = item.get("meta", {}).get("repeat_of")
     if rep:
         facts.append(f"🔁 повтор лота №{esc(str(rep))} от {_short_date(item['meta'].get('repeat_seen')) or '?'}")
+    donor = item.get("meta", {}).get("donor") or item.get("meta", {}).get("agency")
+    if donor and donor not in ("UN",):
+        facts.append(f"🏦 {esc(_trim(str(donor), 40))}")
     if a.get("budget_info"):
         facts.append(f"💰 {esc(_trim(a['budget_info'], 50))}")
     urg = (a.get("urgency") or "").lower()

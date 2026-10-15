@@ -13,6 +13,7 @@ import logging
 from datetime import datetime, timezone
 
 import config
+import dedupe
 from store import Store
 
 log = logging.getLogger("export")
@@ -25,6 +26,26 @@ EXPIRED_KEEP_DAYS = 30    # закрытые тендеры держим ещё 
 
 _MONTHS = {m: i + 1 for i, m in enumerate(
     ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"])}
+
+
+def _hide_intl(r) -> bool:
+    """Международный тендер не для нас: разбор сказал «вне профиля/региона», глобальное
+    извещение ООН («Multiple destinations» без ЦА в названии) или старый разбор ≤ 3 баллов."""
+    try:
+        a = json.loads(r["analysis"] or "{}")
+    except Exception:
+        a = {}
+    if str(a.get("profile_match") or "").lower() in ("нет", "none"):
+        return True
+    if str(a.get("geo") or "").lower() in ("глобальный", "другой_регион"):
+        return True
+    item = {"category": r["category"], "title": r["title"], "summary": r["summary"] or ""}
+    if dedupe.is_off_region(item):
+        return True
+    try:
+        return int(a.get("relevance_score")) <= 3
+    except (TypeError, ValueError):
+        return False
 
 
 def _budget_str(v, origin: str | None = None) -> str | None:
@@ -116,6 +137,8 @@ def export_all(store: Store) -> list:
         # давно закрытые тендеры (дедлайн прошёл > EXPIRED_KEEP_DAYS дней назад) — с сайта долой
         dl = (it.get("deadline") or "")[:10]
         if re.fullmatch(r"\d{4}-\d{2}-\d{2}", dl) and dl < expired_before:
+            continue
+        if it["category"] == config.CAT_INTL and _hide_intl(r):
             continue
         items.append(it)
     items.sort(key=lambda x: x.get("firstSeen") or "", reverse=True)

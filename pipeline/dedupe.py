@@ -183,11 +183,27 @@ def is_goods_procurement(item: dict) -> bool:
     return any(k in title for k in config.GOODS_KEYWORDS)
 
 
+def is_off_profile(item: dict) -> bool:
+    """Тематика, которая никогда не профиль компаний (медицина, вакцины, уборка, вычитка…) —
+    по заголовку тендера, до модели. Только тендерные категории."""
+    if item.get("category") not in (config.CAT_INTL, config.CAT_UZTEND, config.CAT_JOB):
+        return False
+    title = f" {_norm_apos((item.get('title') or '').lower())} "
+    return any(k in title for k in config.OFFPROFILE_KEYWORDS)
+
+
 def is_off_region(item: dict) -> bool:
     """Международное извещение про чужую страну (Африка, ЛатАм, ЮВА…) без нашей."""
     if item.get("category") != config.CAT_INTL:
         return False
-    blob = f"{item.get('title','')} {item.get('summary','')[:600]}".lower()
+    title = (item.get("title") or "").lower()
+    blob = f"{title} {item.get('summary','')[:600]}".lower()
+    # Глобальное извещение ООН («Multiple destinations» в строке UNGM): фильтр страны на UNGM
+    # отдаёт и их, если Узбекистан лишь в списке допустимых стран — вакцины ВОЗ, MENA,
+    # полевые склады ООН (15.10.2026: 81 из 241 извещения UNGM за 60 дней). Оставляем,
+    # только если ЦА названа в самом заголовке.
+    if "multiple destinations" in blob or (item.get("meta") or {}).get("multi_dest"):
+        return not any(k in title for k in config.REGION_KEYWORDS)
     ours = any(k in blob for k in config.REGION_KEYWORDS)
     if ours:
         return False

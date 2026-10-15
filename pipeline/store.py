@@ -10,6 +10,7 @@
 """
 
 import json
+import re
 import sqlite3
 import logging
 from datetime import datetime, timedelta, timezone
@@ -174,6 +175,27 @@ class Store:
              json.dumps(npa_refs, ensure_ascii=False),
              int(notified), dedupe.item_slug(item), _now(), dedupe.tokens_str(item)))
         self.db.commit()
+
+    def similar_tender(self, item: dict, days: int = 120, thr: float = 0.6) -> str | None:
+        """Тот же тендер из ДРУГОГО источника (агрегатор MangoFetch vs UNGM/ВБ/UNDP/IsDB):
+        сходство названий без префикса «[UN·UZB]» ≥ thr. Возвращает uid найденной записи."""
+        def _t(title):
+            return dedupe.tokens(re.sub(r"^\[[^\]]*\]\s*", "", title or ""))
+        mine = _t(item.get("title"))
+        if len(mine) < 3:
+            return None
+        for uid, title in self.db.execute(
+                """SELECT uid, title FROM items WHERE category IN (?, ?)
+                   AND first_seen >= datetime('now', ?) AND origin != ?""",
+                (config.CAT_INTL, config.CAT_UZTEND, f"-{days} days", item.get("origin") or "")):
+            theirs = _t(title)
+            # доля от ДЛИННОГО названия (а не от короткого, как overlap): у настоящих дублей
+            # названия почти совпадают, а «Strengthening … Management Systems» ложно склеивал
+            # PIM АБР с пастбищами ПРООН (15.10)
+            common = len(mine & theirs)
+            if theirs and common >= 3 and common / max(len(mine), len(theirs)) >= thr:
+                return uid
+        return None
 
     def find_repeat(self, item: dict, days: int = 45) -> dict | None:
         """Повторная публикация лота: тот же источник и то же название у ДРУГОГО uid за

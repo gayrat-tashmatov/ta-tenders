@@ -13,6 +13,7 @@ TA Tenders — оркестратор пайплайна.
   → семантический дедуп против истории 14 дней → дубли внутри запуска.
 """
 
+import re
 import sys
 import logging
 import argparse
@@ -57,6 +58,14 @@ def _alert(msg: str):
         notify._send(f"🚨 <b>TA Tenders — сбой</b>\n<pre>{notify.esc(msg[:500])}</pre>")
     except Exception:
         pass
+
+
+def _title_sim(a: str, b: str) -> float:
+    """Сходство названий тендеров без префикса «[UN·UZB]»: доля от длинного."""
+    ta = dedupe.tokens(re.sub(r"^\[[^\]]*\]\s*", "", a or ""))
+    tb = dedupe.tokens(re.sub(r"^\[[^\]]*\]\s*", "", b or ""))
+    common = len(ta & tb)
+    return common / max(len(ta), len(tb)) if ta and tb and common >= 3 else 0.0
 
 
 def _hours_left(it: dict):
@@ -107,13 +116,6 @@ def run(send_telegram: bool = True):
                     continue
 
             it["npa_refs"] = dedupe.extract_npa_refs(it.get("title"), it.get("full_text"))
-            # Акт из RSS lex.uz, который реестр уже знает (пришёл раньше из Telegram или на
-            # другом языке) — это та же карточка, второй не нужно.
-            if (it["category"] == config.CAT_LAW and it.get("meta", {}).get("rss_law")
-                    and it["npa_refs"] and store.npa_lookup(it["npa_refs"])):
-                store.mark_seen(it)
-                mentions_only += 1
-                continue
 
             # Чужой регион (Африка/ЛатАм/ЮВА без упоминания ЦА) — не наш рынок.
             # Отсечённое словарями НЕ помечаем seen: проверка дешёвая (без LLM), а
@@ -126,10 +128,32 @@ def run(send_telegram: bool = True):
             if dedupe.is_goods_procurement(it):
                 goods_skipped += 1
                 continue
+            # Тематика никогда не наша (медицина, вакцины, уборка, вычитка…) — тоже на входе.
+            if dedupe.is_off_profile(it):
+                goods_skipped += 1
+                continue
 
             # Повтор той же записи (тот же uid/URL/текст) — просто пропуск.
             if store.is_seen(it):
                 continue
+            # Акт из RSS lex.uz, который реестр уже знает (пришёл раньше из Telegram или на
+            # другом языке) — это та же карточка, второй не нужно.
+            if (it["category"] == config.CAT_LAW and it.get("meta", {}).get("rss_law")
+                    and it["npa_refs"] and store.npa_lookup(it["npa_refs"])):
+                store.mark_seen(it)
+                mentions_only += 1
+                continue
+            # Агрегатор (MangoFetch) дублирует прямые источники — оставляем только то,
+            # чего у нас нет (в первую очередь АБР). Сверка по названию с базой и с этим прогоном.
+            if it.get("meta", {}).get("cross_source"):
+                dup = store.similar_tender(it) or next(
+                    (f.get("uid") for f in fresh
+                     if not f.get("meta", {}).get("cross_source")
+                     and _title_sim(it["title"], f["title"]) >= 0.6), None)
+                if dup:
+                    store.mark_seen(it)
+                    continue
+                sources.enrich_mangofetch(it)
 
             # НОВАЯ публикация про уже известный акт → упоминание к карточке,
             # не отдельная запись (это и убирает повторы НПА). Только для НОВОСТЕЙ:
@@ -213,12 +237,20 @@ def run(send_telegram: bool = True):
                 final = int(analysis.get("relevance_score"))
             except (TypeError, ValueError):
                 final = score
-            if it["category"] == config.CAT_INTL:
-                final = max(final, score)
-            # TenderWeek: рубрика «Консультационные услуги» / «Финансовые услуги» и т.п. — это
-            # наш профиль по определению, а описание в листинге обрезано (детали за логином),
-            # и модель ставила 6 одинаковым «Консультационные услуги» от ГРП. Не теряем.
-            if it.get("meta", {}).get("consulting_cat"):
+            # Решает РАЗБОР. До 15.10 для международных брался max(разбор, фильтр), а фильтр
+            # ставил всем 7 — так в канал шли вакцины ВОЗ, уборка, вычитка текстов.
+            profile = str(analysis.get("profile_match") or "").lower()
+            geo = str(analysis.get("geo") or "").lower()
+            off_profile = profile in ("нет", "none", "no")
+            off_geo = is_tender and geo in ("глобальный", "другой_регион", "global", "other")
+            if off_profile or off_geo:
+                final = min(final, 3)
+                log.info("вне профиля/региона (%s/%s): %s", profile or "?", geo or "?", it["title"][:60])
+            elif profile == "пограничный":
+                final = min(final, 6)          # на сайт с пометкой, в канал — нет
+            # TenderWeek: рубрика «Консультационные услуги» и т.п. — описание в листинге обрезано
+            # (детали за логином), модель занижает. Пол 7 — только если разбор НЕ сказал «не наш профиль».
+            elif it.get("meta", {}).get("consulting_cat"):
                 final = max(final, config.MIN_SCORE_FOR_NOTIFY)
 
             will_notify = final >= config.MIN_SCORE_FOR_NOTIFY
