@@ -137,6 +137,8 @@ def _track(category: str, analysis: dict, meta: dict, title: str = "") -> str:
         return "expert"
     if meta.get("individual"):
         return "expert"                          # ВБ INDV, карьерные порталы ООН
+    if (title or "").startswith(("[etender]", "[xt-xarid]")):
+        return "company"                         # лот госзакупок — всегда отбор организации, даже если модель сказала «оба»
     aud = str(analysis.get("audience") or "").lower()
     if aud:
         return {"эксперт": "expert", "оба": "both"}.get(aud, "company")

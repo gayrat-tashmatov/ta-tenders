@@ -25,3 +25,4 @@ web/next-env.d.ts
 
 # файл с логинами/паролями порталов — только локально, НЕ в репозиторий
 docs/checklist_topadvisor.xlsx
+web/tsconfig.tsbuildinfo

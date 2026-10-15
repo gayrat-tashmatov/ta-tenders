@@ -296,6 +296,8 @@ def run(send_telegram: bool = True):
 
         log.info("К отправке: %d (LLM-анализов: %d)", len(processed), analyzed)
 
+        if send_telegram:
+            notify.check_expert_chat(store)   # до экспорта — чтобы итог попал в meta.json этого прогона
         new_insight = insights.generate_law_insight(store)
 
         exported = export.export_all(store)
@@ -307,7 +309,6 @@ def run(send_telegram: bool = True):
 
         sent = 0
         if send_telegram:
-            notify.check_expert_chat(store)
             notify.send_morning(store)
             sent = notify.send_report(processed)
             if new_insight:

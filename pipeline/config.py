@@ -7,6 +7,7 @@ TA Tenders — конфигурация пайплайна.
 """
 
 import os
+import re
 from pathlib import Path
 
 try:
@@ -26,7 +27,13 @@ TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT = os.getenv("TELEGRAM_CHAT_ID", "")
 # Личный чат эксперта (Гайрат): позиции для индивидуального консультанта дублируются туда.
 # Узнать id: написать боту /start, затем getUpdates. Пусто — только в канал.
-TELEGRAM_EXPERT_CHAT = os.getenv("TELEGRAM_EXPERT_CHAT_ID", "")
+def _chat_id(raw: str) -> str:
+    """Из значения секрета берём сам id: в секрет часто вставляют всю строку «NAME = 123» (15.10.2026)."""
+    m = re.search(r"-?\d{5,}|@\w{4,}", raw or "")
+    return m.group(0) if m else ""
+
+
+TELEGRAM_EXPERT_CHAT = _chat_id(os.getenv("TELEGRAM_EXPERT_CHAT_ID", ""))
 # Утренняя сводка «Сегодня в кабинете» — один раз в день после этого часа по Ташкенту.
 MORNING_HOUR_TASHKENT = int(os.getenv("MORNING_HOUR_TASHKENT", "7"))
 ANTHROPIC_KEY = os.getenv("ANTHROPIC_API_KEY", "")
