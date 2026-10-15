@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import {
   DIRECTION_LABEL,
   cleanTitle,
@@ -133,6 +133,13 @@ export function Workspace({
 
   const sel = shown.find((t) => t.id === selId) ?? rows.find((t) => t.id === selId) ?? shown[0] ?? null;
   const selS = sel ? my(sel.id) : null;
+  const detailRef = useRef<HTMLElement>(null);
+  // новая позиция — карточка справа с начала (раньше оставалась прокрученной от предыдущей)
+  useEffect(() => {
+    detailRef.current?.scrollTo({ top: 0 });
+    if (mobileDetail) window.scrollTo({ top: 0 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sel?.id]);
 
   useEffect(() => {
     if (initialId) document.getElementById(`row-${initialId}`)?.scrollIntoView({ block: "center" });
@@ -243,7 +250,7 @@ export function Workspace({
         })}
       </section>
 
-      <aside className="ws-detail">
+      <aside className="ws-detail" ref={detailRef}>
         {!sel && <div className="empty">Выберите позицию слева</div>}
         {sel && selS && (
           <article>

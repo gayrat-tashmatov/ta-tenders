@@ -23,7 +23,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <header className="cab-top">
         <div className="cab-top-in">
           <Link href="/app" className="cab-brand">
-            TopAdvisor<span>Tenders</span>
+            Tenders
           </Link>
           <CabNav />
           <div className="cab-me">

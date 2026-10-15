@@ -94,7 +94,7 @@ export default async function TodayPage() {
       <div className="two-col">
         <section className="block">
           <div className="block-head">
-            <h2>Для компаний — TopAdvisor и UNISON</h2>
+            <h2>Для компаний</h2>
             <Link href="/app/tenders?f=new" className="small">все новые ({newCompany.length}) →</Link>
           </div>
           {newCompany.length === 0 && <p className="empty-s">Новых тендеров по профилю нет.</p>}

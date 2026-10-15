@@ -55,8 +55,6 @@ jobs:
           HEALTHCHECK_URL: ${{ secrets.HEALTHCHECK_URL }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-          ALERTS_IMAP_USER: ${{ secrets.ALERTS_IMAP_USER }}   # ящик для рассылок DevelopmentAid и др.
-          ALERTS_IMAP_PASS: ${{ secrets.ALERTS_IMAP_PASS }}   # пароль ПРИЛОЖЕНИЯ этого ящика (не от площадки)
           HEADLESS_ENABLED: "1"
           HEADLESS_ON: "ebrd,ungm"   # xt-xarid — напрямую через JSON-RPC (13.10)
           INSIGHT_EVERY_DAYS: "7"   # недельный регуляторный обзор (ежедневно — раздел «Сегодня» из разборов актов)

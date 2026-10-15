@@ -105,7 +105,8 @@ export async function markSeenNow(scope: string): Promise<ActionResult & { at?: 
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "Сессия истекла — войдите заново" };
   const { error } = await supabase.from("tender_state").upsert(
-    { user_id: user.id, tender_id: SEEN_KEY, status: "meta", note: at, updated_at: at },
+    // status должен быть из списка tender_state_status_check (new|viewed|working|…), «meta» база отвергала
+    { user_id: user.id, tender_id: SEEN_KEY, status: "viewed", note: at, updated_at: at },
     { onConflict: "user_id,tender_id" },
   );
   if (error) return { ok: false, error: `Не сохранилось: ${error.message}` };

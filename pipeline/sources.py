@@ -1066,7 +1066,7 @@ def collect_all() -> list:
     items = []
     items += _tally(fetch_worldbank())
     items += _tally(fetch_ted())
-    items += _tally(fetch_undp())
+    # fetch_undp отключён 15.10.2026: robots.txt procurement-notices.undp.org = Disallow, поток идёт через UNGM
     items += _tally(fetch_isdb())
     items += _tally(fetch_mfi_rss())
     items += _tally(fetch_uzjobs())
@@ -1081,11 +1081,7 @@ def collect_all() -> list:
     except Exception as e:
         log.warning("headless источники недоступны: %s", e)
     items += _tally(fetch_mangofetch())      # после всех прямых (вкл. UNGM headless): сверка дублей в том же прогоне
-    try:
-        import mail_alerts
-        items += _tally(mail_alerts.fetch_mail_alerts())
-    except Exception as e:
-        log.warning("Почтовые рассылки: модуль FAIL: %s", e)
+    # почтовые рассылки (mail_alerts.py) отключены 15.10.2026: DevelopmentAid больше не нужен
     items += _tally(fetch_lexuz())
     items += _tally(fetch_news_rss())
     log.info("ИТОГО собрано: %d элементов", len(items))

@@ -129,6 +129,24 @@ def _buttons(item: dict) -> list:
     return btns
 
 
+_DIR_TG = {"право": "право", "бизнес": "бизнес-консалтинг", "ИТ_цифровизация": "ИТ и цифровизация",
+           "энергетика_климат": "энергетика и климат", "пограничный": "смежное направление"}
+# В канал не пишем, КОМУ подходит (имена и компании) — только направления (15.10.2026)
+_NAMES_RE = re.compile(r"(TopAdvisor|Top Advisor|UNISON(\s+CONSULT)?|BizAdvisor|Гайрат\w*|Ташматов\w*|Tashmatov|Gayrat)", re.I)
+
+
+def _no_names(text: str) -> str | None:
+    """Текст без упоминаний компаний и людей; если без них фраза теряет смысл — None."""
+    if not text:
+        return None
+    if not _NAMES_RE.search(text):
+        return text
+    cleaned = _NAMES_RE.sub("", text)
+    cleaned = re.sub(r"\s+([,.;:])", r"\1", re.sub(r"\s{2,}", " ", cleaned)).strip(" ,;:—-")
+    # «профиль  по бизнес-консалтингу» и т.п. — если осталось меньше половины, не показываем
+    return cleaned if len(cleaned) > 0.6 * len(text) else None
+
+
 def is_expert(item: dict, a: dict) -> bool:
     return item["category"] == config.CAT_JOB or str(a.get("audience") or "").lower() in ("эксперт", "оба")
 
@@ -147,11 +165,12 @@ def act_card(item: dict, a: dict) -> tuple:
     if ch:
         lines.append("\n<b>Что меняется:</b>")
         lines += [f"• {esc(_trim(x, 180))}" for x in ch]
-    if r.get("business_impact"):
-        lines.append(f"\n<b>Бизнесу:</b> {esc(_trim(r['business_impact'], 300))}")
-    opp = [o for o in r.get("opportunities", []) if o.get("for") != "бизнес"][:2]
+    bi = _no_names(r.get("business_impact") or "")
+    if bi:
+        lines.append(f"\n<b>Бизнесу:</b> {esc(_trim(bi, 300))}")
+    opp = [w for w in (_no_names(o.get("what", "")) for o in r.get("opportunities", []) if o.get("for") != "бизнес") if w][:2]
     if opp:
-        lines.append("<b>Нам:</b> " + "; ".join(f"{esc(o['for'])} — {esc(_trim(o['what'], 140))}" for o in opp))
+        lines.append("<b>Возможности:</b> " + "; ".join(esc(_trim(w, 160)) for w in opp))
     proc = [x for x in r.get("expected_procurements", []) if x][:2]
     if proc:
         lines.append("<b>Будут закупать:</b> " + "; ".join(esc(_trim(x, 140)) for x in proc))
@@ -171,9 +190,11 @@ def card(item: dict, a: dict) -> tuple:
         kind = "👤 Для эксперта · " + kind
     lines = [f"{_ICON.get(cat, '•')} <b>{esc(head)}</b>",
              f"<i>{esc(kind)} · {esc(item['origin'])}</i>", ""]
-    why = a.get("profile_reason")
-    if why:
-        lines.append(f"<b>Почему нам:</b> {esc(_trim(why, 220))}")
+    direction = _DIR_TG.get(str(a.get("profile_match") or ""))
+    why = _no_names(a.get("profile_reason") or "")
+    if direction or why:
+        head_dir = f"<b>Подходит по направлению:</b> {esc(direction)}" if direction else "<b>Подходит:</b>"
+        lines.append(head_dir + (f" — {esc(_trim(why, 200))}" if why else ""))
 
     # КТО и ЧТО
     who = a.get("target_entity")
@@ -209,9 +230,9 @@ def card(item: dict, a: dict) -> tuple:
         lines.append(" · ".join(facts))
 
     # ЗАЧЕМ НАМ и ЧТО ДЕЛАТЬ
-    rec = a.get("consulting_recommendation")
+    rec = _no_names(a.get("consulting_recommendation") or "")
     if rec and rec != "Изучить условия":
-        lines.append(f"\n<b>Зачем нам:</b> {esc(_trim(rec, 260))}")
+        lines.append(f"\n<b>Что предложить:</b> {esc(_trim(rec, 260))}")
     elig = a.get("eligibility")
     if elig:
         lines.append(f"<b>Требования:</b> {esc(_trim(elig, 200))}")

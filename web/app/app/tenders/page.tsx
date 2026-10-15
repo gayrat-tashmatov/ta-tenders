@@ -8,7 +8,7 @@ export default function TendersPage({ searchParams }: { searchParams: Promise<{ 
     <WorkspacePage
       track="company"
       title="Тендеры для компаний"
-      subtitle="TopAdvisor и UNISON: отбор фирм, госзакупки услуг, донорские проекты."
+      subtitle="Отбор фирм, госзакупки услуг, донорские проекты."
       searchParams={searchParams}
     />
   );
