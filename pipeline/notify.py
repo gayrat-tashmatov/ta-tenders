@@ -25,13 +25,14 @@ def esc(s) -> str:
     return html.escape(str(s or ""))
 
 
-def _send(text: str, buttons=None) -> bool:
-    """buttons — список (label, url)."""
-    if not (config.TELEGRAM_TOKEN and config.TELEGRAM_CHAT):
+def _send(text: str, buttons=None, chat: str | None = None) -> bool:
+    """buttons — список (label, url); chat — другой чат (по умолчанию канал)."""
+    chat = chat or config.TELEGRAM_CHAT
+    if not (config.TELEGRAM_TOKEN and chat):
         log.warning("Telegram: нет токена/чата — пропуск отправки")
         return False
     payload = {
-        "chat_id": config.TELEGRAM_CHAT,
+        "chat_id": chat,
         "text": text[:4096],
         "parse_mode": "HTML",
         "link_preview_options": '{"is_disabled": true}',
@@ -115,7 +116,8 @@ def _buttons(item: dict) -> list:
     btns = []
     if config.SITE_BASE_URL:
         slug = dedupe.item_slug(item)
-        btns.append(("Разбор в кабинете", f"{config.SITE_BASE_URL}/t/{slug}"))
+        path = "law" if item.get("category") == config.CAT_LAW else "item"
+        btns.append(("Разбор в кабинете", f"{config.SITE_BASE_URL}/app/{path}/{slug}"))
     meta = item.get("meta") or {}
     if meta.get("portal_only"):
         num = str(meta.get("number") or "")[:25]
@@ -127,15 +129,51 @@ def _buttons(item: dict) -> list:
     return btns
 
 
+def is_expert(item: dict, a: dict) -> bool:
+    return item["category"] == config.CAT_JOB or str(a.get("audience") or "").lower() in ("эксперт", "оба")
+
+
+def act_card(item: dict, a: dict) -> tuple:
+    """Карточка закона: суть, что меняется, что это даёт — и кому из нас это работа."""
+    r = a["act"]
+    imp = {"высокая": "⚖️❗", "средняя": "⚖️"}.get(r.get("importance"), "⚖️")
+    head = r.get("title_ru") or _headline(item, a)
+    sub = " · ".join(x for x in (r.get("act_type"), r.get("number") and f"№ {r['number']}",
+                                  r.get("effective") and f"в силу {_short_date(r['effective'])}") if x)
+    lines = [f"{imp} <b>{esc(_trim(head, 160))}</b>", f"<i>{esc(sub)}</i>", ""]
+    if r.get("essence"):
+        lines.append(esc(_trim(r["essence"], 420)))
+    ch = [x for x in r.get("key_changes", []) if x][:3]
+    if ch:
+        lines.append("\n<b>Что меняется:</b>")
+        lines += [f"• {esc(_trim(x, 180))}" for x in ch]
+    if r.get("business_impact"):
+        lines.append(f"\n<b>Бизнесу:</b> {esc(_trim(r['business_impact'], 300))}")
+    opp = [o for o in r.get("opportunities", []) if o.get("for") != "бизнес"][:2]
+    if opp:
+        lines.append("<b>Нам:</b> " + "; ".join(f"{esc(o['for'])} — {esc(_trim(o['what'], 140))}" for o in opp))
+    proc = [x for x in r.get("expected_procurements", []) if x][:2]
+    if proc:
+        lines.append("<b>Будут закупать:</b> " + "; ".join(esc(_trim(x, 140)) for x in proc))
+    return "\n".join(lines), _buttons(item)
+
+
 def card(item: dict, a: dict) -> tuple:
     """Структурная карточка: с первого взгляда понятно КТО объявил, ЧТО нужно,
     ЗАЧЕМ это нам, СРОКИ и ЧТО ДЕЛАТЬ. Детали — в кабинете."""
+    if item["category"] == config.CAT_LAW and a.get("act"):
+        return act_card(item, a)
     head = _headline(item, a)
     cat = item["category"]
     kind = {config.CAT_INTL: "Международный тендер", config.CAT_UZTEND: "Тендер · Узбекистан",
             config.CAT_LAW: "Новый НПА", config.CAT_JOB: "Позиция эксперта"}.get(cat, "Материал")
+    if is_expert(item, a):
+        kind = "👤 Для эксперта · " + kind
     lines = [f"{_ICON.get(cat, '•')} <b>{esc(head)}</b>",
              f"<i>{esc(kind)} · {esc(item['origin'])}</i>", ""]
+    why = a.get("profile_reason")
+    if why:
+        lines.append(f"<b>Почему нам:</b> {esc(_trim(why, 220))}")
 
     # КТО и ЧТО
     who = a.get("target_entity")
@@ -204,29 +242,32 @@ def digest(rows: list, category: str) -> str:
 def send_report(processed: list) -> int:
     """processed — [{item, score, analysis}]. Возвращает число отправленных сообщений."""
     if not processed:
-        _send("🟢 <b>TA Tenders</b>\nНовых релевантных материалов не найдено.")
-        return 0
+        return 0          # пустые прогоны в канал не пишем (9 прогонов в день = 9 «ничего нет»)
 
     cat_of = lambda p: p["item"]["category"]
     by_score = lambda p: -(p["analysis"].get("relevance_score") or p.get("score") or 0)
+    # позиции экспертов — полноценными карточками (раньше уходили одной строкой в сводке)
     tenders_law = [p for p in processed
-                   if cat_of(p) in (config.CAT_INTL, config.CAT_UZTEND, config.CAT_LAW)]
-    jobs = sorted([p for p in processed if cat_of(p) == config.CAT_JOB], key=by_score)
+                   if cat_of(p) in (config.CAT_INTL, config.CAT_UZTEND, config.CAT_LAW, config.CAT_JOB)]
+    jobs = []
     news = sorted([p for p in processed if cat_of(p) == config.CAT_NEWS], key=by_score)
 
     header = (f"🔔 <b>TA Tenders</b> — {time.strftime('%d.%m.%Y')}\n"
               f"Тендеры/НПА: <b>{len(tenders_law)}</b> · Позиции: <b>{len(jobs)}</b> · "
               f"Новости: <b>{len(news)}</b>")
-    hdr_btn = [("Все тендеры на сайте", config.SITE_BASE_URL)] if config.SITE_BASE_URL else None
-    _send(header, hdr_btn)
-    time.sleep(SEND_GAP)
+    hdr_btn = [("Открыть «Сегодня»", f"{config.SITE_BASE_URL}/app")] if config.SITE_BASE_URL else None
+    if len(processed) >= 3:
+        _send(header, hdr_btn)
+        time.sleep(SEND_GAP)
 
     sent = 0
-    order = {config.CAT_INTL: 0, config.CAT_UZTEND: 1, config.CAT_LAW: 2}
+    order = {config.CAT_INTL: 0, config.CAT_UZTEND: 1, config.CAT_JOB: 2, config.CAT_LAW: 3}
     for p in sorted(tenders_law, key=lambda x: (order.get(cat_of(x), 9), by_score(x))):
         text, buttons = card(p["item"], p["analysis"])
         if _send(text, buttons):
             sent += 1
+        if config.TELEGRAM_EXPERT_CHAT and is_expert(p["item"], p["analysis"]):
+            _send(text, buttons, chat=config.TELEGRAM_EXPERT_CHAT)
         time.sleep(SEND_GAP)
 
     if jobs:
@@ -240,15 +281,70 @@ def send_report(processed: list) -> int:
 
 
 def send_insight(insight: dict) -> bool:
-    """Анонс нового аналитического дайджеста с кнопкой на сайт."""
-    text = (f"📊 <b>{esc(insight.get('title', 'Регуляторный дайджест'))}</b>\n\n"
-            f"{esc(_trim(insight.get('lead', ''), 500))}")
+    """Анонс недельного регуляторного обзора: лид, 3 главных акта и что делать."""
+    lines = [f"📊 <b>Обзор недели: {esc(insight.get('title', 'регуляторные изменения'))}</b>", "",
+             esc(_trim(insight.get("lead", ""), 600))]
+    top = insight.get("top_acts") or []
+    if top:
+        lines.append("\n<b>Главное:</b>")
+        for t in top[:3]:
+            lines.append(f"• <b>{esc(_trim(t.get('title', ''), 120))}</b> — {esc(_trim(t.get('action', ''), 160))}")
+    pipe = insight.get("pipeline") or []
+    if pipe:
+        lines.append(f"\n<b>Ожидаемые закупки:</b> {len(pipe)} — список в обзоре")
     buttons = []
     if config.SITE_BASE_URL and insight.get("id"):
-        buttons.append(("Читать разбор", f"{config.SITE_BASE_URL}/analytics/{insight['id']}"))
-    return _send(text, buttons or None)
+        buttons.append(("Читать обзор", f"{config.SITE_BASE_URL}/app/analytics/{insight['id']}"))
+    return _send("\n".join(lines), buttons or None)
 
 
 def send_test() -> bool:
     return _send("✅ <b>TA Tenders</b> — тест связи. HTML работает: "
                  "&lt;цена&gt; 1.000.000 сум (100%).")
+
+
+def send_morning(store) -> bool:
+    """«Сегодня в кабинете» — один раз в день после MORNING_HOUR_TASHKENT: что нового за сутки
+    по трём трекам, лучшее по каждому и ближайшие сроки. Это повод открыть кабинет утром."""
+    from datetime import datetime, timedelta, timezone
+    now_tk = datetime.now(timezone.utc) + timedelta(hours=5)
+    today = now_tk.strftime("%Y-%m-%d")
+    if now_tk.hour < config.MORNING_HOUR_TASHKENT or store.kv_get("morning_sent") == today:
+        return False
+    since = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
+    rows = store.db.execute(
+        "SELECT * FROM items WHERE first_seen >= ? AND category != ? ORDER BY score DESC", (since, config.CAT_NEWS)).fetchall()
+    def an(r):
+        try:
+            return json.loads(r["analysis"] or "{}")
+        except Exception:
+            return {}
+    comp, exp, acts = [], [], []
+    for r in rows:
+        a = an(r)
+        if r["category"] == config.CAT_LAW:
+            if (a.get("act") or {}).get("importance") in ("высокая", "средняя"):
+                acts.append((r, a))
+        elif (r["score"] or 0) >= 7 and str(a.get("profile_match") or "") != "нет":
+            (exp if str(a.get("audience") or "") in ("эксперт", "оба") or r["category"] == config.CAT_JOB else comp).append((r, a))
+    if not (comp or exp or acts):
+        store.kv_set("morning_sent", today)
+        return False
+    def line(r, a):
+        return f"• {esc(_trim(a.get('title_ru') or _strip_tag(r['title']), 110))}"
+    out = [f"☀️ <b>Сегодня в кабинете</b> — {now_tk.strftime('%d.%m')}", ""]
+    if comp:
+        out.append(f"<b>Для компаний:</b> {len(comp)}")
+        out += [line(r, a) for r, a in comp[:3]]
+    if exp:
+        out.append(f"\n<b>👤 Для эксперта:</b> {len(exp)}")
+        out += [line(r, a) for r, a in exp[:3]]
+    if acts:
+        imp = sum(1 for _, a in acts if a["act"].get("importance") == "высокая")
+        out.append(f"\n<b>⚖️ Законодательство:</b> {len(acts)} актов с разбором, из них важных {imp}")
+        out += [f"• {esc(_trim(a['act'].get('title_ru') or r['title'], 110))}" for r, a in acts[:2]]
+    btn = [("Открыть «Сегодня»", f"{config.SITE_BASE_URL}/app")] if config.SITE_BASE_URL else None
+    ok = _send("\n".join(out), btn)
+    if ok:
+        store.kv_set("morning_sent", today)
+    return ok

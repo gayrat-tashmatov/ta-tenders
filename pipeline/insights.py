@@ -49,71 +49,76 @@ def should_generate(store: Store) -> bool:
     return len(_law_items(store, config.INSIGHT_LOOKBACK_DAYS)) >= config.INSIGHT_MIN_LAW_ITEMS
 
 
-def _call_model(prompt: str):
-    """MODEL_INSIGHT → при любой ошибке MODEL_ANALYZE."""
-    client = llm._anthropic()
-    for model in (config.MODEL_INSIGHT, config.MODEL_ANALYZE):
-        try:
-            resp = client.messages.create(
-                model=model, max_tokens=8096,
-                messages=[{"role": "user", "content": prompt}])
-            data = llm._extract_json(llm._resp_text(resp))
-            if isinstance(data, dict) and data.get("title") and data.get("sections"):
-                log.info("Инсайт сгенерирован моделью %s", model)
-                return data
-            log.warning("Инсайт: модель %s вернула неожиданный формат", model)
-        except Exception as e:
-            log.warning("Инсайт: модель %s FAIL: %s", model, e)
-    return None
+def _weekly_model(prompt: str) -> dict | None:
+    """Недельный обзор: Opus 5.5, JSON по схеме; отказ классификатора — серверная замена модели."""
+    try:
+        # длинный ответ → потоковый режим (иначе SDK отказывается: «Streaming is required…»)
+        with llm._anthropic().beta.messages.stream(
+                model=config.MODEL_INSIGHT, max_tokens=32000,
+                output_config={"effort": "high",
+                               "format": {"type": "json_schema", "schema": config.WEEKLY_SCHEMA}},
+                betas=["server-side-fallback-2026-07-01"], extra_body={"fallbacks": "default"},
+                messages=[{"role": "user", "content": prompt}]) as stream:
+            resp = stream.get_final_message()
+        if resp.stop_reason == "refusal":
+            log.warning("Обзор: отказ модели")
+            return None
+        return json.loads(next(b.text for b in resp.content if b.type == "text"))
+    except Exception as e:
+        log.warning("Обзор: модель %s FAIL: %s", config.MODEL_INSIGHT, e)
+        return None
 
 
 def generate_law_insight(store: Store, force: bool = False) -> dict | None:
-    """Возвращает созданный инсайт (или None)."""
+    """Недельный регуляторный обзор из РАЗБОРОВ актов (analysis.act), а не из сырых заголовков."""
     if not config.ANTHROPIC_KEY:
-        log.info("Инсайт: нет ANTHROPIC_API_KEY — пропуск")
+        log.info("Обзор: нет ANTHROPIC_API_KEY — пропуск")
         return None
     if not force and not should_generate(store):
-        log.info("Инсайт: условия не выполнены (рано или мало актов) — пропуск")
+        log.info("Обзор: рано (раз в %d дн) или мало актов — пропуск", config.INSIGHT_EVERY_DAYS)
         return None
-
     items = _law_items(store, config.INSIGHT_LOOKBACK_DAYS)
-    if not items:
-        log.info("Инсайт: нет актов за период")
+    order = {"высокая": 0, "средняя": 1, "низкая": 2}
+    acts = []
+    for it in items:
+        try:
+            a = json.loads(it["analysis"] or "{}").get("act")
+        except Exception:
+            a = None
+        if not a:
+            continue
+        acts.append({"act": a.get("number") or it["title"][:60], "type": a.get("act_type"),
+                     "title": a.get("title_ru"), "importance": a.get("importance"),
+                     "effective": a.get("effective"), "spheres": a.get("spheres"),
+                     "essence": a.get("essence"), "key_changes": a.get("key_changes"),
+                     "business_impact": a.get("business_impact"), "obligations": a.get("obligations"),
+                     "opportunities": a.get("opportunities"),
+                     "expected_procurements": a.get("expected_procurements"),
+                     "_item": it["id"], "_url": it["url"]})
+    acts.sort(key=lambda x: order.get(x.get("importance") or "", 3))
+    if len(acts) < config.INSIGHT_MIN_LAW_ITEMS:
+        log.info("Обзор: разобранных актов за период %d — мало", len(acts))
         return None
-
-    acts_blob = []
-    for it in items[:40]:
-        refs = json.loads(it["npa_refs"] or "[]")
-        refs_h = ", ".join(r for r in refs if not r.startswith("LEX")) or \
-            ", ".join(refs) or "реквизит не распознан"
-        acts_blob.append(f"- [{refs_h}] {it['title']}\n  Текст: {(it['full_text'] or '')[:500]}\n"
-                         f"  Ссылка: {it['url']}")
     period = _fmt_period(config.INSIGHT_LOOKBACK_DAYS)
-    prompt = config.INSIGHT_PROMPT.format(period=period, acts="\n".join(acts_blob))
-
-    data = _call_model(prompt)
+    payload = [{k: v for k, v in a.items() if not k.startswith("_")} for a in acts[:45]]
+    data = _weekly_model(config.WEEKLY_PROMPT.format(
+        period=period, company_profile=config.COMPANY_PROFILE,
+        acts=json.dumps(payload, ensure_ascii=False)))
     if not data:
         return None
-
-    # Ссылки на первоисточники для блока «Источники» на странице дайджеста
-    sources = []
-    for it in items[:40]:
-        refs = [r for r in json.loads(it["npa_refs"] or "[]") if not r.startswith("LEX")]
-        sources.append({"keys": refs, "title": it["title"][:180],
-                        "url": it["url"], "itemId": it["id"]})
-
+    sources = [{"keys": [a["act"]], "title": a.get("title") or "", "url": a["_url"], "itemId": a["_item"],
+                "importance": a.get("importance")} for a in acts[:45]]
     now = datetime.now(timezone.utc)
-    insight_id = f"law-{now.strftime('%Y-%m-%d')}"
+    insight_id = f"law-week-{now.strftime('%Y-%m-%d')}"
+    body = {k: data.get(k, []) for k in ("top_acts", "sections", "for_business", "opportunities",
+                                         "pipeline", "calendar")}
+    body["format"] = "weekly-v2"
     store.db.execute(
         "INSERT OR REPLACE INTO insights(id, kind, title, lead, body, sources, period, created) "
         "VALUES (?,?,?,?,?,?,?,?)",
         (insight_id, "law", data.get("title", ""), data.get("lead", ""),
-         json.dumps({"sections": data.get("sections", []),
-                     "business_impact": data.get("business_impact", []),
-                     "how_to_prepare": data.get("how_to_prepare", [])},
-                    ensure_ascii=False),
-         json.dumps(sources, ensure_ascii=False),
+         json.dumps(body, ensure_ascii=False), json.dumps(sources, ensure_ascii=False),
          period, now.isoformat(timespec="seconds")))
     store.db.commit()
-    log.info("Инсайт сохранён: %s — %s", insight_id, data.get("title", "")[:80])
+    log.info("Обзор сохранён: %s — %s (актов %d)", insight_id, data.get("title", "")[:80], len(acts))
     return {"id": insight_id, **data}

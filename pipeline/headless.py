@@ -220,6 +220,10 @@ def _ungm_rows(page) -> list:
     }""")
 
 
+_ISO3 = {"Uzbekistan": "UZB", "Kazakhstan": "KAZ", "Kyrgyzstan": "KGZ", "Tajikistan": "TJK",
+         "Turkmenistan": "TKM"}   # «TUR» модель принимала за Турцию (15.10.2026)
+
+
 def _collect_ungm(ctx, mk, region_match, max_items) -> list:
     """UNGM (вся система ООН: ПРООН, МОТ, IOM, FAO, ЮНИСЕФ, WFP…):
     для каждой страны из UNGM_COUNTRIES — выбрать её в фильтре, нажать Search,
@@ -310,7 +314,7 @@ def _collect_ungm(ctx, mk, region_match, max_items) -> list:
                 m_dl = re.search(r"\b(\d{1,2}[-–][A-Za-z]{3}[-–]\d{4})\b", r["text"])
                 items.append(mk(
                     f"UNGM · {agency}", config.CAT_INTL, "ungm.org",
-                    f"[UN·{country[:3].upper()}] {title[:230]}",
+                    f"[UN·{_ISO3.get(country, country[:3].upper())}] {title[:230]}",
                     f"https://www.ungm.org{r['href']}", None,
                     summary=" · ".join(lines[:6])[:700], full_text=r["text"][:2500],
                     uid=f"ungm:{nid}",

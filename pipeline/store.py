@@ -246,6 +246,17 @@ class Store:
                 (origin, now, int(n), last_nz, total))
         self.db.commit()
 
+    # ─────────────── Служебные отметки (утренняя сводка и т.п.) ───────────────
+    def kv_get(self, key: str):
+        self.db.execute("CREATE TABLE IF NOT EXISTS kv (key TEXT PRIMARY KEY, value TEXT)")
+        row = self.db.execute("SELECT value FROM kv WHERE key=?", (key,)).fetchone()
+        return row[0] if row else None
+
+    def kv_set(self, key: str, value: str):
+        self.db.execute("CREATE TABLE IF NOT EXISTS kv (key TEXT PRIMARY KEY, value TEXT)")
+        self.db.execute("INSERT OR REPLACE INTO kv(key, value) VALUES (?, ?)", (key, value))
+        self.db.commit()
+
     def stats(self) -> dict:
         c = self.db.execute
         return {

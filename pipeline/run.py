@@ -178,7 +178,7 @@ def run(send_telegram: bool = True):
 
         if not fresh:
             if send_telegram:
-                notify._send("🟢 <b>TA Tenders</b>\nНовых материалов нет.")
+                notify.send_morning(store)      # пустой прогон: только утренняя сводка, если пора
             export.export_all(store)
             _ping()
             return
@@ -195,15 +195,23 @@ def run(send_telegram: bool = True):
         fresh = other_part + dedupe.dedup_within_run(news_part)
         log.info("После дедупа новостей внутри запуска: %d из %d", len(fresh), before)
 
-        processed, analyzed = [], 0
+        processed, analyzed, acts_reviewed = [], 0, 0
         # Тендеры/НПА/вакансии — на сайт ВСЕ (оценка влияет только на Telegram и
         # порядок). Разбор LLM получают релевантные (score ≥ MIN_SCORE_FOR_DEEP)
         # и, отдельно, все тендеры в пределах бюджета анализов.
         for it in sorted(fresh, key=lambda x: -x.get("score", 0)):
             score = it.get("score", 0)
             is_tender = it["category"] in (config.CAT_INTL, config.CAT_UZTEND, config.CAT_JOB)
-            want_deep = (score >= config.MIN_SCORE_FOR_DEEP or is_tender) \
-                and analyzed < config.ANALYZE_MAX
+            is_act = it["category"] == config.CAT_LAW
+            if is_act:
+                # Акт: разбор по ПОЛНОМУ тексту (Opus 5.5). Законы, указы, постановления Президента
+                # и Кабмина — всегда (фильтр по заголовку ставил указу о СЭЗ «Сурхон-Агро» 3 балла);
+                # ведомственные — если фильтр счёл значимыми.
+                want_deep = (dedupe.is_major_act(it) or score >= config.ACT_MIN_FILTER_SCORE) \
+                    and acts_reviewed < config.ACT_REVIEW_MAX
+            else:
+                want_deep = (score >= config.MIN_SCORE_FOR_DEEP or is_tender) \
+                    and analyzed < config.ANALYZE_MAX
             if not want_deep:
                 store.save_item(it, score, None, it["npa_refs"], notified=False)
                 if it["category"] == config.CAT_LAW and it["npa_refs"]:
@@ -219,13 +227,23 @@ def run(send_telegram: bool = True):
 
             # Полный текст страницы для глубокого анализа (news, UNGM, UNDP, uzjobs):
             # снippet'а мало — дотягиваем статью/извещение, как делал v4.
-            if len(it.get("full_text") or "") < 700:
+            if not is_act and len(it.get("full_text") or "") < 700:
                 page_text = sources.fetch_full_page_text(it.get("url", ""))
                 if len(page_text) > len(it.get("full_text") or ""):
                     it["full_text"] = page_text
 
-            analysis = llm.analyze(it)
-            analyzed += 1
+            analysis = None
+            if is_act:
+                kind, payload = sources.fetch_act_text(it.get("url", ""))
+                review = llm.review_act(it, kind, payload)
+                acts_reviewed += 1
+                if review:
+                    analysis = llm.act_to_analysis(review)
+                    log.info("акт разобран (%s, %s): %s", review.get("importance"), kind or "реквизиты",
+                             review.get("title_ru", "")[:60])
+            if analysis is None:
+                analysis = llm.analyze(it)
+                analyzed += 1
             # реквизит, который нашла модель, но пропустил regex
             extra_ref = analysis.get("npa_ref")
             if extra_ref:
@@ -288,6 +306,7 @@ def run(send_telegram: bool = True):
 
         sent = 0
         if send_telegram:
+            notify.send_morning(store)
             sent = notify.send_report(processed)
             if new_insight:
                 notify.send_insight(new_insight)

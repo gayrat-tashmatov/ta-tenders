@@ -32,7 +32,7 @@ export default function HealthPage() {
   const health = meta.health ?? [];
   const updated = meta.updatedAt ? new Date(meta.updatedAt) : null;
   return (
-    <main className="container cab-section">
+    <div className="page">
       <h1 className="page-title">Здоровье источников</h1>
       <p className="page-sub">
         Что и когда отдал каждый источник в последнем прогоне. Ноль у источника,
@@ -72,6 +72,6 @@ export default function HealthPage() {
           </table>
         </div>
       )}
-    </main>
+    </div>
   );
 }

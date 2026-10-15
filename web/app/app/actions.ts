@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { isDemo, supabaseServer } from "@/lib/supabase/server";
+import { SEEN_KEY } from "@/lib/cabinet";
 
 export type ActionResult = { ok: boolean; error?: string };
 
@@ -41,7 +42,7 @@ async function upsertState(
   });
   if (logErr) console.warn("activity_log insert failed:", logErr.message);
 
-  revalidatePath("/app");
+  revalidatePath("/app", "layout");
   return { ok: true };
 }
 
@@ -91,4 +92,26 @@ export async function markAllViewed(
   });
   revalidatePath("/app");
   return { ok: true, count: tenderIds.length };
+}
+
+/** «Отметить всё просмотренным»: одна отметка времени вместо строки на каждый тендер.
+ *  Всё, что появилось до неё и не имеет своего статуса, больше не считается новым. */
+export async function markSeenNow(scope: string): Promise<ActionResult & { at?: string }> {
+  const at = new Date().toISOString();
+  if (isDemo()) return { ok: true, at };
+  const supabase = await supabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Сессия истекла — войдите заново" };
+  const { error } = await supabase.from("tender_state").upsert(
+    { user_id: user.id, tender_id: SEEN_KEY, status: "meta", note: at, updated_at: at },
+    { onConflict: "user_id,tender_id" },
+  );
+  if (error) return { ok: false, error: `Не сохранилось: ${error.message}` };
+  await supabase.from("activity_log").insert({
+    user_id: user.id, tender_id: "*", tender_title: scope, action: "mark_all_viewed", value: at,
+  });
+  revalidatePath("/app", "layout");
+  return { ok: true, at };
 }

@@ -109,7 +109,51 @@ def _row_to_item(r) -> dict:
         "contact": analysis.get("contact_suggestion"),
         "urgency": analysis.get("urgency"),
         "summary": r["summary"],
+        # 15.10.2026: профиль, аудитория, донор, разбор акта
+        "direction": analysis.get("profile_match") or _legacy_direction(r),   # право|бизнес|ИТ_цифровизация|энергетика_климат|пограничный|нет
+        "whyUs": analysis.get("profile_reason"),
+        "geo": analysis.get("geo") or meta.get("country"),
+        "track": _track(r["category"], analysis, meta, r["title"]),       # company|expert|both|law|news
+        "donor": meta.get("donor") or meta.get("agency"),
+        "act": analysis.get("act"),                           # структурированный разбор НПА (Opus 5.5)
     }
+
+
+def _legacy_direction(r) -> str | None:
+    """Старые записи без разметки: явно чужая тема (медицина, уборка…) → «нет»."""
+    if r["category"] not in (config.CAT_INTL, config.CAT_UZTEND, config.CAT_JOB):
+        return None
+    if dedupe.is_off_profile({"category": r["category"], "title": r["title"]}):
+        return "нет"
+    return None
+
+
+def _track(category: str, analysis: dict, meta: dict, title: str = "") -> str:
+    if category == config.CAT_LAW:
+        return "law"
+    if category == config.CAT_NEWS:
+        return "news"
+    if category == config.CAT_JOB:
+        return "expert"
+    if meta.get("individual"):
+        return "expert"                          # ВБ INDV, карьерные порталы ООН
+    aud = str(analysis.get("audience") or "").lower()
+    if aud:
+        return {"эксперт": "expert", "оба": "both"}.get(aud, "company")
+    if meta.get("number") and category == config.CAT_UZTEND and "etender" in str(meta.get("mf_url") or "") + str(title)[:10]:
+        return "company"
+    if title.startswith(("[etender]", "[xt-xarid]")):
+        return "company"                       # лоты госзакупок — всегда отбор исполнителя-организации
+    return "expert" if _EXPERT_RE.search(title or "") and not _FIRM_RE.search(title or "") else "company"
+
+
+# Старые записи без поля audience: индивидуальная позиция или отбор фирм — по названию.
+_EXPERT_RE = re.compile(
+    r"individual consultant|national consultant|international consultant|\bconsultant\b|\bexpert\b|"
+    r"specialist|coordinator|team leader|\bpiu\b|\bic[- ]?\d|external collaborator|"
+    r"индивидуальн\w* консультант|консультант\b|эксперт(?!из)|специалист|координатор|"
+    r"mutaxassis|maslahatchi|ekspert(?!iz)|koordinator", re.I)
+_FIRM_RE = re.compile(r"consulting firm|\bfirms?\b|qcbs|\bcqs\b|\blcs\b|\bqbs\b|компани|фирм|организаци", re.I)
 
 
 def export_all(store: Store) -> list:
@@ -170,6 +214,13 @@ def export_all(store: Store) -> list:
                     "sections": body.get("sections", []),
                     "businessImpact": body.get("business_impact", []),
                     "howToPrepare": body.get("how_to_prepare", []),
+                    # недельный обзор v2 (15.10.2026)
+                    "format": body.get("format", "legacy"),
+                    "topActs": body.get("top_acts", []),
+                    "forBusiness": body.get("for_business", []),
+                    "opportunities": body.get("opportunities", []),
+                    "pipeline": body.get("pipeline", []),
+                    "calendar": body.get("calendar", []),
                     "sources": json.loads(r["sources"] or "[]")})
 
     stats = store.stats()

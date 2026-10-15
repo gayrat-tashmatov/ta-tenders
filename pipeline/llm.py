@@ -146,3 +146,62 @@ def analyze(item: dict) -> dict:
     except Exception as e:
         log.warning("LLM-анализ FAIL: %s", e)
         return _fallback(item)
+
+
+# ─────────────────────────── Разбор акта (Opus 5.5, полный текст или PDF-скан) ───────────────────────────
+_IMPORTANCE_SCORE = {"высокая": 8, "средняя": 6, "низкая": 4}
+
+
+def review_act(item: dict, kind: str | None, payload) -> dict | None:
+    """Структурированный разбор акта. kind: 'text' | 'pdf' | None (тогда — по реквизитам из RSS).
+    JSON гарантирован схемой (output_config.format). Отказ модели → None."""
+    if not config.ANTHROPIC_KEY:
+        return None
+    import base64
+    meta = item.get("meta") or {}
+    prompt = config.ACT_REVIEW_PROMPT.format(
+        company_profile=config.COMPANY_PROFILE,
+        meta=f"{item.get('title','')} | {meta.get('act_info') or item.get('summary','')[:300]} | {item.get('url','')}")
+    content = []
+    if kind == "pdf":
+        content.append({"type": "document", "source": {"type": "base64", "media_type": "application/pdf",
+                                                       "data": base64.b64encode(payload).decode()}})
+        content.append({"type": "text", "text": prompt})
+    elif kind == "text":
+        content.append({"type": "text", "text": prompt + "\n\nТЕКСТ АКТА:\n" + str(payload)[:40000]})
+    else:
+        content.append({"type": "text", "text": prompt + "\n\nПолного текста нет — разбери по реквизитам, "
+                        "importance не выше «средняя», списки оставь пустыми, если данных нет."})
+    try:
+        resp = _anthropic().beta.messages.create(
+            model=config.MODEL_ACT, max_tokens=16000,
+            output_config={"effort": "medium",
+                           "format": {"type": "json_schema", "schema": config.ACT_REVIEW_SCHEMA}},
+            betas=["server-side-fallback-2026-07-01"],
+            extra_body={"fallbacks": "default"},     # отказ классификатора → модель-замена на сервере
+            messages=[{"role": "user", "content": content}])
+        if resp.stop_reason == "refusal":
+            log.warning("Разбор акта: отказ модели (%s)", getattr(resp.stop_details, "category", None))
+            return None
+        data = json.loads(next(b.text for b in resp.content if b.type == "text"))
+        data["source_kind"] = kind or "meta"
+        return data
+    except Exception as e:
+        log.warning("Разбор акта FAIL %s: %s", item.get("uid"), e)
+        return None
+
+
+def act_to_analysis(review: dict) -> dict:
+    """Разбор акта → поля карточки (совместимо с остальным сайтом) + сам разбор в analysis['act']."""
+    imp = review.get("importance") or "средняя"
+    opp = "; ".join(f"{o['for']}: {o['what']}" for o in review.get("opportunities", [])[:3])
+    return {"title_ru": review.get("title_ru"), "summary_ru": review.get("essence"),
+            "site_brief": review.get("business_impact"), "relevance_score": _IMPORTANCE_SCORE.get(imp, 6),
+            "opportunity_type": "нпа", "npa_ref": review.get("number") or None,
+            "consulting_recommendation": opp or None,
+            "legal_aspects": review.get("key_changes", [])[:5],
+            "action_items": [f"{o['who']}: {o['what']}" + (f" — до {o['deadline']}" if o.get("deadline") else "")
+                             for o in review.get("obligations", [])[:4]],
+            "urgency": {"высокая": "высокая", "средняя": "средняя"}.get(imp, "низкая"),
+            "deadline_info": None, "target_entity": None, "budget_info": None,
+            "act": review}

@@ -106,6 +106,7 @@ def fetch_worldbank(rows: int = 60) -> list:
                 uid=f"wb:{nid}" if nid else None,
                 meta={"deadline": n.get("submission_deadline_date"),
                       "reference": n.get("bid_reference_no"),
+                      "individual": n.get("procurement_method_code") == "INDV",   # индивидуальный консультант
                       "notice_type": ntype, "project_id": pid, "project": proj,
                       "donor": "World Bank",
                       "country": n.get("project_ctry_name")}))
@@ -422,6 +423,61 @@ def fetch_lexuz_rss() -> list:
     return items
 
 
+_LEX_NOISE = re.compile(r"(Предложения по документу|Прослушать аудио|Получить ссылку из элемента документа|"
+                        r"Ҳужжатга таклиф юбориш|Аудиони тинглаш|Ҳужжат элементидан ҳавола олиш|"
+                        r"\[ ОКОЗ:[^\]]*\]|\[ ТСЗ:[^\]]*\]|\[ ОКОЗ[^\]]*\]|\[ ТСЗ[^\]]*\])\s*")
+
+
+def _lex_page_text(s, url: str):
+    r = s.get(url, timeout=config.HTTP_TIMEOUT)
+    soup = BeautifulSoup(r.text, "lxml")
+    el = soup.select_one("#divCont")
+    text = _LEX_NOISE.sub("", re.sub(r"\s+", " ", el.get_text(" ", strip=True))) if el else ""
+    orig = None
+    if el is not None:
+        for a in el.select("a[href]"):
+            label = a.get_text(" ", strip=True).lower()
+            # «Текст акта приводится на <a>узбекском языке</a>» — ссылка на оригинал
+            if re.search(r"/docs?/-?\d+", a["href"]) and any(k in label for k in ("оригинал", "original", "узбекском")):
+                orig = a["href"] if a["href"].startswith("http") else "https://lex.uz" + a["href"]
+                break
+    return text, orig
+
+
+def fetch_act_text(url: str) -> tuple:
+    """Полный текст акта lex.uz для разбора: ('text', str) | ('pdf', bytes) | (None, None).
+    Ведомственные акты — текстом в #divCont; указы и постановления — PDF-сканом (/pdffile/<id>),
+    их читает модель напрямую. Русская страница часто пуста («текст приводится на узбекском»)
+    со ссылкой на оригинал — идём по ней."""
+    m = re.search(r"docs?/(-?\d+)", url or "")
+    if not m:
+        return None, None
+    s = _session()
+    best = ""
+    try:
+        text, orig = _lex_page_text(s, url)
+        best = text
+        short = len(text) < 600 or "приводится на узбекском" in text
+        if short and orig:
+            t2, _ = _lex_page_text(s, orig)
+            if len(t2) > len(best):
+                best = t2
+        if len(best) >= 600 and "приводится на узбекском" not in best[:600]:
+            return "text", best[:40000]
+        ids = [m.group(1).lstrip("-")]
+        if orig:
+            mo = re.search(r"docs?/(-?\d+)", orig)
+            if mo:
+                ids.append(mo.group(1).lstrip("-"))
+        for did in ids:
+            r = s.get(f"https://lex.uz/pdffile/{did}", timeout=60)
+            if r.ok and r.content[:4] == b"%PDF" and len(r.content) < 15_000_000:
+                return "pdf", r.content
+    except Exception as e:
+        log.warning("lex.uz текст акта FAIL %s: %s", url, e)
+    return ("text", best) if best else (None, None)
+
+
 def fetch_lexuz() -> list:
     """НПА: RSS lex.uz; Telegram-канал — только как резерв, если RSS пуст."""
     items = fetch_lexuz_rss()
@@ -509,8 +565,8 @@ def fetch_xtxarid_api(max_items: int | None = None) -> list:
 
 # ─────────────────────────── MangoFetch — агрегатор доноров (публичные страницы стран) ───────────────────────────
 MANGOFETCH_BASE = "https://www.mangofetch.com"
-MANGOFETCH_COUNTRIES = {"Uzbekistan": "UZB", "Kazakhstan": "KAZ", "Kyrgyzstan": "KYR",
-                        "Tajikistan": "TAJ", "Turkmenistan": "TUR"}
+MANGOFETCH_COUNTRIES = {"Uzbekistan": "UZB", "Kazakhstan": "KAZ", "Kyrgyzstan": "KGZ",
+                        "Tajikistan": "TJK", "Turkmenistan": "TKM"}   # ISO3: «TUR» модель читала как Турцию
 _MF_DONOR_SHORT = {
     "Asian Development Bank": "ADB", "World Bank": "WB", "Islamic Development Bank": "IsDB",
     "Asian Infrastructure Investment Bank": "AIIB", "EBRD": "EBRD", "European Union": "EU",
@@ -623,6 +679,107 @@ def enrich_mangofetch(item: dict) -> None:
             item["url"] = orig                          # кнопка «Источник» — сразу к донору
     except Exception as e:
         log.warning("MangoFetch детали FAIL %s: %s", item.get("uid"), e)
+
+
+# ─────────────────────────── Позиции для индивидуальных консультантов (15.10.2026) ───────────────────────────
+_CA_ISO = {"UZ": "UZB", "KZ": "KAZ", "KG": "KGZ", "TJ": "TJK", "TM": "TKM"}
+_WB_CA_OTHER = "Kazakhstan^Kyrgyz Republic^Tajikistan^Turkmenistan"
+_WB_ISO = {"Kazakhstan": "KAZ", "Kyrgyz Republic": "KGZ", "Tajikistan": "TJK", "Turkmenistan": "TKM", "Uzbekistan": "UZB"}
+
+
+def fetch_worldbank_indv(rows: int = 100) -> list:
+    """ВБ: индивидуальные консультанты (метод INDV) в остальных странах ЦА — Узбекистан уже идёт
+    основным потоком. Фильтр procurement_method_code=INDV работает только без «_exact»."""
+    items = []
+    try:
+        r = requests.get(config.WB_API_URL, params={
+            "format": "json", "rows": rows, "srt": "noticedate", "order": "desc",
+            "fl": config.WB_API_FIELDS, "project_ctry_name_exact": _WB_CA_OTHER,
+            "notice_type_exact": "Request for Expression of Interest", "procurement_method_code": "INDV"},
+            headers=config.HTTP_HEADERS, timeout=config.HTTP_TIMEOUT)
+        r.raise_for_status()
+        now = datetime.now(timezone.utc)
+        for n in r.json().get("procnotices", []):
+            nid, task = n.get("id", ""), (n.get("bid_description") or "").strip()
+            if not nid or not task:
+                continue
+            dl = n.get("submission_deadline_date") or ""
+            try:
+                if dl and datetime.fromisoformat(dl.replace("Z", "+00:00")) < now:
+                    continue
+            except ValueError:
+                pass
+            published = None
+            try:
+                published = datetime.strptime(n.get("noticedate", ""), "%d-%b-%Y").replace(tzinfo=timezone.utc)
+            except ValueError:
+                pass
+            ctry = n.get("project_ctry_name", "")
+            items.append(_mk(
+                "World Bank", config.CAT_JOB, "World Bank",
+                f"[WB·{_WB_ISO.get(ctry, ctry[:3].upper())}] {task}",
+                f"https://projects.worldbank.org/en/projects-operations/procurement-detail/{nid}", published,
+                summary=f"Индивидуальный консультант. Проект ВБ: {n.get('project_name','')}. Страна: {ctry}.",
+                full_text=strip_html(n.get("notice_text", "")) or task, uid=f"wb:{nid}",
+                meta={"deadline": dl[:10] or None, "donor": "World Bank", "country": ctry, "individual": True,
+                      "reference": n.get("bid_reference_no"), "project": n.get("project_name")}))
+        log.info("World Bank INDV (ЦА без УЗ): %d", len(items))
+    except Exception as e:
+        log.warning("World Bank INDV FAIL: %s", e)
+    return items
+
+
+# Карьерные порталы ООН на Oracle HCM: публичный REST, по которому работает сам сайт вакансий.
+UN_HCM_SITES = [
+    ("UNDP", "estm.fa.em2.oraclecloud.com", "CX_1"),
+    ("UN Women", "estm.fa.em2.oraclecloud.com", "CX_1001"),
+    ("IOM", "fa-evlj-saasfaprod1.fa.ocs.oraclecloud.com", "CX_1001"),
+]
+_HCM_SKIP = re.compile(r"\b(intern|internship|volunteer|driver|cleaner|guard|receptionist|clerk|"
+                       r"nurse|doctor|physician|medical|associate,? admin|admin(istrative)? assistant)\b", re.I)
+
+
+def fetch_un_careers(max_pages: int = 12) -> list:
+    """ПРООН, UN Women, МОМ: вакансии и консультации в странах ЦА (проектные позиции, NPSA/IC)."""
+    items, s = [], _session()
+    for org, host, site in UN_HCM_SITES:
+        base = f"https://{host}/hcmRestApi/resources/latest/recruitingCEJobRequisitions"
+        n = 0
+        try:
+            for page in range(max_pages):
+                finder = f"findReqs;siteNumber={site},limit=25,offset={page * 25},sortBy=POSTING_DATES_DESC"
+                r = s.get(base, params={"onlyData": "true", "expand": "requisitionList.secondaryLocations",
+                                        "finder": finder}, timeout=config.HTTP_TIMEOUT)
+                r.raise_for_status()
+                data = r.json().get("items") or []
+                reqs = data[0].get("requisitionList", []) if data else []
+                for q in reqs:
+                    iso = _CA_ISO.get(q.get("PrimaryLocationCountry") or "")
+                    title = (q.get("Title") or "").strip()
+                    if not iso or not title or _HCM_SKIP.search(title):
+                        continue
+                    pub = None
+                    try:
+                        pub = datetime.fromisoformat(str(q.get("PostedDate"))[:10]).replace(tzinfo=timezone.utc)
+                    except ValueError:
+                        pass
+                    jid = q.get("Id")
+                    items.append(_mk(
+                        f"{org} (вакансии)", config.CAT_JOB, f"{org.lower().replace(' ', '')}-careers",
+                        f"[{org}·{iso}] {title}",
+                        f"https://{host}/hcmUI/CandidateExperience/en/sites/{site}/job/{jid}", pub,
+                        summary=f"{org}. Страна: {q.get('PrimaryLocationCountry')}. {q.get('PrimaryLocation') or ''}",
+                        full_text=title, uid=f"hcm:{org.lower().replace(' ', '')}:{jid}",
+                        meta={"deadline": q.get("PostingEndDate"), "donor": org, "agency": org,
+                              "country": q.get("PrimaryLocation") or q.get("PrimaryLocationCountry"),
+                              "individual": True}))
+                    n += 1
+                if len(reqs) < 25:
+                    break
+            log.info("%s вакансии (ЦА): %d", org, n)
+        except Exception as e:
+            log.warning("%s вакансии FAIL: %s", org, e)
+    return items
 
 
 # ─────────────────────────── 6. TenderWeek — ПУБЛИЧНЫЙ листинг ───────────────────────────
@@ -916,17 +1073,19 @@ def collect_all() -> list:
     items += _tally(fetch_tenderweek_public())
     items += _tally(fetch_etender_api())
     items += _tally(fetch_xtxarid_api())
-    items += _tally(fetch_mangofetch())
-    try:
-        import mail_alerts
-        items += _tally(mail_alerts.fetch_mail_alerts())
-    except Exception as e:
-        log.warning("Почтовые рассылки: модуль FAIL: %s", e)
+    items += _tally(fetch_worldbank_indv())
+    items += _tally(fetch_un_careers())
     try:
         from headless import collect_all_headless    # playwright опционален
         items += _tally(collect_all_headless())
     except Exception as e:
         log.warning("headless источники недоступны: %s", e)
+    items += _tally(fetch_mangofetch())      # после всех прямых (вкл. UNGM headless): сверка дублей в том же прогоне
+    try:
+        import mail_alerts
+        items += _tally(mail_alerts.fetch_mail_alerts())
+    except Exception as e:
+        log.warning("Почтовые рассылки: модуль FAIL: %s", e)
     items += _tally(fetch_lexuz())
     items += _tally(fetch_news_rss())
     log.info("ИТОГО собрано: %d элементов", len(items))

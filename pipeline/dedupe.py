@@ -208,3 +208,20 @@ def is_off_region(item: dict) -> bool:
     if ours:
         return False
     return any(k in blob for k in config.OFFREGION_KEYWORDS)
+
+
+# ─────────────────────────── Уровень акта ───────────────────────────
+_MAJOR_ACT_RE = re.compile(
+    r"(закон республики|указ президента|постановление президента|постановление кабинета министров|"
+    r"қонуни|ўрқ-|президентининг фармони|президентининг қарори|вазирлар маҳкамасининг қарори|"
+    r"#қонун|#президент_фармони|#президент_қарори|#ҳукумат_қарори)", re.I)
+
+
+def is_major_act(item: dict) -> bool:
+    """Закон, указ, постановление Президента или Кабмина — разбираем всегда."""
+    refs = item.get("npa_refs") or []
+    if any(str(k).split("-")[0] in ("ZRU", "UP", "PP", "PKM") for k in refs):
+        return True
+    meta = item.get("meta") or {}
+    blob = f"{item.get('title','')} {meta.get('act_info','')} {(item.get('summary') or '')[:300]}"
+    return bool(_MAJOR_ACT_RE.search(blob))
