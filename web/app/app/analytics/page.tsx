@@ -3,7 +3,7 @@ import { getInsights, getItems } from "@/lib/data";
 import { DIRECTION_LABEL, deadlineStatus, fmtDate, isTenderCategory } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Аналитика — TA Tenders" };
+export const metadata = { title: "Аналитика — Tenders" };
 
 function Bars({ data }: { data: [string, number][] }) {
   const max = Math.max(1, ...data.map(([, n]) => n));

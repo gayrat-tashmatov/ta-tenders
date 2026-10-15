@@ -4,7 +4,7 @@ import { loadCabinet } from "@/lib/cabinet";
 import { LawList, type LawRow } from "./law-list";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Законодательство — TA Tenders" };
+export const metadata = { title: "Законодательство — Tenders" };
 
 export default async function LawPage() {
   const me = await currentUser();

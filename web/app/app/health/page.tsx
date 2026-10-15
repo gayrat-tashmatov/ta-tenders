@@ -1,6 +1,6 @@
 import { getMeta } from "@/lib/data";
 
-export const metadata = { title: "Источники | Кабинет TA Tenders" };
+export const metadata = { title: "Источники — Tenders" };
 export const dynamic = "force-dynamic";
 
 interface Health {

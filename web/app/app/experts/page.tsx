@@ -1,7 +1,7 @@
 import { WorkspacePage } from "../ws-page";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Для эксперта — TA Tenders" };
+export const metadata = { title: "Для эксперта — Tenders" };
 
 export default function ExpertsPage({ searchParams }: { searchParams: Promise<{ id?: string; f?: string }> }) {
   return (

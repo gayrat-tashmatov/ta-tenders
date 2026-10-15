@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const it = getItem(id);
-  return { title: `${it ? cleanTitle(it).slice(0, 80) : "Позиция"} — TA Tenders` };
+  return { title: `${it ? cleanTitle(it).slice(0, 80) : "Позиция"} — Tenders` };
 }
 
 export default async function ItemPage({ params }: { params: Promise<{ id: string }> }) {

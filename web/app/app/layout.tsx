@@ -4,7 +4,7 @@ import { getMeta } from "@/lib/data";
 import { CabNav } from "@/components/cab-nav";
 import { signOut } from "../login/actions";
 
-export const metadata = { title: "TA Tenders — кабинет" };
+export const metadata = { title: "Tenders" };
 
 function freshness(iso: string): string {
   if (!iso) return "нет данных";

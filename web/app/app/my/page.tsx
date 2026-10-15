@@ -6,7 +6,7 @@ import { cleanTitle, fmtDate, type FullItem } from "@/lib/types";
 import { DeadlinePill, DirectionChip, originLine } from "@/components/item-bits";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Мои — TA Tenders" };
+export const metadata = { title: "Мои — Tenders" };
 
 const GROUPS = [
   { key: "working", label: "В работе" },

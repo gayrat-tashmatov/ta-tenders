@@ -1,6 +1,6 @@
 import { LoginForm } from "./login-form";
 
-export const metadata = { title: "Вход | TA Tenders" };
+export const metadata = { title: "Вход — Tenders" };
 
 export default async function LoginPage({
   searchParams,

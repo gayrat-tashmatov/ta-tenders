@@ -9,13 +9,11 @@ export function LoginForm({ next }: { next: string }) {
     <div className="login-wrap">
       <form className="login-card" action={action}>
         <input type="hidden" name="next" value={next} />
-        <div className="login-brand">
-          TopAdvisor <span>· Tenders</span>
-        </div>
+        <div className="login-brand">Tenders</div>
         <h1>Вход в кабинет</h1>
         <p className="login-sub">
-          Мониторинг тендеров, донорских проектов и НПА. Доступ только для
-          команды — аккаунты выдаёт администратор.
+          Тендеры, позиции для экспертов и законодательство. Доступ только для
+          команды, аккаунты выдаёт администратор.
         </p>
         <label>
           E-mail

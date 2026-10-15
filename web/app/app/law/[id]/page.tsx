@@ -9,7 +9,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const it = getItem(id);
   const t = it?.act?.title_ru || (it ? stripRawTitle(it.titleRu || it.title) : "Акт");
-  return { title: `${t.slice(0, 80)} — TA Tenders` };
+  return { title: `${t.slice(0, 80)} — Tenders` };
 }
 
 const FOR_LABEL: Record<string, string> = {

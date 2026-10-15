@@ -1,22 +1,19 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { IBM_Plex_Mono, Manrope } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
-  subsets: ["latin", "cyrillic"],
-  variable: "--font-inter",
-});
+// Дизайн «Мята»: Manrope — интерфейс, IBM Plex Mono — даты, сроки и числа
+const ui = Manrope({ subsets: ["latin", "cyrillic"], weight: ["400", "500", "600", "700", "800"], variable: "--font-ui" });
+const mono = IBM_Plex_Mono({ subsets: ["latin", "cyrillic"], weight: ["400", "500"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
-  title: "TA Tenders — тендеры, донорские проекты и НПА Узбекистана",
-  description:
-    "Агрегатор возможностей для консалтинга: тендеры МФО (Всемирный банк, ЕБРР, АБР, ООН), " +
-    "госзакупки Узбекистана, позиции экспертов и мониторинг законодательства — с разбором по каждой позиции.",
+  title: "Tenders",
+  description: "Тендеры, позиции для экспертов и законодательство Узбекистана и Центральной Азии — с разбором по каждой позиции.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru" className={inter.variable}>
+    <html lang="ru" className={`${ui.variable} ${mono.variable}`}>
       <body>{children}</body>
     </html>
   );

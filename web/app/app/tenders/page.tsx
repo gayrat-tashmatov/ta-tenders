@@ -1,7 +1,7 @@
 import { WorkspacePage } from "../ws-page";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Тендеры для компаний — TA Tenders" };
+export const metadata = { title: "Тендеры для компаний — Tenders" };
 
 export default function TendersPage({ searchParams }: { searchParams: Promise<{ id?: string; f?: string }> }) {
   return (

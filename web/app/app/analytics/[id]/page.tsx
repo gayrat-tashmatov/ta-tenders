@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  return { title: `${getInsight(id)?.title?.slice(0, 80) ?? "Обзор"} — TA Tenders` };
+  return { title: `${getInsight(id)?.title?.slice(0, 80) ?? "Обзор"} — Tenders` };
 }
 
 const FOR_LABEL: Record<string, string> = { TopAdvisor: "TopAdvisor", UNISON: "UNISON", Гайрат: "Гайрат (эксперт)" };
