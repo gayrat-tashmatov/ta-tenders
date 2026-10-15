@@ -237,7 +237,10 @@ def export_all(store: Store) -> list:
     meta = {"updatedAt": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             "counts": {"feed": len(feed), "items": len(items), "npa": len(npa),
                        "insights": len(ins)},
-            "stats": stats, "health": health}
+            "stats": stats, "health": health,
+            # служебные отметки: утренняя сводка, личный чат эксперта (без самого id)
+            "telegram": {"morningSent": store.kv_get("morning_sent"),
+                         "expertChat": (store.kv_get("expert_chat") or "").split(":")[0] or None}}
 
     for name, data in (("feed.json", feed), ("items.json", items),
                        ("npa.json", npa), ("insights.json", ins), ("meta.json", meta)):

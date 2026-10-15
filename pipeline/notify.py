@@ -369,3 +369,20 @@ def send_morning(store) -> bool:
     if ok:
         store.kv_set("morning_sent", today)
     return ok
+
+
+def check_expert_chat(store) -> None:
+    """Разово подтверждает личный чат эксперта (секрет TELEGRAM_EXPERT_CHAT_ID) и пишет итог в kv —
+    так проверка видна в данных репозитория, без доступа к логам GitHub."""
+    import hashlib
+    chat = config.TELEGRAM_EXPERT_CHAT
+    if not chat:
+        store.kv_set("expert_chat", "не задан")
+        return
+    tag = hashlib.sha1(chat.encode()).hexdigest()[:8]
+    if (store.kv_get("expert_chat") or "").startswith(f"ok:{tag}"):
+        return
+    ok = _send("✅ <b>Личные уведомления эксперта подключены.</b>\n\nСюда будут приходить позиции "
+               "для индивидуального консультанта. Общие тендеры и законы — в канале.", chat=chat)
+    from datetime import datetime, timezone
+    store.kv_set("expert_chat", f"{'ok' if ok else 'ошибка'}:{tag}:{datetime.now(timezone.utc).isoformat(timespec='minutes')}")

@@ -178,6 +178,7 @@ def run(send_telegram: bool = True):
 
         if not fresh:
             if send_telegram:
+                notify.check_expert_chat(store)
                 notify.send_morning(store)      # пустой прогон: только утренняя сводка, если пора
             export.export_all(store)
             _ping()
@@ -306,6 +307,7 @@ def run(send_telegram: bool = True):
 
         sent = 0
         if send_telegram:
+            notify.check_expert_chat(store)
             notify.send_morning(store)
             sent = notify.send_report(processed)
             if new_insight:
