@@ -197,6 +197,28 @@ class Store:
                 return uid
         return None
 
+    def drop_aggregator_copy(self, item: dict, days: int = 60, thr: float = 0.6) -> int:
+        """Прямой источник принёс позицию, которая уже лежит копией с агрегатора (MangoFetch) —
+        копию агрегатора удаляем: у прямого источника точнее ссылка и данные (15.10.2026:
+        3 позиции ВБ по Таджикистану пришли сначала через MangoFetch, потом из API ВБ)."""
+        def _t(title):
+            return dedupe.tokens(re.sub(r"^\[[^\]]*\]\s*", "", title or ""))
+        mine = _t(item.get("title"))
+        if len(mine) < 2:
+            return 0
+        dropped = 0
+        for iid, title in self.db.execute(
+                "SELECT id, title FROM items WHERE origin='mangofetch.com' AND first_seen >= datetime('now', ?)",
+                (f"-{days} days",)).fetchall():
+            theirs = _t(title)
+            common = len(mine & theirs)
+            if theirs and common >= min(3, len(mine)) and common / max(len(mine), len(theirs)) >= thr:
+                self.db.execute("DELETE FROM items WHERE id=?", (iid,))
+                dropped += 1
+        if dropped:
+            self.db.commit()
+        return dropped
+
     def find_repeat(self, item: dict, days: int = 45) -> dict | None:
         """Повторная публикация лота: тот же источник и то же название у ДРУГОГО uid за
         последние N дней (etender/TW переобъявляют несостоявшиеся процедуры — UzAuto ×3 за

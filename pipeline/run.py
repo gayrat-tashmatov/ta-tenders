@@ -154,6 +154,9 @@ def run(send_telegram: bool = True):
                     store.mark_seen(it)
                     continue
                 sources.enrich_mangofetch(it)
+            elif it["category"] in (config.CAT_INTL, config.CAT_JOB):
+                if store.drop_aggregator_copy(it):
+                    log.info("копия MangoFetch заменена прямым источником: %s", it["title"][:60])
 
             # НОВАЯ публикация про уже известный акт → упоминание к карточке,
             # не отдельная запись (это и убирает повторы НПА). Только для НОВОСТЕЙ:
