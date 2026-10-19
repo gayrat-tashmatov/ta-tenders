@@ -1,5 +1,23 @@
 [
  {
+  "id": "etender-519626",
+  "category": "uz_tender",
+  "source": "UZEX e-Tender (конкурс)",
+  "origin": "etender.uzex.uz",
+  "titleRu": "Разработка информационной системы в Ташкенте",
+  "title": "[etender] Axborot tizimi yaratish",
+  "summaryRu": "Закупка на создание информационной системы объявлена заказчиком «UNICON-SOFT» МЧЖФ в Ташкенте (Yunusobod). Бюджет: 2 232 533 333,33 узбекских сумов. Срок подачи заявок: 26 октября 2026 года.",
+  "buyer": "\"UNICON-SOFT\" MCHJ",
+  "deadline": "2026-10-26",
+  "budget": "2 232 533 333,33 узбекских сумов",
+  "score": 8,
+  "urgency": "высокая",
+  "published": "2026-10-19 19:28:49+00:00",
+  "firstSeen": "2026-10-19T15:45:19+00:00",
+  "npaRefs": [],
+  "url": "https://etender.uzex.uz/lot/519626"
+ },
+ {
   "id": "tw-36697",
   "category": "uz_tender",
   "source": "TenderWeek",
