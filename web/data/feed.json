@@ -1,5 +1,43 @@
 [
  {
+  "id": "u-3191d218080ff50a",
+  "category": "news",
+  "source": "Gazeta.uz",
+  "origin": "Gazeta.uz",
+  "titleRu": "Привлечение дата-центров ИИ в Узбекистан: возможности и требования",
+  "title": "Гонка за дата-центрами: шанс для Узбекистана",
+  "summaryRu": "Статья аналитика Бехзодхона Алиханова в Gazeta.uz рассматривает потенциал Узбекистана для привлечения инвестиций в дата-центры для искусственного интеллекта на фоне глобального дефицита электроэнергии и мощностей. Автор анализирует конкурентные преимущества страны (режим УП-189, английское право, тариф на электроэнергию, ВИЭ) и барьеры, требующие государственной политики и инфраструктурного планирования.",
+  "buyer": null,
+  "deadline": null,
+  "budget": null,
+  "score": 7,
+  "urgency": "средняя",
+  "published": "2026-10-20 05:16:00+00:00",
+  "firstSeen": "2026-10-20T05:21:54+00:00",
+  "npaRefs": [
+   "UP-189"
+  ],
+  "url": "https://www.gazeta.uz/ru/2026/10/20/data-centers/"
+ },
+ {
+  "id": "etender-519607",
+  "category": "uz_tender",
+  "source": "UZEX e-Tender (конкурс)",
+  "origin": "etender.uzex.uz",
+  "titleRu": "Закупка услуг по пошиву и производству спецодежды",
+  "title": "[etender] Maxsus kiyim tikish va ishlab chiqarish xizmati",
+  "summaryRu": "Заказчик GIDROQURILISH BUYURTMACHI XIZMATI MCHJ (Ташкент) проводит закупку услуг по пошиву и изготовлению спецодежды. Бюджет: 110 684 000 UZS. Срок подачи предложений: до 27 октября 2026 года.",
+  "buyer": "GIDROQURILISH BUYURTMACHI XIZMATI MCHJ",
+  "deadline": "2026-10-27",
+  "budget": "110 684 000 UZS",
+  "score": 1,
+  "urgency": "низкая",
+  "published": "2026-10-20 10:03:02+00:00",
+  "firstSeen": "2026-10-20T05:21:39+00:00",
+  "npaRefs": [],
+  "url": "https://etender.uzex.uz/lot/519607"
+ },
+ {
   "id": "lexuz-8545685",
   "category": "legislation",
   "source": "lex.uz",
