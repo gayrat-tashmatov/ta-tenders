@@ -1,5 +1,23 @@
 [
  {
+  "id": "u-2805fa37c36d7409",
+  "category": "news",
+  "source": "UzDaily EN",
+  "origin": "UzDaily EN",
+  "titleRu": "Узбекистан обсуждает планы создания Ташкентского международного финцентра",
+  "title": "Uzbekistan Discusses Plans for Tashkent International Financial Centre",
+  "summaryRu": "Проведено совещание Межведомственной рабочей группы Совета иностранных инвесторов при Президенте Узбекистана по обсуждению создания Ташкентского международного финансового центра (ТМФЦ). Заказчик — Президентская администрация Узбекистана (координатор проекта Нодир Жураев). Бюджет и сроки в тексте не указаны.",
+  "buyer": "Президентская администрация Узбекистана (координатор: Нодир Жураев)",
+  "deadline": null,
+  "budget": null,
+  "score": 7,
+  "urgency": "средняя",
+  "published": "2026-10-24 08:30:00+00:00",
+  "firstSeen": "2026-10-24T17:33:00+00:00",
+  "npaRefs": [],
+  "url": "https://www.uzdaily.uz/en/uzbekistan-discusses-plans-for-tashkent-international-financial-centre/"
+ },
+ {
   "id": "lexuz-8554309",
   "category": "legislation",
   "source": "lex.uz",
