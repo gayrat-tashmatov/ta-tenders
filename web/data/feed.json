@@ -1,5 +1,23 @@
 [
  {
+  "id": "etender-521918",
+  "category": "uz_tender",
+  "source": "UZEX e-Tender (конкурс)",
+  "origin": "etender.uzex.uz",
+  "titleRu": "Закупка штампованных комплектующих для UzAuto Motors",
+  "title": "[etender] UzAuto Motors AJ da ishlab chiqarilayotgan Modellar uchun  shtamplash usuli bilan tayyorlanadigon butlovchi qismlarini xarid qilish",
+  "summaryRu": "UzAuto Motors AJ проводит закупку комплектующих деталей, производимых методом штампования для моделей автомобилей. Сумма закупки: 1 042 370 000 узбекских сумов. Срок подачи предложений: с 26 октября по 2 ноября 2026 года.",
+  "buyer": "\"UZAUTO MOTORS\" AJ",
+  "deadline": "2026-11-02",
+  "budget": "1 042 370 000 узбекских сумов (UZS)",
+  "score": 1,
+  "urgency": "низкая",
+  "published": "2026-10-26 08:13:58+00:00",
+  "firstSeen": "2026-10-26T05:22:12+00:00",
+  "npaRefs": [],
+  "url": "https://etender.uzex.uz/lot/521918"
+ },
+ {
   "id": "u-a88b1ee613bc752d",
   "category": "news",
   "source": "Nuz.uz",
