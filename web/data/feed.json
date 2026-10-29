@@ -1,5 +1,23 @@
 [
  {
+  "id": "etender-522109",
+  "category": "uz_tender",
+  "source": "UZEX e-Tender (конкурс)",
+  "origin": "etender.uzex.uz",
+  "titleRu": "Привлечение специалистов по научным исследованиям",
+  "title": "[etender] Услуга по выезду специалистов по научным исследованиям (Ilmiy tadqiqotlar bo'yicha mutaxassislarni jalb etish xizmati)",
+  "summaryRu": "Государственное учреждение водоснабжения Пайарикского района (Самарканд) закупает услугу по привлечению и выезду специалистов по научным исследованиям. Бюджет: 25 000 000 UZS. Срок подачи: 2026-11-05.",
+  "buyer": "Пайарик туман Сув етказиб бериш хизмати далат муассасаси",
+  "deadline": "2026-11-05",
+  "budget": "25 000 000 UZS",
+  "score": 1,
+  "urgency": "низкая",
+  "published": "2026-10-29 09:55:26+00:00",
+  "firstSeen": "2026-10-29T05:21:29+00:00",
+  "npaRefs": [],
+  "url": "https://etender.uzex.uz/lot/522109"
+ },
+ {
   "id": "etender-522140",
   "category": "uz_tender",
   "source": "UZEX e-Tender (конкурс)",
