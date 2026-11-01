@@ -1,5 +1,23 @@
 [
  {
+  "id": "mf-b1074c58-113e-4a16-8b0e-308382231a0d",
+  "category": "international_tender",
+  "source": "MangoFetch · World Bank",
+  "origin": "mangofetch.com",
+  "titleRu": "Специалист по окружающей среде (Таджикистан, ВБ)",
+  "title": "[WB·TJK] Environmental Specialist",
+  "summaryRu": "Всемирный банк объявляет отбор индивидуального эксперта-специалиста по окружающей среде для проекта в Таджикистане. Конкретные сроки, бюджет и объём работ в тексте источника не указаны.",
+  "buyer": "World Bank",
+  "deadline": "2026-11-04",
+  "budget": null,
+  "score": 7,
+  "urgency": "средняя",
+  "published": "2026-10-19 00:00:00+00:00",
+  "firstSeen": "2026-11-01T17:12:44+00:00",
+  "npaRefs": [],
+  "url": "https://projects.worldbank.org/en/projects-operations/procurement-detail/OP00475989"
+ },
+ {
   "id": "mf-dff84e90-fc22-484c-b48f-beccddf3c431",
   "category": "international_tender",
   "source": "MangoFetch · Asian Development Bank",
