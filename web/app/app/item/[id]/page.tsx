@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getItem } from "@/lib/data";
-import { DIRECTION_LABEL, cleanTitle, deadlineLabel, fmtDate, sourceLinkLabel, stripRawTitle } from "@/lib/types";
+import { DIRECTION_LABEL, cleanTitle, deadlineLabel, fmtDate, geoLabel, sourceLinkLabel, stripRawTitle } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -33,7 +33,7 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
       <dl className="facts">
         <dt>Финансирование</dt><dd>{it.donor || it.source}</dd>
         {it.buyer && it.buyer !== it.donor && (<><dt>Заказчик</dt><dd>{it.buyer}</dd></>)}
-        {it.geo && (<><dt>Страна</dt><dd>{it.geo}</dd></>)}
+        {it.geo && (<><dt>Страна</dt><dd>{geoLabel(it.geo)}</dd></>)}
         {it.budget && (<><dt>Бюджет</dt><dd>{it.budget}</dd></>)}
         {it.published && (<><dt>Опубликовано</dt><dd>{fmtDate(it.published)}</dd></>)}
         <dt>Срок подачи</dt><dd>{fmtDate(it.deadline) ?? "не указан"} {dl.tone !== "none" && <span className={`dl dl-${dl.tone}`}>{dl.text}</span>}</dd>

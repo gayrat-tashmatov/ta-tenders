@@ -56,6 +56,10 @@ export type Direction =
   | "пограничный"
   | "нет";
 
+/** В разборе страна лежит служебным значением («центральная_азия»). */
+export const geoLabel = (g: string) =>
+  g.replace(/_/g, " ").replace(/(^|\s)\S/g, (c) => c.toUpperCase());
+
 export const DIRECTION_LABEL: Record<string, string> = {
   право: "Право",
   бизнес: "Бизнес-консалтинг",

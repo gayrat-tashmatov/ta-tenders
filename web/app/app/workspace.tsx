@@ -8,6 +8,7 @@ import {
   deadlineLabel,
   deadlineStatus,
   fmtDate,
+  geoLabel,
   sourceLinkLabel,
   stripRawTitle,
   type FullItem,
@@ -268,7 +269,7 @@ export function Workspace({
             <dl className="facts">
               <dt>Финансирование</dt><dd>{sel.donor || sel.source}</dd>
               {sel.buyer && sel.buyer !== sel.donor && (<><dt>Заказчик</dt><dd>{sel.buyer}</dd></>)}
-              {sel.geo && (<><dt>Страна</dt><dd>{sel.geo}</dd></>)}
+              {sel.geo && (<><dt>Страна</dt><dd>{geoLabel(sel.geo)}</dd></>)}
               {sel.budget && (<><dt>Бюджет</dt><dd>{sel.budget}</dd></>)}
               {sel.published && (<><dt>Опубликовано</dt><dd>{fmtDate(sel.published)}</dd></>)}
               <dt>Срок подачи</dt>
