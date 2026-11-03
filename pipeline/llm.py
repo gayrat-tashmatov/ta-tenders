@@ -148,6 +148,22 @@ def needs_clean(text: str) -> bool:
     return bool(config.FOREIGN_SCRIPT_RE.search(text) or config.NAMES_RE.search(text))
 
 
+_PROPER_RE = re.compile(r"«[^»]+»|\"[^\"]+\"|\b\d[\d\s.,]*\d\b|\b\d\b|\b[A-ZА-ЯЁ]{2,}\b"
+                        r"|(?<=[a-zа-яё,;:] )[A-ZА-ЯЁ][a-zа-яё]{3,}")
+
+
+def _kept_facts(old: str, new: str) -> bool:
+    """Правка не потеряла чисел и собственных названий: без этой проверки модель заодно
+    убирала заказчиков («АО Узбекгидроэнерго» → «адресату»)."""
+    src = re.sub(r"профил\w*\s+\d", "", config.NAMES_RE.sub(" ", old))
+    return all(tok.strip('«»"').lower() in new.lower()
+               for tok in _PROPER_RE.findall(src) if not config.FOREIGN_SCRIPT_RE.search(tok))
+
+
+def mechanical_clean(text: str) -> str:
+    return re.sub(r"\s{2,}", " ", config.NAMES_RE.sub("компания", config.FOREIGN_SCRIPT_RE.sub("", text)))
+
+
 def clean_texts(texts: list) -> list:
     """Убирает из строк чужой алфавит и названия компаний: сначала моделью, чтобы фраза
     осталась связной, а что осталось — механически."""
@@ -160,12 +176,12 @@ def clean_texts(texts: list) -> list:
         data = _extract_json(_resp_text(resp))
         if isinstance(data, list) and len(data) == len(texts):
             # строка, ужатая или раздутая вдвое, — признак сбоя, а не правки
-            out = [new if isinstance(new, str) and 0.5 * len(old) <= len(new) <= 2 * len(old) + 40 else old
+            out = [new if isinstance(new, str) and 0.5 * len(old) <= len(new) <= 2 * len(old) + 40
+                   and not needs_clean(new) and _kept_facts(old, new) else old
                    for old, new in zip(texts, data)]
     except Exception as e:
         log.warning("Чистка текстов FAIL: %s", e)
-    return [re.sub(r"\s{2,}", " ", config.NAMES_RE.sub("компания", config.FOREIGN_SCRIPT_RE.sub("", s)))
-            for s in out]
+    return [mechanical_clean(s) for s in out]
 
 
 def clean_analysis(data: dict) -> dict:

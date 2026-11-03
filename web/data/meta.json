@@ -1,17 +1,17 @@
 {
- "updatedAt": "2026-11-03T15:46:57+00:00",
+ "updatedAt": "2026-11-03T16:06:07+00:00",
  "counts": {
-  "feed": 1347,
-  "items": 1347,
+  "feed": 1346,
+  "items": 1346,
   "npa": 515,
   "insights": 42
  },
  "stats": {
-  "items": 15229,
-  "seen": 25359,
+  "items": 15228,
+  "seen": 25163,
   "npa": 515,
   "mentions": 7,
-  "notified": 943
+  "notified": 945
  },
  "health": [
   {

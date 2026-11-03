@@ -135,11 +135,21 @@ def backfill_clean(_limit: int = 0):
             slots += hits
     log.info("карточек %d, строк %d", len(parsed), len(slots))
     chunks = [slots[i:i + 12] for i in range(0, len(slots), 12)]
+    originals = [c[k] for c, k in slots]
     with ThreadPoolExecutor(max_workers=6) as pool:
         results = list(pool.map(lambda ch: llm.clean_texts([c[k] for c, k in ch]), chunks))
-    for ch, res in zip(chunks, results):
-        for (c, k), new in zip(ch, res):
+        for ch, res in zip(chunks, results):
+            for (c, k), new in zip(ch, res):
+                c[k] = new
+        # Что не прошло проверку в пачке, повторяем по одной строке: там осталась механическая замена
+        stubs = [i for i, (c, k) in enumerate(slots) if not llm._kept_facts(originals[i], c[k])
+                 or c[k] == llm.mechanical_clean(originals[i])]
+        log.info("повтор по одной: %d", len(stubs))
+        for i, new in zip(stubs, pool.map(lambda i: llm.clean_texts([originals[i]])[0], stubs)):
+            c, k = slots[i]
             c[k] = new
+    mech = sum(c[k] == llm.mechanical_clean(originals[i]) for i, (c, k) in enumerate(slots))
+    log.info("осталось механической заменой: %d", mech)
     for iid, a in parsed.items():
         store.db.execute("UPDATE items SET analysis=? WHERE id=?", (json.dumps(a, ensure_ascii=False), iid))
     store.db.commit()
