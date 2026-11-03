@@ -1,5 +1,6 @@
 import Link from "next/link";
 import {
+  FOR_LABEL,
   DIRECTION_LABEL,
   cleanTitle,
   deadlineLabel,
@@ -65,7 +66,7 @@ export function ActMini({ it, isNew }: { it: FullItem; isNew?: boolean }) {
       {a?.essence && <div className="mini-sum">{a.essence}</div>}
       {opp && (
         <div className="mini-why">
-          <b>{opp.for}:</b> {opp.what}
+          <b>{FOR_LABEL[opp.for] ?? opp.for}:</b> {opp.what}
         </div>
       )}
     </Link>

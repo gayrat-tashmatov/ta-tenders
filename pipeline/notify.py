@@ -132,7 +132,7 @@ def _buttons(item: dict) -> list:
 _DIR_TG = {"право": "право", "бизнес": "бизнес-консалтинг", "ИТ_цифровизация": "ИТ и цифровизация",
            "энергетика_климат": "энергетика и климат", "пограничный": "смежное направление"}
 # В канал не пишем, КОМУ подходит (имена и компании) — только направления (15.10.2026)
-_NAMES_RE = re.compile(r"(TopAdvisor|Top Advisor|UNISON(\s+CONSULT)?|BizAdvisor|Гайрат\w*|Ташматов\w*|Tashmatov|Gayrat)", re.I)
+_NAMES_RE = config.NAMES_RE
 
 
 def _no_names(text: str) -> str | None:

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { fmtDate, stripRawTitle, type ActReview } from "@/lib/types";
+import { FOR_LABEL, fmtDate, stripRawTitle, type ActReview } from "@/lib/types";
 
 export interface LawRow {
   id: string; title: string; titleRu: string | null; firstSeen: string; published: string | null;
@@ -10,7 +10,6 @@ export interface LawRow {
 }
 
 const IMP: Record<string, number> = { высокая: 0, средняя: 1, низкая: 2 };
-const FOR_LABEL: Record<string, string> = { TopAdvisor: "TopAdvisor", UNISON: "UNISON", Гайрат: "Эксперт", бизнес: "Бизнесу" };
 
 export function LawList({ rows, seenUntil }: { rows: LawRow[]; seenUntil: string }) {
   const [imp, setImp] = useState<"important" | "all">("important");

@@ -9,7 +9,7 @@ uid — основа вечного дедупа: "wb:OP00461411", "tw:36300", "
 
 import re
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
 import requests
 import feedparser
@@ -567,13 +567,17 @@ def fetch_xtxarid_api(max_items: int | None = None) -> list:
 GRANTPLUS_API = "https://grantplus.unops.org/api/external/funding-opportunity"
 GRANTPLUS_URL = "https://grantplus.unops.org/funding-opportunity"
 GRANTPLUS_CA = {"UZ": "UZB", "KZ": "KAZ", "KG": "KGZ", "TJ": "TJK", "TM": "TKM"}
-# Больше стран — это глобальный конкурс (например, «отчёт о потерях и ущербе» на 239 стран), не про ЦА
+# Больше стран — глобальный конкурс: из таких берём только климат и энергетику (профиль энергетики и климата)
 GRANTPLUS_MAX_COUNTRIES = 15
+GRANTPLUS_CLIMATE_RE = re.compile(
+    r"climat|loss and damage|adaptation|mitigation|decarboni|carbon|greenhouse|emission|renewable|energy|\bndc\b|\besg\b",
+    re.I)
 
 
 def fetch_grantplus(page_size: int = 50) -> list:
     """Гранты UNOPS Grant+: открытый JSON, которым пользуется сам сайт; robots.txt разрешает
-    обход, вход нужен только для подачи. Берём конкурсы, где страна ЦА названа прямо."""
+    обход, вход нужен только для подачи. Берём конкурсы, где страна ЦА названа прямо,
+    и глобальные по климату и энергетике, куда ЦА допущена."""
     items, s, now = [], _session(), datetime.now(timezone.utc)
     total_open = 0
     try:
@@ -590,8 +594,9 @@ def fetch_grantplus(page_size: int = 50) -> list:
                     continue
                 areas = g.get("geographicAreas") or []
                 ours = [GRANTPLUS_CA[a["code"]] for a in areas if a.get("code") in GRANTPLUS_CA]
-                if not ours or len(areas) > GRANTPLUS_MAX_COUNTRIES:
+                if not ours:
                     continue
+                is_global = len(areas) > GRANTPLUS_MAX_COUNTRIES
                 due = _iso_dt(g.get("submissionDueDate"))
                 if due and due < now:
                     continue
@@ -607,7 +612,11 @@ def fetch_grantplus(page_size: int = 50) -> list:
                 except Exception as e:
                     log.warning("UNOPS Grant+ карточка %s: %s", gid, e)
                 desc = strip_html(g.get("description") or "")
-                countries = ", ".join(a.get("name", "") for a in areas)
+                goal_names = " ".join(x.get("description") or "" for x in (g.get("goals") or []))
+                if is_global and not GRANTPLUS_CLIMATE_RE.search(f"{name} {desc} {goal_names}"):
+                    continue
+                countries = ("весь мир, включая Центральную Азию" if is_global
+                             else ", ".join(a.get("name", "") for a in areas))
                 who = ", ".join(e.get("name", "") for e in (g.get("eligibleEntities") or []))
                 cur = (g.get("currency") or {}).get("code") or ""
                 money = g.get("fundingAvailable")
@@ -615,37 +624,37 @@ def fetch_grantplus(page_size: int = 50) -> list:
                 goals = ", ".join(re.sub(r"^GOAL \d+:\s*", "", x.get("description") or "") for x in (g.get("goals") or []))
                 info = _iso_dt(g.get("informationSessionDate"))
                 clar = _iso_dt(g.get("clarificationDeadline"))
-                # сроки — по Ташкенту: портал хранит их в UTC
-                tk = lambda d: (d + timedelta(hours=5)).strftime("%Y-%m-%d") if d else None
+                # дата как на портале, без сдвига на Ташкент: 31.12 22:59 UTC не должно стать 01.01
+                ymd = lambda d: d.strftime("%Y-%m-%d") if d else None
                 m = re.search(r"funded by (?:the )?([A-Z][\w&.\- ]{1,50}?)(?= and | with |,|\.| implemented)", desc)
                 donor = f"{m.group(1).strip()} через UNOPS" if m else "UNOPS"
                 bits = ["Грант, конкурс предложений.", f"Финансирование: {donor}."]
                 if budget:
                     bits.append(f"Сумма: {budget}.")
-                if tk(due):
-                    bits.append(f"Срок подачи заявок: {tk(due)}.")
+                if ymd(due):
+                    bits.append(f"Срок подачи заявок: {ymd(due)}.")
                 bits.append(f"Страны: {countries}.")
                 if who:
                     bits.append(f"Кто может подать: {who}.")
-                if tk(info):
-                    bits.append(f"Информационная сессия: {tk(info)}.")
-                if tk(clar):
-                    bits.append(f"Вопросы принимаются до: {tk(clar)}.")
+                if ymd(info):
+                    bits.append(f"Информационная сессия: {ymd(info)}.")
+                if ymd(clar):
+                    bits.append(f"Вопросы принимаются до: {ymd(clar)}.")
                 if goals:
                     bits.append(f"Цели ООН: {goals}.")
                 items.append(_mk(
                     "UNOPS Grant+", config.CAT_INTL, "grantplus.unops.org",
-                    f"[Грант·{ours[0] if len(ours) == 1 else 'ЦА'}] {name[:260]}",
+                    f"[Грант·{'Мир' if is_global else ours[0] if len(ours) == 1 else 'ЦА'}] {name[:260]}",
                     f"{GRANTPLUS_URL}/{gid}", _iso_dt(g.get("postingDate")),
                     summary=" ".join(bits), full_text=f"{name}. {' '.join(bits)}\n\n{desc}",
                     uid=f"grantplus:{gid}",
                     meta={"kind": "grant", "reference": g.get("referenceNumber"), "number": g.get("referenceNumber"),
-                          "deadline": tk(due), "donor": donor, "buyer": "UNOPS", "cost": budget,
-                          "country": countries, "eligible": who}))
+                          "deadline": ymd(due), "donor": donor, "buyer": "UNOPS", "cost": budget,
+                          "country": countries, "eligible": who, "global_climate": is_global}))
             if len(rows) < page_size or total_open >= int(data.get("totalCount") or 0):
                 break
             page += 1
-        log.info("UNOPS Grant+: открытых %d → про ЦА %d", total_open, len(items))
+        log.info("UNOPS Grant+: открытых %d → взято %d", total_open, len(items))
     except Exception as e:
         log.warning("UNOPS Grant+ FAIL: %s", e)
     return items

@@ -60,6 +60,11 @@ export type Direction =
 export const geoLabel = (g: string) =>
   g.replace(/_/g, " ").replace(/(^|\s)\S/g, (c) => c.toUpperCase());
 
+/** Кому возможность в разборе акта: на экране направление, а не название компании. */
+export const FOR_LABEL: Record<string, string> = {
+  TopAdvisor: "Право и консалтинг", UNISON: "Энергетика и климат", Гайрат: "Эксперт", бизнес: "Бизнесу",
+};
+
 export const DIRECTION_LABEL: Record<string, string> = {
   право: "Право",
   бизнес: "Бизнес-консалтинг",

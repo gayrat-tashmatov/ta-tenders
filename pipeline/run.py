@@ -276,7 +276,8 @@ def run(send_telegram: bool = True):
             profile = str(analysis.get("profile_match") or "").lower()
             geo = str(analysis.get("geo") or "").lower()
             off_profile = profile in ("нет", "none", "no")
-            off_geo = is_tender and geo in ("глобальный", "другой_регион", "global", "other")
+            off_geo = (is_tender and geo in ("глобальный", "другой_регион", "global", "other")
+                       and not it.get("meta", {}).get("global_climate"))
             if off_profile or off_geo:
                 final = min(final, 3)
                 log.info("вне профиля/региона (%s/%s): %s", profile or "?", geo or "?", it["title"][:60])
@@ -287,7 +288,8 @@ def run(send_telegram: bool = True):
             elif it.get("meta", {}).get("consulting_cat"):
                 final = max(final, config.MIN_SCORE_FOR_NOTIFY)
 
-            will_notify = final >= config.MIN_SCORE_FOR_NOTIFY
+            is_grant = it.get("meta", {}).get("kind") == "grant"
+            will_notify = final >= (config.MIN_SCORE_FOR_NOTIFY_GRANT if is_grant else config.MIN_SCORE_FOR_NOTIFY)
             # Почти истёкший дедлайн — в канал не шлём (не успеть), на сайт — да.
             hrs = _hours_left(it)
             if hrs is not None and hrs < config.NOTIFY_MIN_HOURS_LEFT:

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getItem, getNpa } from "@/lib/data";
-import { fmtDate, stripRawTitle } from "@/lib/types";
+import { FOR_LABEL, fmtDate, stripRawTitle } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -11,10 +11,6 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const t = it?.act?.title_ru || (it ? stripRawTitle(it.titleRu || it.title) : "Акт");
   return { title: `${t.slice(0, 80)} — Tenders` };
 }
-
-const FOR_LABEL: Record<string, string> = {
-  TopAdvisor: "TopAdvisor", UNISON: "UNISON", Гайрат: "Гайрат (эксперт)", бизнес: "Бизнесу",
-};
 
 export default async function ActPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

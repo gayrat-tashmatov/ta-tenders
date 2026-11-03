@@ -1,5 +1,5 @@
 """Разовый догон (15.10.2026): разметка профиля для открытых тендеров и разборы актов.
-python backfill.py profile [N] | acts [N]"""
+python backfill.py profile [N] | acts [N] | clean"""
 import json
 import sys
 import logging
@@ -120,7 +120,33 @@ def backfill_acts(limit: int):
     log.info("акты: разобрано %d", done)
 
 
+def backfill_clean(_limit: int = 0):
+    """03.11.2026: убрать из готовых разборов чужой алфавит и названия компаний."""
+    store = Store()
+    parsed, slots = {}, []
+    for r in store.db.execute("SELECT id, analysis FROM items WHERE analysis IS NOT NULL").fetchall():
+        try:
+            a = json.loads(r["analysis"])
+        except Exception:
+            continue
+        hits = [(c, k) for c, k in llm._text_slots(a) if llm.needs_clean(c[k])]
+        if hits:
+            parsed[r["id"]] = a
+            slots += hits
+    log.info("карточек %d, строк %d", len(parsed), len(slots))
+    chunks = [slots[i:i + 12] for i in range(0, len(slots), 12)]
+    with ThreadPoolExecutor(max_workers=6) as pool:
+        results = list(pool.map(lambda ch: llm.clean_texts([c[k] for c, k in ch]), chunks))
+    for ch, res in zip(chunks, results):
+        for (c, k), new in zip(ch, res):
+            c[k] = new
+    for iid, a in parsed.items():
+        store.db.execute("UPDATE items SET analysis=? WHERE id=?", (json.dumps(a, ensure_ascii=False), iid))
+    store.db.commit()
+    log.info("готово; осталось строк с проблемой: %d", sum(llm.needs_clean(c[k]) for c, k in slots))
+
+
 if __name__ == "__main__":
     what = sys.argv[1]
     n = int(sys.argv[2]) if len(sys.argv) > 2 else 300
-    {"profile": backfill_profile, "acts": backfill_acts}[what](n)
+    {"profile": backfill_profile, "acts": backfill_acts, "clean": backfill_clean}[what](n)

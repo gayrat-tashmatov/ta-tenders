@@ -37,7 +37,11 @@ def _hide_intl(r) -> bool:
         a = {}
     if str(a.get("profile_match") or "").lower() in ("нет", "none"):
         return True
-    if str(a.get("geo") or "").lower() in ("глобальный", "другой_регион"):
+    try:
+        global_climate = json.loads(r["meta"] or "{}").get("global_climate")
+    except Exception:
+        global_climate = False
+    if str(a.get("geo") or "").lower() in ("глобальный", "другой_регион") and not global_climate:
         return True
     item = {"category": r["category"], "title": r["title"], "summary": r["summary"] or ""}
     if dedupe.is_off_region(item):

@@ -121,6 +121,61 @@ def _fallback(item: dict) -> dict:
             "target_entity": None, "budget_info": None, "deadline_info": None}
 
 
+# Значения из перечней, а не текст для чтения: их чистка сломала бы логику
+_CLEAN_SKIP = {"for", "profile_match", "audience", "geo", "opportunity_type", "urgency", "importance",
+               "npa_ref", "source_kind", "url", "act_key", "key"}
+
+
+def _text_slots(obj):
+    """Все строки разбора как (контейнер, ключ), чтобы заменить их на месте."""
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            if k in _CLEAN_SKIP:
+                continue
+            if isinstance(v, str):
+                yield obj, k
+            else:
+                yield from _text_slots(v)
+    elif isinstance(obj, list):
+        for i, v in enumerate(obj):
+            if isinstance(v, str):
+                yield obj, i
+            else:
+                yield from _text_slots(v)
+
+
+def needs_clean(text: str) -> bool:
+    return bool(config.FOREIGN_SCRIPT_RE.search(text) or config.NAMES_RE.search(text))
+
+
+def clean_texts(texts: list) -> list:
+    """Убирает из строк чужой алфавит и названия компаний: сначала моделью, чтобы фраза
+    осталась связной, а что осталось — механически."""
+    out = list(texts)
+    try:
+        resp = _anthropic().messages.create(
+            model=config.MODEL_ANALYZE, max_tokens=8192,
+            messages=[{"role": "user", "content": config.CLEAN_PROMPT.format(
+                texts=json.dumps(texts, ensure_ascii=False))}])
+        data = _extract_json(_resp_text(resp))
+        if isinstance(data, list) and len(data) == len(texts):
+            # строка, ужатая или раздутая вдвое, — признак сбоя, а не правки
+            out = [new if isinstance(new, str) and 0.5 * len(old) <= len(new) <= 2 * len(old) + 40 else old
+                   for old, new in zip(texts, data)]
+    except Exception as e:
+        log.warning("Чистка текстов FAIL: %s", e)
+    return [re.sub(r"\s{2,}", " ", config.NAMES_RE.sub("компания", config.FOREIGN_SCRIPT_RE.sub("", s)))
+            for s in out]
+
+
+def clean_analysis(data: dict) -> dict:
+    slots = [(c, k) for c, k in _text_slots(data) if needs_clean(c[k])]
+    if slots and config.ANTHROPIC_KEY:
+        for (c, k), new in zip(slots, clean_texts([c[k] for c, k in slots])):
+            c[k] = new
+    return data
+
+
 def analyze(item: dict) -> dict:
     if not config.ANTHROPIC_KEY:
         return _fallback(item)
@@ -143,7 +198,7 @@ def analyze(item: dict) -> dict:
         for key in ("docs_checklist", "legal_aspects", "action_items"):
             if not isinstance(data.get(key), list):
                 data[key] = []
-        return data
+        return clean_analysis(data)
     except Exception as e:
         log.warning("LLM-анализ FAIL: %s", e)
         return _fallback(item)
@@ -186,7 +241,7 @@ def review_act(item: dict, kind: str | None, payload) -> dict | None:
             return None
         data = json.loads(next(b.text for b in resp.content if b.type == "text"))
         data["source_kind"] = kind or "meta"
-        return data
+        return clean_analysis(data)
     except Exception as e:
         log.warning("Разбор акта FAIL %s: %s", item.get("uid"), e)
         return None

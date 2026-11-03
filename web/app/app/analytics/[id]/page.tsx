@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getInsight, getItems } from "@/lib/data";
-import { fmtDate } from "@/lib/types";
+import { FOR_LABEL, fmtDate } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -10,7 +10,6 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   return { title: `${getInsight(id)?.title?.slice(0, 80) ?? "Обзор"} — Tenders` };
 }
 
-const FOR_LABEL: Record<string, string> = { TopAdvisor: "TopAdvisor", UNISON: "UNISON", Гайрат: "Гайрат (эксперт)" };
 
 export default async function InsightPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
