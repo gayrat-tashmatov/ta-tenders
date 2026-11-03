@@ -19,7 +19,7 @@ export type CabTender = Pick<
   | "id" | "category" | "source" | "origin" | "title" | "titleRu" | "url" | "buyer" | "budget"
   | "deadline" | "published" | "score" | "summaryRu" | "siteBrief" | "recommendation"
   | "eligibility" | "docsChecklist" | "legalAspects" | "actionItems" | "firstSeen" | "portalOnly"
-  | "lotNumber" | "repeatOf" | "direction" | "whyUs" | "donor" | "geo" | "track"
+  | "lotNumber" | "repeatOf" | "direction" | "whyUs" | "donor" | "geo" | "track" | "grant"
 >;
 export interface WsState { tenderId: string; status: string | null; saved: boolean; note: string | null }
 
@@ -234,6 +234,7 @@ export function Workspace({
               <div className="row-main">
                 <div className="row-title">{isNew(t) && <span className="dot-new" />}{cleanTitle(t)}</div>
                 <div className="row-meta">
+                  {t.grant && <span className="tag-grant">Грант</span>}
                   <span>{t.donor || t.source.replace(/\s*\(.*\)$/, "")}</span>
                   {t.buyer && t.buyer !== t.donor && <span>{t.buyer.slice(0, 50)}</span>}
                   {t.published && <span>опубл. {fmtDate(t.published)}</span>}
@@ -258,6 +259,7 @@ export function Workspace({
             <div className="d-chips">
               {sel.direction && sel.direction !== "нет" && <span className={`dir dir-${sel.direction}`}>{DIRECTION_LABEL[sel.direction]}</span>}
               {typeof sel.score === "number" && <span className="pill">релевантность {sel.score}/10</span>}
+              {sel.grant && <span className="pill">грант</span>}
               {sel.repeatOf && <span className="pill pill-warn">повтор лота № {sel.repeatOf}</span>}
             </div>
             <h2 className="d-title">{cleanTitle(sel)}</h2>

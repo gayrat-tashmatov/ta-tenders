@@ -143,6 +143,9 @@ def _no_names(text: str) -> str | None:
         return text
     cleaned = _NAMES_RE.sub("", text)
     cleaned = re.sub(r"\s+([,.;:])", r"\1", re.sub(r"\s{2,}", " ", cleaned)).strip(" ,;:—-")
+    # «TopAdvisor и UNISON могут…» оставляло висячее «и могут…»
+    cleaned = re.sub(r"^(и|или|а также)\s+", "", cleaned)
+    cleaned = cleaned[:1].upper() + cleaned[1:]
     # «профиль  по бизнес-консалтингу» и т.п. — если осталось меньше половины, не показываем
     return cleaned if len(cleaned) > 0.6 * len(text) else None
 
@@ -186,7 +189,9 @@ def card(item: dict, a: dict) -> tuple:
     cat = item["category"]
     kind = {config.CAT_INTL: "Международный тендер", config.CAT_UZTEND: "Тендер · Узбекистан",
             config.CAT_LAW: "Новый НПА", config.CAT_JOB: "Позиция эксперта"}.get(cat, "Материал")
-    if is_expert(item, a):
+    if item.get("meta", {}).get("kind") == "grant":
+        kind = "Грант"
+    elif is_expert(item, a):
         kind = "👤 Для эксперта · " + kind
     lines = [f"{_ICON.get(cat, '•')} <b>{esc(head)}</b>",
              f"<i>{esc(kind)} · {esc(item['origin'])}</i>", ""]

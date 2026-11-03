@@ -9,7 +9,7 @@ uid — основа вечного дедупа: "wb:OP00461411", "tw:36300", "
 
 import re
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import requests
 import feedparser
@@ -563,6 +563,101 @@ def fetch_xtxarid_api(max_items: int | None = None) -> list:
     return items
 
 
+# ─────────────────────────── UN Grant+ (UNOPS) — гранты и конкурсы предложений ───────────────────────────
+GRANTPLUS_API = "https://grantplus.unops.org/api/external/funding-opportunity"
+GRANTPLUS_URL = "https://grantplus.unops.org/funding-opportunity"
+GRANTPLUS_CA = {"UZ": "UZB", "KZ": "KAZ", "KG": "KGZ", "TJ": "TJK", "TM": "TKM"}
+# Больше стран — это глобальный конкурс (например, «отчёт о потерях и ущербе» на 239 стран), не про ЦА
+GRANTPLUS_MAX_COUNTRIES = 15
+
+
+def fetch_grantplus(page_size: int = 50) -> list:
+    """Гранты UNOPS Grant+: открытый JSON, которым пользуется сам сайт; robots.txt разрешает
+    обход, вход нужен только для подачи. Берём конкурсы, где страна ЦА названа прямо."""
+    items, s, now = [], _session(), datetime.now(timezone.utc)
+    total_open = 0
+    try:
+        page = 0
+        while True:
+            r = s.get(GRANTPLUS_API, params={"pageIndex": page, "pageSize": page_size, "ascending": "true"},
+                      headers={"Accept": "application/json"}, timeout=config.HTTP_TIMEOUT)
+            r.raise_for_status()
+            data = r.json()
+            rows = data.get("records") or []
+            total_open += len(rows)
+            for g in rows:
+                if str(g.get("stage") or "").lower() != "open":
+                    continue
+                areas = g.get("geographicAreas") or []
+                ours = [GRANTPLUS_CA[a["code"]] for a in areas if a.get("code") in GRANTPLUS_CA]
+                if not ours or len(areas) > GRANTPLUS_MAX_COUNTRIES:
+                    continue
+                due = _iso_dt(g.get("submissionDueDate"))
+                if due and due < now:
+                    continue
+                gid, name = g.get("id"), (g.get("name") or "").strip()
+                if not gid or not name:
+                    continue
+                # Кто может подать и цели ООН есть только в карточке, в списке они пустые
+                try:
+                    d = s.get(f"{GRANTPLUS_API}/{gid}", headers={"Accept": "application/json"},
+                              timeout=config.HTTP_TIMEOUT)
+                    d.raise_for_status()
+                    g = {**g, **d.json()}
+                except Exception as e:
+                    log.warning("UNOPS Grant+ карточка %s: %s", gid, e)
+                desc = strip_html(g.get("description") or "")
+                countries = ", ".join(a.get("name", "") for a in areas)
+                who = ", ".join(e.get("name", "") for e in (g.get("eligibleEntities") or []))
+                cur = (g.get("currency") or {}).get("code") or ""
+                money = g.get("fundingAvailable")
+                budget = f"{money:,.0f} {cur}".replace(",", " ").strip() if isinstance(money, (int, float)) else None
+                goals = ", ".join(re.sub(r"^GOAL \d+:\s*", "", x.get("description") or "") for x in (g.get("goals") or []))
+                info = _iso_dt(g.get("informationSessionDate"))
+                clar = _iso_dt(g.get("clarificationDeadline"))
+                # сроки — по Ташкенту: портал хранит их в UTC
+                tk = lambda d: (d + timedelta(hours=5)).strftime("%Y-%m-%d") if d else None
+                m = re.search(r"funded by (?:the )?([A-Z][\w&.\- ]{1,50}?)(?= and | with |,|\.| implemented)", desc)
+                donor = f"{m.group(1).strip()} через UNOPS" if m else "UNOPS"
+                bits = ["Грант, конкурс предложений.", f"Финансирование: {donor}."]
+                if budget:
+                    bits.append(f"Сумма: {budget}.")
+                if tk(due):
+                    bits.append(f"Срок подачи заявок: {tk(due)}.")
+                bits.append(f"Страны: {countries}.")
+                if who:
+                    bits.append(f"Кто может подать: {who}.")
+                if tk(info):
+                    bits.append(f"Информационная сессия: {tk(info)}.")
+                if tk(clar):
+                    bits.append(f"Вопросы принимаются до: {tk(clar)}.")
+                if goals:
+                    bits.append(f"Цели ООН: {goals}.")
+                items.append(_mk(
+                    "UNOPS Grant+", config.CAT_INTL, "grantplus.unops.org",
+                    f"[Грант·{ours[0] if len(ours) == 1 else 'ЦА'}] {name[:260]}",
+                    f"{GRANTPLUS_URL}/{gid}", _iso_dt(g.get("postingDate")),
+                    summary=" ".join(bits), full_text=f"{name}. {' '.join(bits)}\n\n{desc}",
+                    uid=f"grantplus:{gid}",
+                    meta={"kind": "grant", "reference": g.get("referenceNumber"), "number": g.get("referenceNumber"),
+                          "deadline": tk(due), "donor": donor, "buyer": "UNOPS", "cost": budget,
+                          "country": countries, "eligible": who}))
+            if len(rows) < page_size or total_open >= int(data.get("totalCount") or 0):
+                break
+            page += 1
+        log.info("UNOPS Grant+: открытых %d → про ЦА %d", total_open, len(items))
+    except Exception as e:
+        log.warning("UNOPS Grant+ FAIL: %s", e)
+    return items
+
+
+def _iso_dt(v):
+    try:
+        return datetime.fromisoformat(str(v).replace("Z", "+00:00"))
+    except (TypeError, ValueError):
+        return None
+
+
 # ─────────────────────────── MangoFetch — агрегатор доноров (публичные страницы стран) ───────────────────────────
 MANGOFETCH_BASE = "https://www.mangofetch.com"
 MANGOFETCH_COUNTRIES = {"Uzbekistan": "UZB", "Kazakhstan": "KAZ", "Kyrgyzstan": "KGZ",
@@ -1080,6 +1175,7 @@ def collect_all() -> list:
         items += _tally(collect_all_headless())
     except Exception as e:
         log.warning("headless источники недоступны: %s", e)
+    items += _tally(fetch_grantplus())
     items += _tally(fetch_mangofetch())      # после всех прямых (вкл. UNGM headless): сверка дублей в том же прогоне
     # почтовые рассылки (mail_alerts.py) отключены 15.10.2026: DevelopmentAid больше не нужен
     items += _tally(fetch_lexuz())

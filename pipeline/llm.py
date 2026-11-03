@@ -139,6 +139,7 @@ def analyze(item: dict) -> dict:
             data["relevance_score"] = int(data.get("relevance_score"))
         except (TypeError, ValueError):
             data["relevance_score"] = int(item.get("score", 6))
+        data["profile_match"] = config.one_direction(data.get("profile_match"))
         for key in ("docs_checklist", "legal_aspects", "action_items"):
             if not isinstance(data.get(key), list):
                 data[key] = []

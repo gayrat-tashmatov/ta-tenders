@@ -24,6 +24,7 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
       <div className="d-chips">
         {it.direction && it.direction !== "нет" && <span className={`dir dir-${it.direction}`}>{DIRECTION_LABEL[it.direction]}</span>}
         {typeof it.score === "number" && <span className="pill">релевантность {it.score}/10</span>}
+        {it.grant && <span className="pill">грант</span>}
         {it.repeatOf && <span className="pill pill-warn">повтор лота № {it.repeatOf}</span>}
       </div>
       <h1>{cleanTitle(it)}</h1>

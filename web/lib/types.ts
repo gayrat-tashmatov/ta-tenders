@@ -42,6 +42,7 @@ export interface FullItem extends FeedItem {
   geo?: string | null;
   track?: Track;
   donor?: string | null;
+  grant?: boolean;
   act?: ActReview | null;
 }
 

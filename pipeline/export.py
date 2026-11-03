@@ -110,11 +110,12 @@ def _row_to_item(r) -> dict:
         "urgency": analysis.get("urgency"),
         "summary": r["summary"],
         # 15.10.2026: профиль, аудитория, донор, разбор акта
-        "direction": analysis.get("profile_match") or _legacy_direction(r),   # право|бизнес|ИТ_цифровизация|энергетика_климат|пограничный|нет
+        "direction": config.one_direction(analysis.get("profile_match")) or _legacy_direction(r),   # право|бизнес|ИТ_цифровизация|энергетика_климат|пограничный|нет
         "whyUs": analysis.get("profile_reason"),
         "geo": analysis.get("geo") or meta.get("country"),
         "track": _track(r["category"], analysis, meta, r["title"]),       # company|expert|both|law|news
         "donor": meta.get("donor") or meta.get("agency"),
+        "grant": meta.get("kind") == "grant",
         "act": analysis.get("act"),                           # структурированный разбор НПА (Opus 5.5)
     }
 

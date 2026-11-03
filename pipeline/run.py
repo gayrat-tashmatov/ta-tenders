@@ -157,6 +157,12 @@ def run(send_telegram: bool = True):
             elif it["category"] in (config.CAT_INTL, config.CAT_JOB):
                 if store.drop_aggregator_copy(it):
                     log.info("копия MangoFetch заменена прямым источником: %s", it["title"][:60])
+                # Грант UNOPS может лежать и на UNGM: вторая карточка не нужна
+                if it.get("meta", {}).get("kind") == "grant" and (
+                        store.similar_tender(it) or any(
+                            _title_sim(it["title"], f["title"]) >= 0.6 for f in fresh)):
+                    store.mark_seen(it)
+                    continue
 
             # НОВАЯ публикация про уже известный акт → упоминание к карточке,
             # не отдельная запись (это и убирает повторы НПА). Только для НОВОСТЕЙ:
@@ -192,6 +198,9 @@ def run(send_telegram: bool = True):
         # на LLM-разбор: он и решит, отправлять ли (relevance_score ≥ 7).
         for it in fresh:
             if it.get("meta", {}).get("kw_match") and it["category"] == config.CAT_UZTEND:
+                it["score"] = max(it.get("score", 0), config.MIN_SCORE_FOR_DEEP)
+            # Грантов единицы и язык у них не закупочный: разбор получают все
+            if it.get("meta", {}).get("kind") == "grant":
                 it["score"] = max(it.get("score", 0), config.MIN_SCORE_FOR_DEEP)
         before = len(fresh)
         news_part = [it for it in fresh if it["category"] == config.CAT_NEWS]
@@ -247,6 +256,9 @@ def run(send_telegram: bool = True):
                              review.get("title_ru", "")[:60])
             if analysis is None:
                 analysis = llm.analyze(it)
+                # Срок гранта из API точнее: модель путает его с датой приёма вопросов
+                if it.get("meta", {}).get("kind") == "grant" and it["meta"].get("deadline"):
+                    analysis["deadline_info"] = it["meta"]["deadline"]
                 analyzed += 1
             # реквизит, который нашла модель, но пропустил regex
             extra_ref = analysis.get("npa_ref")

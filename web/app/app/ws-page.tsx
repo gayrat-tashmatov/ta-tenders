@@ -12,7 +12,7 @@ const pick = (it: FullItem): CabTender => ({
   legalAspects: it.legalAspects ?? [], actionItems: it.actionItems ?? [], firstSeen: it.firstSeen,
   portalOnly: it.portalOnly, lotNumber: it.lotNumber, repeatOf: it.repeatOf ?? null,
   direction: it.direction ?? null, whyUs: it.whyUs ?? null, donor: it.donor ?? null,
-  geo: it.geo ?? null, track: it.track,
+  geo: it.geo ?? null, track: it.track, grant: it.grant ?? false,
 });
 
 export async function WorkspacePage({
