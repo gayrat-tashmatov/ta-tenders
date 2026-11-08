@@ -1,5 +1,23 @@
 [
  {
+  "id": "mf-ddb545f2-a894-43f0-a933-43cb92456259",
+  "category": "international_tender",
+  "source": "MangoFetch · Welthungerhilfe",
+  "origin": "mangofetch.com",
+  "titleRu": "Исследование жизнеспособности проекта в Таджикистане и Киргизии",
+  "title": "[Welthung·TJK] Feasibility Study in Tajikistan and Kyrgyzstan",
+  "summaryRu": "Организация Deutsche Welthungerhilfe (Таджикский офис) приглашает консультантов и консультационные группы подготовить исследование жизнеспособности регионального проекта по укреплению гражданского общества и развитию климатоустойчивых продовольственных систем молодёжью в Центральной Азии. Заказчик: Welthungerhilfe Tajikistan (Душанбе). Бюджет и сроки выполнения: не указаны. Срок подачи предложений: 19 ноября 2026 г., 23:00 (CET).",
+  "buyer": "Welthungerhilfe",
+  "deadline": "2026-11-19",
+  "budget": null,
+  "score": 7,
+  "urgency": "средняя",
+  "published": "2026-11-05 00:00:00+00:00",
+  "firstSeen": "2026-11-08T17:22:18+00:00",
+  "npaRefs": [],
+  "url": "https://eu.eu-supply.com/app/rfq/rwlentrance_s.asp?PID=462936&PP=transactions.asp&B=WELTHUNGERHILFE&PS=1"
+ },
+ {
   "id": "u-e179cb1c94e3c938",
   "category": "news",
   "source": "Nuz.uz",
