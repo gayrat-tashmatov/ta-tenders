@@ -1,5 +1,23 @@
 [
  {
+  "id": "tw-36826",
+  "category": "uz_tender",
+  "source": "TenderWeek",
+  "origin": "TenderWeek",
+  "titleRu": "Расчет норм расхода горючесмазочных материалов",
+  "title": "[TW] Расчет норм расхода ГСМ",
+  "summaryRu": "Заказчик Asia Trans Gas СП ООО объявляет закупку услуг по расчету норм расхода ГСМ. Сумма, сроки и полное описание в тексте не представлены (текст обрезан).",
+  "buyer": "Asia Trans Gas СП ООО",
+  "deadline": "2026-11-18",
+  "budget": null,
+  "score": 2,
+  "urgency": "низкая",
+  "published": "2026-11-11 00:00:00+00:00",
+  "firstSeen": "2026-11-11T09:33:29+00:00",
+  "npaRefs": [],
+  "url": "https://www.tenderweek.com/tender-36826"
+ },
+ {
   "id": "tw-36825",
   "category": "uz_tender",
   "source": "TenderWeek",
