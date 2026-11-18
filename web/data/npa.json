@@ -123,7 +123,15 @@
   "itemId": "lexuz-8592881",
   "title": "[НПА] О мерах по цифровизации сферы спорта и внедрению системы эффективного управления",
   "firstSeen": "2026-11-16T17:22:52+00:00",
-  "mentions": []
+  "mentions": [
+   {
+    "item_id": "u-5fa459ba5163f130",
+    "kind": "news",
+    "title": "В Узбекистане за тренировками спортсменов будут следить с помощью искусственного интеллекта",
+    "url": "https://nuz.uz/2026/11/18/v-uzbekistane-za-trenirovkami-sportsmenov-budut-sledit-s-pomoshhyu-iskusstvennogo-intellekta/",
+    "added": "2026-11-18T14:21:40+00:00"
+   }
+  ]
  },
  {
   "key": "LEX-8592881",
