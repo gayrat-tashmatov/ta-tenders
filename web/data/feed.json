@@ -1,5 +1,23 @@
 [
  {
+  "id": "ungm-323264",
+  "category": "international_tender",
+  "source": "UNGM · UN",
+  "origin": "ungm.org",
+  "titleRu": "Разработка искусственного интеллекта для управления обучением и консультациями",
+  "title": "[UN·UZB] RFP/426/2026/SAD/ROAP (Re-tender) Development of the Better Work Smart Toolbox: An AI-powered system for managing and customizing training and advisory tools.",
+  "summaryRu": "Международная организация труда (МОТ) объявляет конкурс на разработку облачной платформы с искусственным интеллектом для управления, кастомизации и распространения обучающих и консультационных инструментов. Проект охватывает несколько стран региона (Узбекистан в составе благополучателей). Крайний срок подачи предложений: 8 декабря 2026 года, 05:30 по GMT.",
+  "buyer": "Международная организация труда (МОТ), региональный офис",
+  "deadline": "2026-12-08",
+  "budget": null,
+  "score": 7,
+  "urgency": "высокая",
+  "published": null,
+  "firstSeen": "2026-11-21T05:22:36+00:00",
+  "npaRefs": [],
+  "url": "https://www.ungm.org/Public/Notice/323264"
+ },
+ {
   "id": "u-c4cf62cc5648cedf",
   "category": "news",
   "source": "UzDaily EN",
