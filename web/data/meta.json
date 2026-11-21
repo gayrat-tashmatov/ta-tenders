@@ -1,157 +1,157 @@
 {
- "updatedAt": "2026-11-21T05:22:36+00:00",
+ "updatedAt": "2026-11-21T08:22:11+00:00",
  "counts": {
-  "feed": 1415,
-  "items": 1415,
+  "feed": 1416,
+  "items": 1416,
   "npa": 695,
   "insights": 45
  },
  "stats": {
-  "items": 19025,
-  "seen": 27531,
+  "items": 19055,
+  "seen": 27598,
   "npa": 695,
   "mentions": 13,
-  "notified": 1213
+  "notified": 1214
  },
  "health": [
   {
    "origin": "Kun.uz",
-   "lastRun": "2026-11-21T05:22:04+00:00",
+   "lastRun": "2026-11-21T08:21:27+00:00",
    "lastCount": 15,
-   "lastNonzero": "2026-11-21T05:22:04+00:00",
-   "total": 4177
+   "lastNonzero": "2026-11-21T08:21:27+00:00",
+   "total": 4192
   },
   {
    "origin": "UzDaily EN",
-   "lastRun": "2026-11-21T05:22:04+00:00",
+   "lastRun": "2026-11-21T08:21:27+00:00",
    "lastCount": 20,
-   "lastNonzero": "2026-11-21T05:22:04+00:00",
-   "total": 3352
+   "lastNonzero": "2026-11-21T08:21:27+00:00",
+   "total": 3358
   },
   {
    "origin": "Podrobno.uz",
-   "lastRun": "2026-11-21T02:21:27+00:00",
+   "lastRun": "2026-11-21T08:21:27+00:00",
    "lastCount": 30,
-   "lastNonzero": "2026-11-21T02:21:27+00:00",
+   "lastNonzero": "2026-11-21T08:21:27+00:00",
    "total": 2511
   },
   {
    "origin": "UzA.uz",
-   "lastRun": "2026-11-21T05:22:04+00:00",
+   "lastRun": "2026-11-21T08:21:27+00:00",
    "lastCount": 20,
-   "lastNonzero": "2026-11-21T05:22:04+00:00",
+   "lastNonzero": "2026-11-21T08:21:27+00:00",
    "total": 2446
   },
   {
    "origin": "Spot.uz",
-   "lastRun": "2026-11-21T05:22:04+00:00",
+   "lastRun": "2026-11-21T08:21:27+00:00",
    "lastCount": 20,
-   "lastNonzero": "2026-11-21T05:22:04+00:00",
+   "lastNonzero": "2026-11-21T08:21:27+00:00",
    "total": 1392
   },
   {
    "origin": "Gazeta.uz",
-   "lastRun": "2026-11-21T05:22:04+00:00",
+   "lastRun": "2026-11-21T08:21:27+00:00",
    "lastCount": 20,
-   "lastNonzero": "2026-11-21T05:22:04+00:00",
-   "total": 1347
+   "lastNonzero": "2026-11-21T08:21:27+00:00",
+   "total": 1348
   },
   {
    "origin": "Nuz.uz",
-   "lastRun": "2026-11-21T05:22:04+00:00",
+   "lastRun": "2026-11-21T08:21:27+00:00",
    "lastCount": 20,
-   "lastNonzero": "2026-11-21T05:22:04+00:00",
-   "total": 1299
+   "lastNonzero": "2026-11-21T08:21:27+00:00",
+   "total": 1300
   },
   {
    "origin": "etender.uzex.uz",
-   "lastRun": "2026-11-21T05:22:04+00:00",
-   "lastCount": 109,
-   "lastNonzero": "2026-11-21T05:22:04+00:00",
+   "lastRun": "2026-11-21T08:21:27+00:00",
+   "lastCount": 110,
+   "lastNonzero": "2026-11-21T08:21:27+00:00",
    "total": 833
   },
   {
    "origin": "lex.uz",
-   "lastRun": "2026-11-21T05:22:04+00:00",
+   "lastRun": "2026-11-21T08:21:27+00:00",
    "lastCount": 161,
-   "lastNonzero": "2026-11-21T05:22:04+00:00",
+   "lastNonzero": "2026-11-21T08:21:27+00:00",
    "total": 514
   },
   {
    "origin": "ungm.org",
-   "lastRun": "2026-11-21T05:22:04+00:00",
+   "lastRun": "2026-11-21T08:21:27+00:00",
    "lastCount": 44,
-   "lastNonzero": "2026-11-21T05:22:04+00:00",
-   "total": 338
+   "lastNonzero": "2026-11-21T08:21:27+00:00",
+   "total": 339
   },
   {
    "origin": "TenderWeek",
-   "lastRun": "2026-11-21T05:22:04+00:00",
+   "lastRun": "2026-11-21T08:21:27+00:00",
    "lastCount": 93,
-   "lastNonzero": "2026-11-21T05:22:04+00:00",
+   "lastNonzero": "2026-11-21T08:21:27+00:00",
    "total": 322
   },
   {
    "origin": "Review.uz",
-   "lastRun": "2026-11-21T05:22:04+00:00",
+   "lastRun": "2026-11-21T08:21:27+00:00",
    "lastCount": 40,
-   "lastNonzero": "2026-11-21T05:22:04+00:00",
+   "lastNonzero": "2026-11-21T08:21:27+00:00",
    "total": 146
   },
   {
    "origin": "mangofetch.com",
-   "lastRun": "2026-11-21T05:22:04+00:00",
+   "lastRun": "2026-11-21T08:21:27+00:00",
    "lastCount": 70,
-   "lastNonzero": "2026-11-21T05:22:04+00:00",
+   "lastNonzero": "2026-11-21T08:21:27+00:00",
    "total": 116
   },
   {
    "origin": "World Bank",
-   "lastRun": "2026-11-21T05:22:04+00:00",
+   "lastRun": "2026-11-21T08:21:27+00:00",
    "lastCount": 26,
-   "lastNonzero": "2026-11-21T05:22:04+00:00",
+   "lastNonzero": "2026-11-21T08:21:27+00:00",
    "total": 70
   },
   {
    "origin": "Gazeta Экономика",
-   "lastRun": "2026-11-21T05:22:04+00:00",
+   "lastRun": "2026-11-21T08:21:27+00:00",
    "lastCount": 20,
-   "lastNonzero": "2026-11-21T05:22:04+00:00",
+   "lastNonzero": "2026-11-21T08:21:27+00:00",
    "total": 36
   },
   {
    "origin": "uzjobs.uz",
-   "lastRun": "2026-11-21T05:22:04+00:00",
+   "lastRun": "2026-11-21T08:21:27+00:00",
    "lastCount": 6,
-   "lastNonzero": "2026-11-21T05:22:04+00:00",
+   "lastNonzero": "2026-11-21T08:21:27+00:00",
    "total": 27
   },
   {
    "origin": "iom-careers",
-   "lastRun": "2026-11-21T05:22:04+00:00",
+   "lastRun": "2026-11-21T08:21:27+00:00",
    "lastCount": 4,
-   "lastNonzero": "2026-11-21T05:22:04+00:00",
+   "lastNonzero": "2026-11-21T08:21:27+00:00",
    "total": 22
   },
   {
    "origin": "AIIB Procurement",
-   "lastRun": "2026-11-21T05:22:04+00:00",
+   "lastRun": "2026-11-21T08:21:27+00:00",
    "lastCount": 4,
-   "lastNonzero": "2026-11-21T05:22:04+00:00",
+   "lastNonzero": "2026-11-21T08:21:27+00:00",
    "total": 13
   },
   {
    "origin": "UNDP",
-   "lastRun": "2026-11-21T05:22:04+00:00",
+   "lastRun": "2026-11-21T08:21:27+00:00",
    "lastCount": 0,
    "lastNonzero": "2026-10-15T05:21:15+00:00",
    "total": 10
   },
   {
    "origin": "undp-careers",
-   "lastRun": "2026-11-21T05:22:04+00:00",
+   "lastRun": "2026-11-21T08:21:27+00:00",
    "lastCount": 2,
-   "lastNonzero": "2026-11-21T05:22:04+00:00",
+   "lastNonzero": "2026-11-21T08:21:27+00:00",
    "total": 9
   },
   {
@@ -163,30 +163,30 @@
   },
   {
    "origin": "isdb.org",
-   "lastRun": "2026-11-21T05:22:04+00:00",
+   "lastRun": "2026-11-21T08:21:27+00:00",
    "lastCount": 0,
    "lastNonzero": "2026-10-23T18:28:14+00:00",
    "total": 4
   },
   {
    "origin": "xt-xarid.uz",
-   "lastRun": "2026-11-21T05:22:04+00:00",
+   "lastRun": "2026-11-21T08:21:27+00:00",
    "lastCount": 0,
    "lastNonzero": "2026-10-05T09:12:22+00:00",
    "total": 4
   },
   {
    "origin": "Tashkent Times",
-   "lastRun": "2026-11-21T05:22:04+00:00",
+   "lastRun": "2026-11-21T08:21:27+00:00",
    "lastCount": 4,
-   "lastNonzero": "2026-11-21T05:22:04+00:00",
+   "lastNonzero": "2026-11-21T08:21:27+00:00",
    "total": 4
   },
   {
    "origin": "grantplus.unops.org",
-   "lastRun": "2026-11-21T05:22:04+00:00",
+   "lastRun": "2026-11-21T08:21:27+00:00",
    "lastCount": 2,
-   "lastNonzero": "2026-11-21T05:22:04+00:00",
+   "lastNonzero": "2026-11-21T08:21:27+00:00",
    "total": 2
   }
  ],

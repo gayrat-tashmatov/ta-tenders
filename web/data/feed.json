@@ -1,5 +1,23 @@
 [
  {
+  "id": "etender-525977",
+  "category": "uz_tender",
+  "source": "UZEX e-Tender (конкурс)",
+  "origin": "etender.uzex.uz",
+  "titleRu": "Разработка информационной системы мониторинга карьеров",
+  "title": "[etender] jami 39 ta karyerlarga olib boruvchi yoʻllarning kirish va chiqish yoʻllarini nazorat qilish uchun 9 ta nazorat nuqtasi tashkil etish orqali \"Karyer nazorati\" axborot tizimini yaratish bo’yicha",
+  "summaryRu": "Заказчик — Управление многоэтажного жилого фонда при Акимате Ташкентской области закупает разработку информационной системы «Мониторинг карьеров» для контроля въездов и выездов на 39 карьерах через 9 контрольных пунктов. Бюджет: 1 080 000 000 узбекских сумов. Срок подачи предложений: с 21 по 27 ноября 2026 года.",
+  "buyer": "Toshkent viloyati hokimligi huzuridagiKop qavatli uylarni tamirlash injinering",
+  "deadline": "2026-11-27",
+  "budget": "1 080 000 000 узбекских сумов",
+  "score": 9,
+  "urgency": "высокая",
+  "published": "2026-11-21 12:10:43+00:00",
+  "firstSeen": "2026-11-21T08:22:02+00:00",
+  "npaRefs": [],
+  "url": "https://etender.uzex.uz/lot/525977"
+ },
+ {
   "id": "ungm-323264",
   "category": "international_tender",
   "source": "UNGM · UN",
